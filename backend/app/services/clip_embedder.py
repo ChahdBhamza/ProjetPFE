@@ -22,9 +22,9 @@ class CLIPEmbedder:
             self.model = CLIPModel.from_pretrained(model_name).to(self.device)
             self.processor = CLIPProcessor.from_pretrained(model_name)
             self.model.eval()
-            print("✓ CLIP model loaded successfully")
+            print("[OK] CLIP model loaded successfully")
         except Exception as e:
-            print(f"❌ Error loading CLIP model: {e}")
+            print(f"[ERROR] Error loading CLIP model: {e}")
             raise e
     
     def embed_image(self, image: Union[str, Image.Image]) -> np.ndarray:
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     test_text = "A photo of a white air conditioner"
     embedding = embedder.embed_text(test_text)
     print(f"Test embedding shape: {embedding.shape}")
-    print("✓ CLIP Embedder is working!")
+    print("[OK] CLIP Embedder is working!")

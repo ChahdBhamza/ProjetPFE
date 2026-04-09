@@ -24,7 +24,7 @@ print("Initializing CLIP Embedder...")
 try:
     embedder = CLIPEmbedder()
 except Exception as e:
-    print(f"Failed to load CLIP: {e}")
+    print(f"Failed to load CLIP: {type(e).__name__}: {str(e)}")
     embedder = None
 
 
@@ -38,7 +38,7 @@ try:
     )
 except Exception as e:
     print(f"Failed to init Qdrant: {e}")
-    qant = None
+    qdrant = None
 
 # Gemini setup
 try:
@@ -144,65 +144,91 @@ async def step3_search(file: UploadFile = File(...)):
     best_match = search_result[0].payload
     similarity_score = search_result[0].score
     
+    # Improved Prompt for better JSON stability
     prompt = f"""
-    You are an expert AC visual inspector with access to Google Search.
-    A user has uploaded a photo of an AC equipment unit (attached).
-    
-    Part 1: Pure Visual Extraction
-    Look closely at the pixels of the image. Extract brand logo, numbers, energy labels, etc.
-    
-    Part 2: Database Cross-Reference
+    Extract technical AC specifications. Return ONLY a JSON object. 
+    NO preamble. NO conversational text.
+
+    Input Context (Retrieved Match):
     {json.dumps(best_match, indent=2, ensure_ascii=False)}
-    (Cosine similarity score: {similarity_score})
-    
-    Part 3: Search Grounding
-    Use Google Search to look up official specs for this unit.
-    
-    Return ONLY valid JSON.
+    (Visual similarity score: {similarity_score})
+
+    Required JSON structure:
+    {{
+      "brand": "string",
+      "model_identifier": "string",
+      "btu_rating": "string",
+      "energy_class": "string",
+      "analysis": "2-3 sentences of visual reasoning",
+      "is_match_verified": boolean
+    }}
     """
     
     try:
+        max_retries = 5
+        retry_delay = 10 
+        model_name = 'gemini-2.5-flash'
+        
         config = types.GenerateContentConfig(
-            tools=[{"google_search": {}}]
+            tools=[{"google_search": {}}],
+            max_output_tokens=1024,
+            temperature=0.7
         )
         
-        max_retries = 3
-        retry_delay = 5
-        
+        print(f"--- Using model: {model_name} ---")
+        last_error = ""
         for attempt in range(max_retries):
             try:
-                # Use gemini-2.0-flash (most stable for grounding)
                 response = gemini_client.models.generate_content(
-                    model='gemini-2.0-flash',
+                    model=model_name,
                     contents=[prompt, image],
                     config=config
                 )
-                break
+                if not response or not response.text:
+                    raise ValueError("Gemini returned an empty response.")
+
+                # Robust JSON Extraction
+                text = response.text
+                if "```json" in text:
+                    text = text.split("```json")[1].split("```")[0]
+                elif "```" in text:
+                    text = text.split("```")[1].split("```")[0]
+                
+                text = text.strip()
+                final_json = json.loads(text)
+                
+                sources = []
+                try:
+                    if response.candidates and response.candidates[0].grounding_metadata:
+                        metadata = response.candidates[0].grounding_metadata
+                        if metadata.grounding_chunks:
+                            for chunk in metadata.grounding_chunks:
+                                if chunk.web:
+                                    sources.append({"title": chunk.web.title, "url": chunk.web.uri})
+                except:
+                    pass
+                    
+                final_json["verification_sources"] = sources
+                return {
+                    "step_3": "Search embedding completed.",
+                    "step_4": "Cosine Similarity Search and LLM RAG JSON generation completed.",
+                    "retrieved_item": best_match,
+                    "cosine_similarity": similarity_score,
+                    "gemini_json_response": final_json
+                }
             except Exception as e:
                 error_msg = str(e).lower()
+                last_error = str(e)
                 if ("503" in error_msg or "unavailable" in error_msg or "429" in error_msg) and attempt < max_retries - 1:
                     wait_time = retry_delay + random.uniform(0, 1)
-                    print(f"Retrying... {attempt+1}")
+                    print(f"Retrying {model_name}... attempt {attempt+1}")
                     time.sleep(wait_time)
                     retry_delay *= 2
                 else:
-                    raise e
+                    print(f"Model {model_name} failed: {e}")
         
-        json_text = response.text.replace('```json', '').replace('```', '').strip()
-        final_json = json.loads(json_text)
-        
-        sources = []
-        try:
-            if response.candidates and response.candidates[0].grounding_metadata:
-                metadata = response.candidates[0].grounding_metadata
-                if metadata.grounding_chunks:
-                    for chunk in metadata.grounding_chunks:
-                        if chunk.web:
-                            sources.append({"title": chunk.web.title, "url": chunk.web.uri})
-        except:
-             pass
-             
-        final_json["verification_sources"] = sources
+        # If all models/retries failed
+        final_json = {"error": "All models failed", "last_error": last_error}
     except Exception as e:
         final_json = {"error": "Failed to parse JSON", "raw_error": str(e), "raw_text": response.text if 'response' in locals() else "None"}
     
