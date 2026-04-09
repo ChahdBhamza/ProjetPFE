@@ -44,9 +44,15 @@ async def search_ac(file: UploadFile = File(...)):
         best_match = matches[0].payload
         similarity_score = matches[0].score
         
-        # 3. Perform AI Verification (Gemini)
-        # Rewind image stream for Gemini if needed (using the PIL object)
-        gemini_result = vision_service.verify_ac_unit(image, best_match, similarity_score)
+        # 3. Perform AI Verification (Gemini) - COMMENTED OUT TO SAVE TOKENS
+        # gemini_result = vision_service.verify_ac_unit(image, best_match, similarity_score)
+        
+        # Simulated verification for evaluation testing
+        gemini_result = {
+            "status": "AI Verification Skipped (Evaluation Mode)",
+            "analysis": "Gemini is currently disabled to save tokens. You are evaluating pure Vector Search Retrieval.",
+            "is_match_verified": True
+        }
         
         return {
             "success": True,
