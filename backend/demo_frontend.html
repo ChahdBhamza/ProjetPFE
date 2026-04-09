@@ -210,6 +210,7 @@
         <header>
             <h1>Visual RAG Explorer</h1>
             <p class="subtitle">Multimodal identification of AC units using CLIP & Gemini</p>
+            <a href="/web-verify" style="color:#10B981; text-decoration:none; font-size:0.9rem; margin-top:10px; display:inline-block;">🚀 Switch to Web Grounding Explorer</a>
         </header>
 
         <div class="upload-card">
@@ -293,8 +294,13 @@
 
                 resultsContainer.style.display = 'grid';
                 
-                // 1. Vector Match (CLIP)
+                // 1. Vector Match (CLIP) Safe Check
                 const vm = data.vector_match;
+                if (!vm || !vm.item) {
+                    console.error("Missing vector_match in response:", data);
+                    alert("The search returned a success code but was missing match data. Check raw debug below.");
+                    return;
+                }
                 const item = vm.item;
                 document.getElementById('vectorMatch').innerHTML = `
                     <div style="margin-bottom: 1rem;">
@@ -342,7 +348,7 @@
                     `;
                 }
 
-                // 3. Raw Debug
+                // 4. Raw Debug
                 document.getElementById('rawDebug').textContent = JSON.stringify(data, null, 2);
                 resultsContainer.scrollIntoView({ behavior: 'smooth' });
 

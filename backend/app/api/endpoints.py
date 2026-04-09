@@ -1,29 +1,27 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from PIL import Image
 from io import BytesIO
-from app.services.clip_embedder import CLIPEmbedder
-from app.services.vector_store import VectorStore
-from app.services.vision_rag_service import VisionRAGService
+from app.services.web_search_service import WebSearchService
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 
-# Services (initialized in main.py or a dependency injection system)
-# For simplicity in this refactor, we can assume they are accessible
-# or pass them as app state.
+# Services
 embedder = None
 vector_store = None
 vision_service = None
+web_service = None
 
-def init_services(e, v, vr):
-    global embedder, vector_store, vision_service
+def init_services(e, v, vr, ws=None):
+    global embedder, vector_store, vision_service, web_service
     embedder = e
     vector_store = v
     vision_service = vr
+    web_service = ws
 
 @router.post("/search")
 async def search_ac(file: UploadFile = File(...)):
     """Unified endpoint for AC Identification & Verification"""
-    if not embedder or not vector_store or not vision_service:
+    if not embedder or not vector_store:
         raise HTTPException(status_code=503, detail="Services not initialized")
 
     try:
@@ -44,13 +42,18 @@ async def search_ac(file: UploadFile = File(...)):
         best_match = matches[0].payload
         similarity_score = matches[0].score
         
-        # 3. Perform AI Verification (Gemini) - COMMENTED OUT TO SAVE TOKENS
-        # gemini_result = vision_service.verify_ac_unit(image, best_match, similarity_score)
+        # 3. REAL-TIME WEB GROUNDING (FREE SEARCH)
+        web_evidence = {"search_conducted": False}
+        if web_service:
+            # Clean name for search (remove .jpg)
+            search_name = best_match.get("filename", "").replace(".jpg", "").replace(".png", "")
+            db_btu = best_match.get("btu", "Unknown")
+            web_evidence = web_service.verify_product_specs(search_name, db_btu)
         
-        # Simulated verification for evaluation testing
+        # 4. AI Verification (Gemini) - COMMENTED OUT
         gemini_result = {
             "status": "AI Verification Skipped (Evaluation Mode)",
-            "analysis": "Gemini is currently disabled to save tokens. You are evaluating pure Vector Search Retrieval.",
+            "analysis": "Gemini is currently disabled to save tokens. Web Grounding is active.",
             "is_match_verified": True
         }
         
@@ -60,6 +63,7 @@ async def search_ac(file: UploadFile = File(...)):
                 "item": best_match,
                 "confidence": similarity_score
             },
+            "web_grounding": web_evidence,
             "verified_details": gemini_result
         }
     except Exception as e:

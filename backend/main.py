@@ -9,31 +9,36 @@ from pathlib import Path
 from app.services.clip_embedder import CLIPEmbedder
 from app.services.vector_store import VectorStore
 from app.services.vision_rag_service import VisionRAGService
+from app.services.web_search_service import WebSearchService
 from app.api.endpoints import router as api_router, init_services
 
 # 1. Initialize FastAPI
 app = FastAPI(title="DetectionAppPFE - Visual RAG API")
 
+# Register API endpoints
+app.include_router(api_router, prefix="/api")
+
 # Define global services placeholders
 embedder = None
 vector_store = None
 vision_service = None
+web_service = None
 
-# 3. Include API routes
-app.include_router(api_router)
+# ... logic ...
 
 # 4. Startup Logic
 @app.on_event("startup")
 async def startup_event():
-    global embedder, vector_store, vision_service
+    global embedder, vector_store, vision_service, web_service
     
     print("[Main] Starting services...")
     embedder = CLIPEmbedder()
     vector_store = VectorStore(path="qdrant_db")
     vision_service = VisionRAGService()
+    web_service = WebSearchService()
     
     # Inject into the router
-    init_services(embedder, vector_store, vision_service)
+    init_services(embedder, vector_store, vision_service, web_service)
     
     # Build the database if empty
     base_dir = Path("../dataequipment/climatiseurs").resolve()

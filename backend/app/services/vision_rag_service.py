@@ -118,4 +118,24 @@ class VisionRAGService:
                         print(f"[VisionRAG] Model {model_name} failed: {e}")
                         break # Move to next model
         
-        return {"error": "All models failed", "last_error": last_error}
+    def identify_from_raw_image(self, image_data):
+        """Pure Visual Identification (Zero DB)"""
+        prompt = """
+        Analyze this air conditioner image. 
+        1. Identify the Brand (LG, Samsung, etc).
+        2. Extract the specific Model Number or Series name.
+        3. Estimate the BTU capacity if visible.
+        
+        Return ONLY a JSON: {"brand": "...", "model": "...", "btu": "..."}
+        """
+        try:
+            # Use the first model in our list
+            model_name = self.models_to_try[0]
+            response = self.client.models.generate_content(
+                model=model_name,
+                contents=[prompt, image_data]
+            )
+            return self._extract_json(response.text)
+        except Exception as e:
+            print(f"[VisionRAG] Raw identification failed: {e}")
+            return {"brand": "Unknown", "model": "Unknown", "btu": "Unknown"}
