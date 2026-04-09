@@ -302,8 +302,15 @@
                         <div style="color: #60A5FA; margin-top: 4px;">Confidence: ${(vm.confidence * 100).toFixed(1)}%</div>
                         <div style="color: #94A3B8; font-size: 0.85rem;">Brand: ${item.brand}</div>
                     </div>
-                    <div style="font-size: 0.9rem; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; white-space: pre-wrap;">
-                        ${item.specs}
+                    <div style="font-size: 0.9rem; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 12px;">
+                        <ul class="specs-list" style="padding: 0.5rem;">
+                            <li><span class="label">BTU:</span> <span>${item.btu || 'N/A'}</span></li>
+                            <li><span class="label">Price:</span> <span style="color: #10B981; font-weight: 600;">${item.price || 'N/A'}</span></li>
+                            <li><span class="label">Inverter:</span> <span>${item.inverter ? '✅ Yes' : '❌ No'}</span></li>
+                            <li><span class="label">Gas:</span> <span>${item.gas || 'N/A'}</span></li>
+                            <li><span class="label">Type:</span> <span>${item.type || 'N/A'}</span></li>
+                            <li><span class="label">Color:</span> <span>${item.color || 'N/A'}</span></li>
+                        </ul>
                     </div>
                 `;
 

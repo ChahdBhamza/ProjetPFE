@@ -1,4 +1,5 @@
 import os
+import json
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
@@ -35,27 +36,34 @@ async def startup_event():
     init_services(embedder, vector_store, vision_service)
     
     # Build the database if empty
-    base_dir = Path("../dataequipment/climatiseurs")
+    base_dir = Path("../dataequipment/climatiseurs").resolve()
+    print(f"[Startup] Looking for data in: {base_dir}")
     
-    # Check if we already have records (to avoid redundant indexing)
-    existing_points = vector_store.client.count(collection_name=vector_store.collection_name).count
-    if existing_points > 0:
-        print(f"[Startup] DB already contains {existing_points} records. Skipping re-indexing.")
+    if not base_dir.exists():
+        print(f"[Startup] ERROR: Data folder '{base_dir}' NOT FOUND.")
         return
 
-    if not base_dir.exists():
-        print(f"[Startup] Warning: Data folder '{base_dir}' not found.")
-        return
+    # Check if we already have records
+    try:
+        existing_points = vector_store.client.count(collection_name=vector_store.collection_name).count
+        if existing_points > 0:
+            print(f"[Startup] DB already contains {existing_points} records. Skipping re-indexing.")
+            return
+    except Exception as e:
+        print(f"[Startup] Collection doesn't exist yet or error: {e}")
 
     print("[Startup] --- BUILDING LOCAL VECTOR DATABASE ---")
-    image_paths = list(base_dir.rglob("images/*.jpg")) + list(base_dir.rglob("images/*.png"))
+    image_paths = list(base_dir.rglob("*.jpg")) + list(base_dir.rglob("*.png"))
+    print(f"[Startup] Found {len(image_paths)} image files to index.")
     
     indexed_count = 0
     for img_path in image_paths:
         try:
             # Generate embedding
             embedding = embedder.embed_image(img_path)
-            if embedding is None: continue
+            if embedding is None:
+                print(f"  [Skip] CLIP failed for: {img_path.name}")
+                continue
             
             # Load metadata (Prioritize JSON if available)
             json_path = img_path.parent.parent / "text" / (img_path.stem + ".json")
@@ -68,10 +76,8 @@ async def startup_event():
 
             if json_path.exists():
                 with open(json_path, "r", encoding="utf-8") as f:
-                    enriched_data = json.load(f)
-                    payload.update(enriched_data)
-            
-            if txt_path.exists() and "specs" not in payload:
+                    payload.update(json.load(f))
+            elif txt_path.exists():
                 with open(txt_path, "r", encoding="utf-8") as f:
                     payload["specs"] = f.read()
 
@@ -84,8 +90,11 @@ async def startup_event():
                 metadata=payload
             )
             indexed_count += 1
+            if indexed_count % 10 == 0:
+                print(f"  [Progress] Indexed {indexed_count}/133...")
+                
         except Exception as e:
-            pass
+            print(f"  [Error] Failed to index {img_path.name}: {e}")
 
     print(f"[Startup] --- SUCCESS: {indexed_count} items indexed ---")
 
