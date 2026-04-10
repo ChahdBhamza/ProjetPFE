@@ -1,4 +1,4 @@
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, models
 from qdrant_client.models import VectorParams, Distance, PointStruct
 import os
 from pathlib import Path
@@ -16,10 +16,10 @@ class VectorStore:
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(size=512, distance=Distance.COSINE),
             )
-            print(f"✓ Collection '{collection_name}' created")
+            print(f"Collection '{collection_name}' created")
         except Exception:
             # Collection likely already exists
-            print(f"✓ Using existing collection '{collection_name}'")
+            print(f"Using existing collection '{collection_name}'")
 
     def add_climatiseur(self, product_id, brand, model_name, embedding, metadata):
         """Add a single product to the vector database"""
@@ -38,11 +38,31 @@ class VectorStore:
             ]
         )
 
-    def search(self, query_vector, limit=3):
-        """Search for similar products"""
+    def search(self, query_vector, limit=3, brand_filter=None, btu_filter=None):
+        """Search for similar products with optional technical filtering"""
+        query_filter = None
+        conditions = []
+        
+        if brand_filter and brand_filter != "Unknown":
+            conditions.append(models.FieldCondition(
+                key="brand",
+                match=models.MatchValue(value=brand_filter)
+            ))
+            
+        if btu_filter and btu_filter != "Unknown":
+            conditions.append(models.FieldCondition(
+                key="btu",
+                match=models.MatchValue(value=btu_filter)
+            ))
+            
+        if conditions:
+            query_filter = models.Filter(must=conditions)
+            print(f"[VectorStore] Searching with filters: {brand_filter} | {btu_filter}")
+
         return self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector.tolist() if hasattr(query_vector, 'tolist') else query_vector,
+            query_filter=query_filter,
             limit=limit
         ).points
 

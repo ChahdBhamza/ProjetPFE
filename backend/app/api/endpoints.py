@@ -1,62 +1,100 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from PIL import Image
 from io import BytesIO
-from app.services.web_search_service import WebSearchService
+import json
 
 router = APIRouter()
 
-# Services
-embedder = None
-vector_store = None
-vision_service = None
-web_service = None
+# Global service holders
+_embedder = None
+_vector_store = None
+_vision_service = None # Gemini
+_web_service = None
+_local_vlm = None # Qwen/Moondream
 
-def init_services(e, v, vr, ws=None):
-    global embedder, vector_store, vision_service, web_service
-    embedder = e
-    vector_store = v
-    vision_service = vr
-    web_service = ws
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm
+    _embedder = embedder
+    _vector_store = vector_store
+    _vision_service = vision_service
+    _web_service = web_service
+    _local_vlm = local_vlm
 
 @router.post("/search")
-async def search_ac(file: UploadFile = File(...)):
-    """Unified endpoint for AC Identification & Verification"""
-    if not embedder or not vector_store:
-        raise HTTPException(status_code=503, detail="Services not initialized")
-
+async def search_endpoint(
+    file: UploadFile = File(...),
+    use_vlm: bool = Form(False) 
+):
     try:
-        # Load and process image
         contents = await file.read()
         image = Image.open(BytesIO(contents))
         
-        # 1. Generate Query Embedding
-        query_vector = embedder.embed_image(image)
-        if query_vector is None:
-            return {"error": "Failed to generate visual features for the image."}
+        # --- ORIGINAL CLIP SEARCH LOGIC ---
+        query_vector = _embedder.embed_image(image)
         
-        # 2. Search Vector Database
-        matches = vector_store.search(query_vector, limit=1)
+        # We only apply filters if 'Edge Mode' is active
+        v_brand = None
+        v_btu = None
+        local_vlm_analysis = {"status": "VLM Disabled for this session."}
+
+        if use_vlm and _local_vlm:
+            print("[Backend] Using Local Edge-AI for Brand Routing...")
+            local_vlm_analysis = _local_vlm.extract_specs(image)
+            v_brand = local_vlm_analysis.get("brand")
+            v_btu = local_vlm_analysis.get("btu")
+
+        # Core Search
+        matches = _vector_store.search(query_vector, limit=1, brand_filter=v_brand, btu_filter=v_btu)
+
+        if not matches and v_btu:
+            print("[Endpoints] No exact BTU match. Falling back to Brand-wide search...")
+            matches = _vector_store.search(query_vector, limit=1, brand_filter=v_brand)
+
         if not matches:
-             return {"error": "No matching equipment found in the database."}
-             
+            print("[Endpoints] No filtered matches. Falling back to Global Semantic search...")
+            matches = _vector_store.search(query_vector, limit=1)
+
+        if not matches:
+            return {"success": False, "error": "No technical matches detected in database."}
+
         best_match = matches[0].payload
         similarity_score = matches[0].score
-        
-        # 3. REAL-TIME WEB GROUNDING (FREE SEARCH)
-        web_evidence = {"search_conducted": False}
-        if web_service:
-            # Clean name for search (remove .jpg)
+
+        # --- REAL-TIME WEB GROUNDING ---
+        web_evidence = {"summary": "Web Grounding active."}
+        if _web_service:
             search_name = best_match.get("filename", "").replace(".jpg", "").replace(".png", "")
-            db_btu = best_match.get("btu", "Unknown")
-            web_evidence = web_service.verify_product_specs(search_name, db_btu)
-        
-        # 4. AI Verification (Gemini) - COMMENTED OUT
-        gemini_result = {
+            web_evidence = _web_service.verify_product_specs(search_name, best_match.get("btu", "Unknown"))
+
+        # --- REASONING COMPONENT (DORMANT AS REQUESTED) ---
+        verified_details = {
             "status": "AI Verification Skipped (Evaluation Mode)",
             "analysis": "Gemini is currently disabled to save tokens. Web Grounding is active.",
             "is_match_verified": True
         }
-        
+
+        # Override only if explicitly in Edge Mode
+        if use_vlm and _local_vlm:
+            print("[Backend] Executing Dual-VLM Comparison (Qwen vs Gemma4)...")
+            # 1. Qwen Analysis
+            qwen_verify = _local_vlm.verify_match(image, best_match)
+            
+            # 2. Gemma 4 Analysis
+            original_model = _local_vlm.model_name
+            _local_vlm.model_name = "gemma4:e2b" 
+            try:
+                gemma_verify = _local_vlm.verify_match(image, best_match)
+            except Exception as e:
+                gemma_verify = {"analysis": f"Gemma4 Error: {str(e)}", "is_match_verified": False}
+            _local_vlm.model_name = original_model # Restore
+            
+            verified_details = {
+                "is_comparison": True,
+                "qwen": qwen_verify,
+                "gemma": gemma_verify
+            }
+
         return {
             "success": True,
             "vector_match": {
@@ -64,7 +102,10 @@ async def search_ac(file: UploadFile = File(...)):
                 "confidence": similarity_score
             },
             "web_grounding": web_evidence,
-            "verified_details": gemini_result
+            "verified_details": verified_details,
+            "local_vlm_raw": local_vlm_analysis
         }
+
     except Exception as e:
+        print(f"[Backend Error] {e}")
         return {"error": str(e)}

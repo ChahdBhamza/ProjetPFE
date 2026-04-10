@@ -2,7 +2,7 @@ import os
 import json
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from pathlib import Path
 
 # Import services
@@ -10,6 +10,7 @@ from app.services.clip_embedder import CLIPEmbedder
 from app.services.vector_store import VectorStore
 from app.services.vision_rag_service import VisionRAGService
 from app.services.web_search_service import WebSearchService
+from app.services.local_vlm_service import LocalVLMService
 from app.api.endpoints import router as api_router, init_services
 
 # 1. Initialize FastAPI
@@ -23,6 +24,7 @@ embedder = None
 vector_store = None
 vision_service = None
 web_service = None
+local_vlm = None
 
 # ... logic ...
 
@@ -37,8 +39,16 @@ async def startup_event():
     vision_service = VisionRAGService()
     web_service = WebSearchService()
     
+    # Optional Local VLM
+    try:
+        local_vlm = LocalVLMService(model_name="qwen2.5vl:3b")
+        print("[Main] Local VLM (Qwen2.5-VL) initialized.")
+    except Exception as e:
+        print(f"[Main] Local VLM skip: {e}")
+        local_vlm = None
+    
     # Inject into the router
-    init_services(embedder, vector_store, vision_service, web_service)
+    init_services(embedder, vector_store, vision_service, web_service, local_vlm)
     
     # Build the database if empty
     base_dir = Path("../dataequipment/climatiseurs").resolve()
@@ -104,13 +114,13 @@ async def startup_event():
     print(f"[Startup] --- SUCCESS: {indexed_count} items indexed ---")
 
 # 5. Dashboard / Demo Route
-@app.get("/", response_class=HTMLResponse)
-async def serve_dashboard():
-    dashboard_path = Path("demo_frontend.html")
-    if dashboard_path.exists():
-        with open(dashboard_path, "r", encoding="utf-8") as f:
-            return f.read()
-    return "<h1>demo_frontend.html not found</h1>"
+@app.get("/")
+async def read_root():
+    return FileResponse("demo_frontend.html")
+
+@app.get("/edge")
+async def read_edge():
+    return FileResponse("edge_ai_demo.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)

@@ -79,9 +79,12 @@ class VisionRAGService:
             
             for attempt in range(max_retries):
                 try:
+                    # Correctly wrap the image bytes for the GenAI SDK
+                    image_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")
+                    
                     response = self.client.models.generate_content(
                         model=model_name,
-                        contents=[prompt, image_data],
+                        contents=[prompt, image_part],
                         config=config
                     )
 
@@ -129,11 +132,12 @@ class VisionRAGService:
         Return ONLY a JSON: {"brand": "...", "model": "...", "btu": "..."}
         """
         try:
-            # Use the first model in our list
-            model_name = self.models_to_try[0]
+            # Correctly wrap the image bytes
+            image_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")
+            
             response = self.client.models.generate_content(
                 model=model_name,
-                contents=[prompt, image_data]
+                contents=[prompt, image_part]
             )
             return self._extract_json(response.text)
         except Exception as e:

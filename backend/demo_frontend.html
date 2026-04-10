@@ -3,94 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AC Visual RAG - Test Panel</title>
+    <title>Visual RAG Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #007AFF;
             --bg: #0F172A;
-            --card: rgba(30, 41, 59, 0.7);
-            --border: rgba(255, 255, 255, 0.1);
+            --card: #1E293B;
+            --primary: #60A5FA;
             --text: #F8FAFC;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
+            --accent: #10B981;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         body {
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
+            margin: 0;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 2rem;
         }
 
-        .container {
-            max-width: 1000px;
+        .main-container {
+            max-width: 1200px;
             width: 100%;
         }
 
-        header {
+        .nav-link {
+            float: right;
+            color: var(--primary);
+            text-decoration: none;
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 24px;
             text-align: center;
             margin-bottom: 3rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(to right, #60A5FA, #A78BFA);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: #94A3B8;
-            font-size: 1.1rem;
-        }
-
-        .upload-card {
-            background: var(--card);
-            backdrop-filter: blur(12px);
             border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 3rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary);
-            background: rgba(0, 122, 255, 0.05);
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        #fileInput {
-            display: none;
         }
 
         #preview {
@@ -98,148 +56,139 @@
             border-radius: 12px;
             margin-top: 1rem;
             display: none;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
 
-        button {
+        .results-grid {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .specs-table {
+            width: 100%;
             margin-top: 1.5rem;
+        }
+
+        .specs-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .label { opacity: 0.6; font-size: 0.9rem; }
+        .value { font-weight: 600; }
+
+        .price-tag { color: var(--accent); font-weight: 700; font-size: 1.2rem; }
+
+        .raw-section {
+            grid-column: span 2;
+            margin-top: 1rem;
+        }
+
+        #rawOutput {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #94A3B8;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 32px;
-            border-radius: 12px;
+            padding: 12px 30px;
+            border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
+            margin-top: 1rem;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .results {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .loader {
             display: none;
-        }
-
-        .result-card {
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-        }
-
-        .result-card h3 {
-            margin-bottom: 1rem;
-            color: #60A5FA;
-            font-size: 1.2rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-        }
-
-        .specs-list {
-            list-style: none;
-        }
-
-        .specs-list li {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .specs-list .label {
-            color: #94A3B8;
-        }
-
-        .gemini-text {
-            line-height: 1.6;
-            color: #E2E8F0;
-        }
-
-        .loading-spinner {
-            display: none;
-            margin: 2rem auto;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,.1);
-            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--border);
             border-top-color: var(--primary);
-            animation: spin 1s ease-in-out infinite;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+            margin: 1rem auto;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        pre {
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.8rem;
-            max-height: 300px;
-        }
-
-        .source-link {
-            color: var(--primary);
-            text-decoration: none;
-            display: block;
-            margin-top: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .source-link:hover {
-            text-decoration: underline;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Visual RAG Explorer</h1>
-            <p class="subtitle">Multimodal identification of AC units using CLIP & Gemini</p>
-            <a href="/web-verify" style="color:#10B981; text-decoration:none; font-size:0.9rem; margin-top:10px; display:inline-block;">🚀 Switch to Web Grounding Explorer</a>
-        </header>
-
-        <div class="upload-card">
-            <div class="upload-area" id="dropZone">
-                <span class="upload-icon">📸</span>
-                <p>Drag & drop or click to upload AC photo</p>
-                <input type="file" id="fileInput" accept="image/*">
-                <img id="preview" src="" alt="Preview">
-            </div>
-            <button id="searchBtn" disabled>Identify AC Unit</button>
-            <div class="loading-spinner" id="spinner"></div>
+    <div class="main-container">
+        <a href="/edge" class="nav-link">⚡ EDGE-AI MODE</a>
+        
+        <div class="upload-section">
+            <h1 style="margin-top:0;">Visual RAG Prototype</h1>
+            <label for="fileInput" style="cursor:pointer;">
+                <div style="font-size:3rem;">📷</div>
+                <p>Click to Upload Unit</p>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;">
+            </label>
+            <img id="preview">
+            <div id="loader" class="loader"></div>
+            <button id="searchBtn" class="btn" style="display:none;">Identify AC Unit</button>
         </div>
 
-        <div class="results" id="resultsContainer">
-            <div class="result-card">
-                <h3>Vectore Store Match (CLIP)</h3>
-                <div id="vectorMatch">
-                    <!-- Dynamic content -->
+        <div id="results" class="results-grid">
+            <!-- Left Card -->
+            <div class="card">
+                <h2>Vectore Store Match (CLIP)</h2>
+                <div id="productName" style="font-weight: 600; margin-bottom: 5px;"></div>
+                <div id="confidencePanel" style="color: var(--primary); font-size: 0.9rem; margin-bottom: 2rem;"></div>
+                
+                <div class="specs-table">
+                    <div class="specs-row"><span class="label">BTU:</span><span class="value" id="resBtu"></span></div>
+                    <div class="specs-row"><span class="label">Price:</span><span class="price-tag" id="resPrice"></span></div>
+                    <div class="specs-row"><span class="label">Inverter:</span><span id="resInverter"></span></div>
+                    <div class="specs-row"><span class="label">Gas:</span><span class="value" id="resGas">Unknown</span></div>
+                    <div class="specs-row"><span class="label">Type:</span><span class="value">Split</span></div>
+                    <div class="specs-row"><span class="label">Color:</span><span class="value" id="resColor"></span></div>
                 </div>
             </div>
-            <div class="result-card">
-                <h3>Gemini Verification & Reasoning</h3>
-                <div id="geminiOutput" class="gemini-text">
-                    <!-- Dynamic content -->
+
+            <!-- Right Card -->
+            <div class="card">
+                <h2>Gemini Verification & Reasoning</h2>
+                <div style="color: var(--accent); font-weight: 600; margin-bottom: 10px;">✓ Intelligence Report</div>
+                <div id="aiAnalysis" style="font-size: 0.95rem; margin-bottom: 1.5rem;"></div>
+                
+                <div class="specs-table">
+                    <div class="specs-row"><span class="label">Verified Brand:</span><span style="color:rgba(255,255,255,0.4)">undefined</span></div>
+                    <div class="specs-row"><span class="label">Model ID:</span><span style="color:rgba(255,255,255,0.4)">undefined</span></div>
+                    <div class="specs-row"><span class="label">BTU Rating:</span><span style="color:rgba(255,255,255,0.4)">undefined</span></div>
+                    <div class="specs-row"><span class="label">Efficiency:</span><span style="color:rgba(255,255,255,0.4)">undefined</span></div>
+                    <div class="specs-row"><span class="label">Match Integrity:</span><span style="color: var(--accent); font-weight:600;">CONFIRMED</span></div>
                 </div>
             </div>
-            <div class="result-card" style="grid-column: span 2;">
-                <h3>Raw Response Debug</h3>
-                <pre id="rawDebug"></pre>
+
+            <!-- Bottom Section -->
+            <div class="card raw-section">
+                <h2>Raw Response Debug</h2>
+                <pre id="rawOutput"></pre>
             </div>
         </div>
     </div>
@@ -248,115 +197,54 @@
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
         const searchBtn = document.getElementById('searchBtn');
-        const resultsContainer = document.getElementById('resultsContainer');
-        const spinner = document.getElementById('spinner');
-        const dropZone = document.getElementById('dropZone');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
 
-        dropZone.onclick = () => fileInput.click();
-
-        fileInput.onchange = (e) => {
+        fileInput.onchange = e => {
             const file = e.target.files[0];
-            if (file) {
+            if(file) {
                 const reader = new FileReader();
-                reader.onload = (ev) => {
-                    preview.src = ev.target.result;
+                reader.onload = f => {
+                    preview.src = f.target.result;
                     preview.style.display = 'block';
-                    searchBtn.disabled = false;
-                };
+                    searchBtn.style.display = 'inline-block';
+                }
                 reader.readAsDataURL(file);
             }
         };
 
         searchBtn.onclick = async () => {
             const file = fileInput.files[0];
-            if (!file) return;
-
-            searchBtn.disabled = true;
-            spinner.style.display = 'block';
-            resultsContainer.style.display = 'none';
-
             const formData = new FormData();
             formData.append('file', file);
+            formData.append('use_vlm', 'false'); // EXPLICITLY DISABLE LOCAL LLM
+
+            loader.style.display = 'block';
+            searchBtn.style.display = 'none';
+            results.style.display = 'none';
 
             try {
-                const response = await fetch('/api/search', {
-                    method: 'POST',
-                    body: formData
-                });
-
+                const response = await fetch('/api/search', { method: 'POST', body: formData });
                 const data = await response.json();
-                console.log("Response:", data);
-
-                if (data.error) {
-                    alert('Error: ' + data.error);
-                    return;
-                }
-
-                resultsContainer.style.display = 'grid';
                 
-                // 1. Vector Match (CLIP) Safe Check
-                const vm = data.vector_match;
-                if (!vm || !vm.item) {
-                    console.error("Missing vector_match in response:", data);
-                    alert("The search returned a success code but was missing match data. Check raw debug below.");
-                    return;
-                }
-                const item = vm.item;
-                document.getElementById('vectorMatch').innerHTML = `
-                    <div style="margin-bottom: 1rem;">
-                        <div style="font-weight: 600; font-size: 1.1rem;">${item.filename || 'Product Match'}</div>
-                        <div style="color: #60A5FA; margin-top: 4px;">Confidence: ${(vm.confidence * 100).toFixed(1)}%</div>
-                        <div style="color: #94A3B8; font-size: 0.85rem;">Brand: ${item.brand}</div>
-                    </div>
-                    <div style="font-size: 0.9rem; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 12px;">
-                        <ul class="specs-list" style="padding: 0.5rem;">
-                            <li><span class="label">BTU:</span> <span>${item.btu || 'N/A'}</span></li>
-                            <li><span class="label">Price:</span> <span style="color: #10B981; font-weight: 600;">${item.price || 'N/A'}</span></li>
-                            <li><span class="label">Inverter:</span> <span>${item.inverter ? '✅ Yes' : '❌ No'}</span></li>
-                            <li><span class="label">Gas:</span> <span>${item.gas || 'N/A'}</span></li>
-                            <li><span class="label">Type:</span> <span>${item.type || 'N/A'}</span></li>
-                            <li><span class="label">Color:</span> <span>${item.color || 'N/A'}</span></li>
-                        </ul>
-                    </div>
-                `;
+                loader.style.display = 'none';
+                results.style.display = 'grid';
 
-                // 2. Gemini Verification
-                const g = data.verified_details;
-                if (g.error) {
-                    document.getElementById('geminiOutput').innerHTML = `
-                        <p style="color: #EF4444;">Verification Failed: ${g.last_error || g.error}</p>
-                    `;
-                } else {
-                    let sourcesHtml = '';
-                    if (g.verification_sources && g.verification_sources.length > 0) {
-                        sourcesHtml = '<div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.5rem;"><strong>Sources:</strong>' + 
-                            g.verification_sources.map(s => `<a href="${s.url}" target="_blank" class="source-link">${s.title}</a>`).join('') + 
-                            '</div>';
-                    }
+                const item = data.vector_match.item;
+                document.getElementById('productName').textContent = item.filename;
+                document.getElementById('confidencePanel').textContent = `Confidence: ${(data.vector_match.confidence * 100).toFixed(1)}%`;
+                
+                document.getElementById('resBtu').textContent = item.btu || '---';
+                document.getElementById('resPrice').textContent = item.price || '---';
+                document.getElementById('resInverter').innerHTML = item.inverter ? '✅ Yes' : '❌ No';
+                document.getElementById('resColor').textContent = item.color || '---';
 
-                    document.getElementById('geminiOutput').innerHTML = `
-                        <div style="color: #10B981; font-weight: 600; margin-bottom: 0.5rem;">✓ Intelligence Report</div>
-                        <p style="font-size: 0.95rem; margin-bottom: 1rem;">${g.analysis}</p>
-                        <ul class="specs-list">
-                            <li><span class="label">Verified Brand:</span> <span>${g.brand}</span></li>
-                            <li><span class="label">Model ID:</span> <span>${g.model_identifier}</span></li>
-                            <li><span class="label">BTU Rating:</span> <span>${g.btu_rating}</span></li>
-                            <li><span class="label">Efficiency:</span> <span>${g.energy_class}</span></li>
-                            <li><span class="label">Match Integrity:</span> <span style="color: ${g.is_match_verified ? '#10B981' : '#F59E0B'}">${g.is_match_verified ? 'CONFIRMED' : 'REJECTED'}</span></li>
-                        </ul>
-                        ${sourcesHtml}
-                    `;
-                }
+                document.getElementById('aiAnalysis').textContent = data.verified_details.analysis;
+                document.getElementById('rawOutput').textContent = JSON.stringify(data, null, 2);
 
-                // 4. Raw Debug
-                document.getElementById('rawDebug').textContent = JSON.stringify(data, null, 2);
-                resultsContainer.scrollIntoView({ behavior: 'smooth' });
-
-            } catch (error) {
-                alert('Connection error: ' + error.message);
-            } finally {
-                spinner.style.display = 'none';
-                searchBtn.disabled = false;
+            } catch (err) {
+                alert("Search Error");
+                loader.style.display = 'none';
             }
         };
     </script>

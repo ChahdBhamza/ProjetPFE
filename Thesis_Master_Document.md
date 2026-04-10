@@ -45,21 +45,27 @@ To compare a user's photo with our database, we convert images into mathematical
     2.  Each product image is passed through the normalized CLIP pipeline.
     3.  The resulting vector + Metadata (Name, Price, Brand, Technical Specs) are stored as a "Point" in Qdrant.
 
-### Step 5: Metadata Enrichment & Standardization
-To transition from "raw scraped text" to a "structured knowledge base," a local **Heuristic Pattern Matching (Regex)** engine was implemented. 
-*   **Purpose**: Extract technical fields (BTU, Gas, Inverter, Price, Color, Surface Area) at zero cost.
-*   **Result**: 133 product records now have structured JSON metadata, enabling precise filtering and verification.
+### Step 5: Technical Identity Standardization & Deduplication
+To transition from "raw scraped data" to a "high-precision technical library," a **Technical Identity Standard** was implemented.
+*   **The Problem**: Retailers often list the same AC unit multiple times with slightly different titles (e.g., "Gree 12k" vs "Gree 12000 BTU Inverter").
+*   **The Solution**: Implemented a normalization engine that extracts a unique **Technical Fingerprint** (Brand + BTU + Inverter + Mode).
+*   **Result**: Reduced a noisy dataset of 133+ records into a refined, deduplicated library of **~60 unique technical identities**. This ensures the RAG system never returns redundant results.
 
 ### Step 6: Multi-Source Web Grounding Architecture (Independent)
 To solve the "Limited Database" problem, a separate **Web Intelligence Explorer** was developed.
 *   **Zero-Token Research**: Uses a free Python search engine (DuckDuckGo) to cross-reference product specs against the live internet.
 *   **Grounding Logic**: Implemented a Regex-based truth engine that extracts BTU from web snippets to verify product authenticity without LLM costs.
 
-### Step 7: Final Refinement & Cost-Engineered Dashboard
-The final phase focused on creating a **100% Non-AI Primary Interface** to demonstrate high accuracy without API dependency.
-*   **Pure Local Identification**: Optimized the `demo_frontend.html` to rely exclusively on CLIP and Qdrant for identification.
-*   **Modularization**: Removed all experimental/dormant AI bridges from the primary search pipeline to ensure that the "Production" version of the dashboard is completely free and private.
-*   **Refactor**: Cleaned up the file structure to eliminate redundant pages and focus exclusively on the high-performance local RAG dashboard.
+### Step 7: Complete Edge-AI Migration (Self-Hosted Architecture)
+The project achieved full independence from cloud-based APIs (Gemini) by migrating all intelligence tasks to a **Local Vision-Language Model (VLM)**.
+*   **Model**: Moondream2 (via Ollama).
+*   **Phase 1 (The Reader)**: Local extraction of brands and technical specifications directly from pixels.
+*   **Phase 2 (The Judge)**: Local visual verification to confirm the match between the user's photo and the technical database index.
+*   **Thesis Impact**: Demonstrates a "Zero-Cost, 100% Private, 100% Offline" architecture, which is a significant advancement for mobile/outdoor equipment detection systems.
+
+### Step 8: Multi-Site Knowledge Fusion
+The data pipeline was expanded to synchronize data from multiple major retailers (Tunisianet + Spacenet).
+*   **Cross-Site Merging**: Standardized technical IDs allow the system to merge a specs-sheet from one site with the price from another, creating a "SuperSpec" for each AC model.
 
 ---
 
@@ -69,9 +75,10 @@ The final phase focused on creating a **100% Non-AI Primary Interface** to demon
 | **Backend** | FastAPI / Uvicorn | High-performance API hosting |
 | **Embeddings** | OpenAI CLIP (ViT-B/32) | Image-to-vector transformation |
 | **Vector DB** | Qdrant | Similarity search engine |
-| **LLM / Vision** | Google Gemini (GenAI) | *Experimental* visual reasoning & Global identification |
-| **Web Research**| DuckDuckGo-Search API | Free external grounding evidence |
-| **Scraper** | BeautifulSoup / HTTPX | Automated data collection |
+| **Local VLM** | Moondream2 (Ollama) | Local visual reasoning & brand extraction |
+| **Cloud LLM** | Google Gemini (GenAI) | *Verification* and fallback search grounding |
+| **Web Research**| DDGS (DuckDuckGo Search) | Free external grounding evidence |
+| **Scraper** | BeautifulSoup / Requests | Multi-site concurrent data collection |
 
 ---
 
@@ -79,11 +86,10 @@ The final phase focused on creating a **100% Non-AI Primary Interface** to demon
 
 | Question | Research Rationale |
 | :--- | :--- |
-| **Why have structured JSON?** | To act as a "Ground Truth." Even if the image match is found, the system needs clean data to verify against real-world evidence. |
+| **Why use a Technical Identity (Deduplication)?** | To ensure search accuracy. Multiple listings for the same hardware dilute the vector space; merging them creates a stronger, unique signal. |
 | **Do we still need raw TXT files?** | Yes. For **Data Lineage**. Keeping the original source allows for future re-processing without re-scraping. |
 | **Why use a Search Library instead of Gemini's built-in Search?** | Cost and Token Efficiency. Offloading the search to a free Python library saves massive token quotas. |
-| **Does the system embed on every run?** | No. Implemented a "Persistent Startup Check" that skips re-indexing if Qdrant already has the 133 records. |
-| **Why keep the Dashboard AI-Free?** | To prove that Visual RAG can be powerful and accurate purely with local models (CLIP), ensuring user privacy and zero operating costs. |
+| **Why move to a Local LLM (Moondream)?** | Privacy and Offline Reliability. Proves that sophisticated Vision-RAG can exist outside the "Cloud" ecosystems. |
 
 ---
 
