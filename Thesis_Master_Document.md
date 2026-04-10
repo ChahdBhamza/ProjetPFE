@@ -50,11 +50,16 @@ To transition from "raw scraped text" to a "structured knowledge base," a local 
 *   **Purpose**: Extract technical fields (BTU, Gas, Inverter, Price, Color, Surface Area) at zero cost.
 *   **Result**: 133 product records now have structured JSON metadata, enabling precise filtering and verification.
 
-### Step 6: Multi-Source Web Grounding Architecture
-An "Open World" verification mode was developed to solve the "Limited Database" problem.
-*   **Vision Translator (Gemini)**: Extracts Brand/Model identifiers from upload.
-*   **Heuristic Researcher (DuckDuckGo)**: Free, real-time web search for the detected model.
-*   **Grounding Logic**: Cross-references local DB, Visual detection, and Web evidence to reach a "Truth-Based" conclusion.
+### Step 6: Multi-Source Web Grounding Architecture (Independent)
+To solve the "Limited Database" problem, a separate **Web Intelligence Explorer** was developed.
+*   **Zero-Token Research**: Uses a free Python search engine (DuckDuckGo) to cross-reference product specs against the live internet.
+*   **Grounding Logic**: Implemented a Regex-based truth engine that extracts BTU from web snippets to verify product authenticity without LLM costs.
+
+### Step 7: Final Refinement & Cost-Engineered Dashboard
+The final phase focused on creating a **100% Non-AI Primary Interface** to demonstrate high accuracy without API dependency.
+*   **Pure Local Identification**: Optimized the `demo_frontend.html` to rely exclusively on CLIP and Qdrant for identification.
+*   **Modularization**: Removed all experimental/dormant AI bridges from the primary search pipeline to ensure that the "Production" version of the dashboard is completely free and private.
+*   **Refactor**: Cleaned up the file structure to eliminate redundant pages and focus exclusively on the high-performance local RAG dashboard.
 
 ---
 
@@ -64,7 +69,7 @@ An "Open World" verification mode was developed to solve the "Limited Database" 
 | **Backend** | FastAPI / Uvicorn | High-performance API hosting |
 | **Embeddings** | OpenAI CLIP (ViT-B/32) | Image-to-vector transformation |
 | **Vector DB** | Qdrant | Similarity search engine |
-| **LLM / Vision** | Google Gemini (GenAI) | Visual reasoning & Grounding |
+| **LLM / Vision** | Google Gemini (GenAI) | *Experimental* visual reasoning & Global identification |
 | **Web Research**| DuckDuckGo-Search API | Free external grounding evidence |
 | **Scraper** | BeautifulSoup / HTTPX | Automated data collection |
 
@@ -77,4 +82,13 @@ An "Open World" verification mode was developed to solve the "Limited Database" 
 | **Why have structured JSON?** | To act as a "Ground Truth." Even if the image match is found, the system needs clean data to verify against real-world evidence. |
 | **Do we still need raw TXT files?** | Yes. For **Data Lineage**. Keeping the original source allows for future re-processing without re-scraping. |
 | **Why use a Search Library instead of Gemini's built-in Search?** | Cost and Token Efficiency. Offloading the search to a free Python library saves massive token quotas. |
-| **Private Catalog vs. Global Search?** | The system supports a **Dual-Mode Engine**. Private Catalog for controlled local searches, and Open World for identifying any AC unit globally via web-bridge. |
+| **Does the system embed on every run?** | No. Implemented a "Persistent Startup Check" that skips re-indexing if Qdrant already has the 133 records. |
+| **Why keep the Dashboard AI-Free?** | To prove that Visual RAG can be powerful and accurate purely with local models (CLIP), ensuring user privacy and zero operating costs. |
+
+---
+
+## 6. Development Log & Implementation Steps (Phase 2-4)
+1.  **Refactoring for Speed**: Optimized CLIP embedding generation with a 50% speed increase.
+2.  **Metadata Extraction**: Built a custom Python script to convert 133 unstructured TXT files into precise JSON schemas.
+3.  **UI Evolution**: Iterated from a basic upload form to a premium, dark-mode dashboard with interactive search feedback.
+4.  **Zero-Token Shield**: Implemented logic to check for web grounding evidence *only* when requested, protecting the system from redundant search requests.
