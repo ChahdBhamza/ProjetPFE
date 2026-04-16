@@ -1,0 +1,18 @@
+# OCR PROMPT EVOLUTION LOG - DetectionAppPFE
+# Documenting the iteration process for the Master's Thesis
+
+================================================================================
+VERSION 1-17: [Refer to previous log entries for initial development]
+================================================================================
+
+================================================================================
+VERSION 18: AMBIENT AWARENESS (Temperature Capture)
+================================================================================
+PROMPT:
+"display_temperature: The glowing digital numbers on the unit (e.g., 21, 27). 
+NEVER include the temperature in the model_code field."
+
+LOGIC/RESULT:
+- INTENT: Resolve the confusion between technical IDs and current appliance settings.
+- RESULT: Cleaner technical metadata for the RAG pipeline and localized current-state info for the UI.
+================================================================================
