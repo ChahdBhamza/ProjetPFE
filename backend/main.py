@@ -11,6 +11,7 @@ from app.services.vector_store import VectorStore
 from app.services.vision_rag_service import VisionRAGService
 from app.services.web_search_service import WebSearchService
 from app.services.local_vlm_service import LocalVLMService
+from app.services.ocr_service import OCRService
 from app.api.endpoints import router as api_router, init_services
 
 # 1. Initialize FastAPI
@@ -25,13 +26,14 @@ vector_store = None
 vision_service = None
 web_service = None
 local_vlm = None
+ocr_service = None
 
 # ... logic ...
 
 # 4. Startup Logic
 @app.on_event("startup")
 async def startup_event():
-    global embedder, vector_store, vision_service, web_service
+    global embedder, vector_store, vision_service, web_service, local_vlm, ocr_service
     
     print("[Main] Starting services...")
     embedder = CLIPEmbedder()
@@ -46,9 +48,17 @@ async def startup_event():
     except Exception as e:
         print(f"[Main] Local VLM skip: {e}")
         local_vlm = None
+
+    # Dedicated OCR Service
+    try:
+        ocr_service = OCRService(model_name="qwen2.5vl:3b")
+        print("[Main] OCR Service (Direct Alphanumeric) initialized.")
+    except Exception as e:
+        print(f"[Main] OCR Init failed: {e}")
+        ocr_service = None
     
     # Inject into the router
-    init_services(embedder, vector_store, vision_service, web_service, local_vlm)
+    init_services(embedder, vector_store, vision_service, web_service, local_vlm, ocr_service)
     
     # Build the database if empty
     base_dir = Path("../dataequipment/climatiseurs").resolve()
@@ -121,6 +131,10 @@ async def read_root():
 @app.get("/edge")
 async def read_edge():
     return FileResponse("edge_ai_demo.html")
+
+@app.get("/ocr")
+async def read_ocr():
+    return FileResponse("ocr_test_ui.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)

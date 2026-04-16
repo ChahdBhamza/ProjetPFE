@@ -12,14 +12,16 @@ _vector_store = None
 _vision_service = None # Gemini
 _web_service = None
 _local_vlm = None # Qwen/Moondream
+_ocr_service = None # OCR Engine
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
     _web_service = web_service
     _local_vlm = local_vlm
+    _ocr_service = ocr_service
 
 @router.post("/search")
 async def search_endpoint(
@@ -109,3 +111,20 @@ async def search_endpoint(
     except Exception as e:
         print(f"[Backend Error] {e}")
         return {"error": str(e)}
+
+@router.post("/ocr")
+async def ocr_endpoint(file: UploadFile = File(...)):
+    """Dedicated endpoint for raw OCR text extraction"""
+    if _ocr_service is None:
+        return {"error": "OCR Service not initialized on server."}
+        
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents))
+        
+        # Core OCR logic
+        result = _ocr_service.process_image(image)
+        return result
+        
+    except Exception as e:
+        return {"error": f"OCR Failed: {str(e)}"}
