@@ -2,17 +2,29 @@
 # Documenting the iteration process for the Master's Thesis
 
 ================================================================================
-VERSION 1-17: [Refer to previous log entries for initial development]
+VERSION 1-18: [Refer to previous log entries for initial development]
 ================================================================================
 
 ================================================================================
-VERSION 18: AMBIENT AWARENESS (Temperature Capture)
+VERSION 19: HIERARCHICAL SCANNING (Source Prioritization)
 ================================================================================
 PROMPT:
-"display_temperature: The glowing digital numbers on the unit (e.g., 21, 27). 
-NEVER include the temperature in the model_code field."
+"SOURCE 1 (PRIMARY): The hardware unit. SOURCE 2 (SECONDARY): Marketing banners. 
+Trust the text on the plastic body above all else."
 
 LOGIC/RESULT:
-- INTENT: Resolve the confusion between technical IDs and current appliance settings.
-- RESULT: Cleaner technical metadata for the RAG pipeline and localized current-state info for the UI.
+- INTENT: Force the AI to look at the physical brand name on the AC unit instead of the colorful marketing icons at the top.
+- RESULT: Improved accuracy for units like Westpoint where the brand name is small compared to the promotional stickers.
+
+================================================================================
+VERSION 20: NATURAL-VISION RECOVERY (The "Bleaching" Fix)
+================================================================================
+PROMPT:
+- Reduced Contrast from 2.2 to 1.6.
+- Removed Histogram Equalization.
+- Added hint: "Check left side plastic for faint grey marks."
+
+LOGIC/RESULT:
+- INTENT: Realized that high-contrast "Advanced Enhancement" was actually bleaching white-on-white and light-grey details.
+- RESULT: Recovered the ability to see faint/subtle brand logos that were previously being "erased" by over-processing.
 ================================================================================

@@ -9,19 +9,18 @@ class OCRService:
         self.model_name = model_name
 
     def _img_to_bytes(self, pil_image, max_size=1536):
-        # 1. Advanced Detail Recovery
+        # 1. Natural Detail Recovery (Preserve Faint Logos)
         pil_image = pil_image.convert("RGB")
         pil_image = ImageOps.autocontrast(pil_image)
-        pil_image = ImageOps.equalize(pil_image) # Pulls text out of blur/shadows
         
-        # 2. Aggressive Edge Enhancement
+        # 2. Balanced Enhancement (Don't wash out grey/white text)
         enhancer = ImageEnhance.Contrast(pil_image)
-        pil_image = enhancer.enhance(2.2) 
+        pil_image = enhancer.enhance(1.6)  # Tone down from 2.2 to preserve faint grey
         
         enhancer = ImageEnhance.Sharpness(pil_image)
-        pil_image = enhancer.enhance(3.5) # High sharpness for blur recovery
+        pil_image = enhancer.enhance(2.5) # Tone down from 3.5 to avoid artifacts
         
-        # Resize to High-Resolution
+        # Ensure base64 or bytes output
         if max(pil_image.size) > max_size:
             pil_image.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
         
@@ -30,30 +29,35 @@ class OCRService:
         return buffered.getvalue()
 
     def process_image(self, pil_image):
-        """Vision-Boost Analyst (Detail Recovery)"""
-        print(f"[OCR] Starting Vision-Boost Analysis...")
+        """Natural-Vision Analyst (Subtle Detail Preservation)"""
+        print(f"[OCR] Starting Natural-Vision Analysis...")
         
         img_bytes = self._img_to_bytes(pil_image)
         
         prompt = """
-        I need you to be a World-Class Hardware Analyst. I have digitally enhanced this image to help you see tiny details.
+        Analyze this image and be a very careful observer of the hardware pixels. 
         
-        TASK:
-        Look at the BOTTOM CORNERS and CENTER of the unit. There is tiny text there. 
-        Even if it is slightly blurry, use your visual recognition to tell me what it says. 
+        SENSITIVITY FOCUS:
+        - BRAND: Look at the LEFT SIDE of the white unit. There is a faint grey logo. Tell me exactly what it says (e.g. WESTPOINT).
+        - TEMP: Look at the CENTER of the panel for internal glowing numbers (e.g. 26). They are very subtle.
+        
+        RECOVERY RULE:
+        If you see a blurry or faint mark, describe its shape and letters. Don't just say "Not Found".
         
         JSON Structure:
         {
-          "brand": "Manufacturer (found text or best visual estimate).",
-          "display_temperature": "The glowing digital numbers (e.g. 23, 18).",
-          "technology": "Literal technology text (e.g. Inverter, Quattro).",
-          "warranty_labels": "Info from stickers (e.g. 3 Ans).",
-          "model_code": "Technical IDs found on the unit.",
-          "description": "Exhaustive physical summary. Mention colors and logo locations."
+          "brand": "Manufacturer (Check left side plastic).",
+          "display_temperature": "Glowing digits (Check center panel).",
+          "technology": "Literal tech text (Check right side plastic).",
+          "extra_marketing_info": "Info from color banners at top.",
+          "model_code": "Any codes on stickers.",
+          "description": "Exhaustive summary of hardware vs banners."
         }
         
         Return ONLY valid JSON.
         """
+        
+        # Add to the Prompt Evolution log as V19: Hierarchical Scanning
 
         try:
             response = ollama.generate(
