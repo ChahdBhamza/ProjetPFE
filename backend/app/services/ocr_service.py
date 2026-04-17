@@ -1,32 +1,11 @@
-import os
-import json
 import io
+import json
 import ollama
 from PIL import Image, ImageEnhance, ImageOps
 
 class OCRService:
     def __init__(self, model_name="qwen2.5vl:3b"):
         self.model_name = model_name
-
-    def _img_to_bytes(self, pil_image, max_size=1536):
-        # 1. Natural Detail Recovery (Preserve Faint Logos)
-        pil_image = pil_image.convert("RGB")
-        pil_image = ImageOps.autocontrast(pil_image)
-        
-        # 2. Balanced Enhancement (Don't wash out grey/white text)
-        enhancer = ImageEnhance.Contrast(pil_image)
-        pil_image = enhancer.enhance(1.6)  # Tone down from 2.2 to preserve faint grey
-        
-        enhancer = ImageEnhance.Sharpness(pil_image)
-        pil_image = enhancer.enhance(2.5) # Tone down from 3.5 to avoid artifacts
-        
-        # Ensure base64 or bytes output
-        if max(pil_image.size) > max_size:
-            pil_image.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
-        
-        buffered = io.BytesIO()
-        pil_image.save(buffered, format="JPEG", quality=95)
-        return buffered.getvalue()
 
     def process_image(self, pil_image):
         """Natural-Vision Analyst (Subtle Detail Preservation)"""

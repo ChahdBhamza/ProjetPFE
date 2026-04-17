@@ -12,5 +12,4 @@ qdrant-client
 torch
 transformers
 Pillow
-
-
+easyocr

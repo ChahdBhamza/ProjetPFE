@@ -1,30 +1,31 @@
 # OCR PROMPT EVOLUTION LOG - DetectionAppPFE
-# Documenting the iteration process for the Master's Thesis
+# Documenting the architectural choices and iteration process for the Master's Thesis
 
 ================================================================================
-VERSION 1-18: [Refer to previous log entries for initial development]
+ARCHITECTURAL RATIONALE: VLM vs. CLASSIC OCR
 ================================================================================
+The DetectionAppPFE pipeline utilizes a Multimodal Vision Language Model (VLM) 
+rather than traditional OCR (e.g., Tesseract or Google Vision API) for several 
+key academic and technical reasons:
+
+1. SCENE UNDERSTANDING: 
+   Unlike classic OCR which simply detects character shapes, the VLM understands 
+   the geometry of an air conditioner. It can distinguish between the hardware 
+   unit (secondary) and marketing banners (noise).
+
+2. CONTEXTUAL FILTERING: 
+   The VLM allows for "Semantic Logic" (e.g., "Ignore the digital temperature 
+   display when extracting the model code"). This is computationally impossible 
+   with pattern-based OCR.
+
+3. DATA STRUCTURE: 
+   The VLM performs "Classification" and "Extraction" simultaneously, outputting 
+   RAG-ready JSON objects without requiring secondary NLP processing layers.
+
+4. ROBUSTNESS: 
+   The pipeline is optimized for non-ideal real-world photos (curved plastic, 
+   low-contrast grey/gold logos, and variable camera distances).
 
 ================================================================================
-VERSION 19: HIERARCHICAL SCANNING (Source Prioritization)
-================================================================================
-PROMPT:
-"SOURCE 1 (PRIMARY): The hardware unit. SOURCE 2 (SECONDARY): Marketing banners. 
-Trust the text on the plastic body above all else."
-
-LOGIC/RESULT:
-- INTENT: Force the AI to look at the physical brand name on the AC unit instead of the colorful marketing icons at the top.
-- RESULT: Improved accuracy for units like Westpoint where the brand name is small compared to the promotional stickers.
-
-================================================================================
-VERSION 20: NATURAL-VISION RECOVERY (The "Bleaching" Fix)
-================================================================================
-PROMPT:
-- Reduced Contrast from 2.2 to 1.6.
-- Removed Histogram Equalization.
-- Added hint: "Check left side plastic for faint grey marks."
-
-LOGIC/RESULT:
-- INTENT: Realized that high-contrast "Advanced Enhancement" was actually bleaching white-on-white and light-grey details.
-- RESULT: Recovered the ability to see faint/subtle brand logos that were previously being "erased" by over-processing.
+VERSION 1-20: [Refer to previous log entries for the full iteration history]
 ================================================================================

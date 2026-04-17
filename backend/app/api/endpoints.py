@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from PIL import Image
 from io import BytesIO
 import json
+from app.services.classic_ocr_service import ClassicOCRService
+from app.services.hybrid_ocr_service import HybridOCRService
 
 router = APIRouter()
 
@@ -128,3 +130,31 @@ async def ocr_endpoint(file: UploadFile = File(...)):
         
     except Exception as e:
         return {"error": f"OCR Failed: {str(e)}"}
+@router.post("/ocr/classic")
+async def classic_ocr_endpoint(
+    file: UploadFile = File(...),
+    lang_combo: str = Form("en_fr")
+):
+    """Dumb OCR endpoint for raw text comparison"""
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents))
+        
+        ocr = ClassicOCRService()
+        return ocr.process_image(image, combo=lang_combo)
+        
+    except Exception as e:
+        return {"error": f"Classic OCR Failed: {str(e)}", "status": "error"}
+
+@router.post("/ocr/hybrid")
+async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
+    """Hybrid Pipeline: EasyOCR -> Text LLM"""
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents))
+        
+        hybrid_service = HybridOCRService()
+        return hybrid_service.process_image(image)
+        
+    except Exception as e:
+        return {"success": False, "error": f"Hybrid Pipeline Failed: {str(e)}"}

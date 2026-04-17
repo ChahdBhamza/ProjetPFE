@@ -136,5 +136,13 @@ async def read_edge():
 async def read_ocr():
     return FileResponse("ocr_test_ui.html")
 
+@app.get("/classic-ocr")
+async def read_classic_ocr():
+    return FileResponse("classic_ocr_test_ui.html")
+
+@app.get("/hybrid-ocr")
+async def read_hybrid_ocr():
+    return FileResponse("hybrid_ocr_test_ui.html")
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)
