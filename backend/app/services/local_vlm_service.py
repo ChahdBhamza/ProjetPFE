@@ -11,61 +11,44 @@ class LocalVLMService:
         self.model_name = model_name
 
     def _img_to_bytes(self, pil_image):
-        # Resize image for speed
-        max_size = 640
+        # SPEED HACK: VLMs process images much faster if they are small. 
+        # 448px is the native internal size for many vision models.
+        max_size = 448
         if max(pil_image.size) > max_size:
             pil_image.thumbnail((max_size, max_size))
             
         buffered = BytesIO()
         if pil_image.mode in ("RGBA", "P"):
             pil_image = pil_image.convert("RGB")
-        pil_image.save(buffered, format="JPEG", quality=85)
+        # Lower quality saves memory and bandwidth
+        pil_image.save(buffered, format="JPEG", quality=60)
         return buffered.getvalue()
 
     def extract_specs(self, pil_image):
-        """Extract Brand and BTU using official Ollama library"""
-        print(f"[LocalVLM] Analyzing with {self.model_name} (Official Lib)...")
-        
+        """Ultra-Fast Extraction using reduced resolution and short prompt"""
         img_bytes = self._img_to_bytes(pil_image)
-        prompt = """You are an expert in HVAC product recognition.
-
-Analyze the input image of an air conditioner and extract the following information with maximum accuracy.
-
-Your PRIORITY is to identify the BRAND, even if:
-- the image is blurry
-- the logo is partially visible
-- the text is distorted or low resolution
-- the brand is inferred from shape, design, font style, or common AC patterns
-
-Use all available visual cues including:
-- logo shape, color, and placement
-- typical brand design patterns (e.g., grille style, LED display position, casing shape)
-- partial or incomplete text (e.g., "SAM" → Samsung, "LG" shape, etc.)
-- common air conditioner models and manufacturer styles
-
-If the brand is uncertain, return your BEST GUESS (do NOT return null).
-
-Also extract:
-- BTU (from visible numbers or inferred from model codes if possible)
-- whether it is an inverter AC (look for "inverter", "dual inverter", "DC inverter", etc.)
-
-STRICT OUTPUT FORMAT:
-Return ONLY a valid JSON object with no explanation:
-{
-  "brand": "string",
-  "btu": "string",
-  "is_inverter": true/false
-}"""
-
+        
+        # Highly optimized prompt for speed + accuracy
+        prompt = """Identify the air conditioner BRAND logo in this image (e.g., IRIS, LG, Condor, Gree, etc.). 
+Look for tiny logos or stylized letters. 
+Return ONLY a valid JSON object: {"brand": "detected_name"}"""
+        
         try:
-            response = ollama.generate(
+            # options and format="json" help ensure the model finishes fast and correctly
+            response = ollama.chat(
                 model=self.model_name,
-                prompt=prompt,
-                images=[img_bytes],
-                stream=False
+                messages=[{
+                    'role': 'user', 
+                    'content': prompt,
+                    'images': [img_bytes]
+                }],
+                options={
+                    "num_predict": 20,   # Stop after 20 words (enough for brand)
+                    "num_ctx": 1024      # Smaller context is faster
+                }
             )
             
-            raw_response = response.get("response", "").strip()
+            raw_response = response.get("message", {}).get("content", "").strip()
             print(f"[LocalVLM] Raw Output: {raw_response}")
             
             # Find JSON
@@ -73,15 +56,14 @@ Return ONLY a valid JSON object with no explanation:
             end = raw_response.rfind("}")
             if start != -1 and end != -1:
                 data = json.loads(raw_response[start:end+1])
-                data["raw_text"] = raw_response
                 return data
             
             # Keyword Fallback
-            for brand in ["Gree", "Samsung", "LG", "TCL", "Haier", "Biolux", "Midea"]:
+            for brand in ["LG", "Samsung", "Condor", "IRIS", "Gree", "TCL", "Midea"]:
                 if brand.lower() in raw_response.lower():
-                    return {"brand": brand, "btu": "Unknown", "is_inverter": False, "raw_text": raw_response}
+                    return {"brand": brand}
                 
-            return {"brand": "Unknown", "btu": "Unknown", "is_inverter": False, "raw_text": raw_response}
+            return {"brand": "Unknown"}
             
         except Exception as e:
             print(f"[LocalVLM] Library Error: {e}")

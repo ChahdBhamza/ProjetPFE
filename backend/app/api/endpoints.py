@@ -154,7 +154,7 @@ async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
         image = Image.open(BytesIO(contents))
         
         hybrid_service = HybridOCRService()
-        return hybrid_service.process_image(image)
+        return await hybrid_service.process_image(image)
         
     except Exception as e:
         return {"success": False, "error": f"Hybrid Pipeline Failed: {str(e)}"}

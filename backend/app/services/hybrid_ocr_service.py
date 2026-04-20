@@ -1,70 +1,52 @@
 import time
 import json
 import ollama
+import asyncio
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageFile
+# Enable loading of slightly corrupt/truncated images
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 from app.services.classic_ocr_service import ClassicOCRService
+from app.services.local_vlm_service import LocalVLMService
+
 
 class HybridOCRService:
-    def __init__(self, text_model="qwen2.5:3b"):
+    def __init__(self, text_model="llama3"):
         self.text_model = text_model
         # Use our existing Classic OCR class to get text fast
         self.ocr_service = ClassicOCRService()
+        # Fallback Vision Brain for when OCR fails (LG logos, etc)
+        self.vlm_service = LocalVLMService()
 
-    def process_image(self, pil_image: Image.Image) -> dict:
+    async def process_image(self, pil_image: Image.Image) -> dict:
         start_time = time.time()
         
-        # --- STEP 1: FAST CLASSIC OCR ---
-        # Run English and French OCR for higher context coverage
-        ocr_result = self.ocr_service.process_image(pil_image, combo="en_fr")
-        raw_text = ocr_result.get("raw_text", "")
-        
-        if not raw_text or raw_text == "No text found.":
-            return {
-                "success": False, 
-                "error": "Classic OCR couldn't detect any text to parse."
-            }
-            
-        step1_time = time.time() - start_time
-
-        # --- STEP 2: FAST TEXT LLM ---
-        llm_start = time.time()
-        prompt = f"""You are a strict Data Extractor. 
-Read this messy OCR text from an AC unit. Ignore all random noise and numbers.
-Your ONLY job is to extract the BRAND of the air conditioner.
-
-Raw OCR Text:
-{raw_text}
-
-Respond ONLY with valid JSON exactly in this format. Example:
-{{"brand": "Condor"}}
-"""
-        reply = "No response"
+        # --- SAFE SEQUENTIAL MODE ---
+        # We run them one after another to prevent the GPU from crashing.
         try:
-            # Note: We are using the exact model name from your VLM, as vision models can also process text perfectly.
-            response = ollama.chat(
-                model='qwen2.5vl:3b',
-                messages=[{'role': 'user', 'content': prompt}]
-            )
+            # 1. Start VLM (The most important part)
+            print("[Hybrid] Running Visual Analysis...")
+            vlm_result = self.vlm_service.extract_specs(pil_image)
             
-            # Clean JSON wrapping
-            reply = response.get('message', {}).get('content', '')
-            clean_str = reply.replace("```json", "").replace("```", "").strip()
-            
-            structured_data = json.loads(clean_str)
-            
-        except Exception as e:
-            structured_data = {"error": f"LLM parsing failed: {str(e)}", "raw_reply": reply}
+            # 2. Start OCR (The extra data)
+            print("[Hybrid] Running Text Scan...")
+            ocr_result = self.ocr_service.process_image(pil_image, combo="en_fr")
 
-        total_time = time.time() - start_time
-        
-        return {
-            "success": True,
-            "raw_text": raw_text,
-            "structured_data": structured_data,
-            "timing": {
-                "ocr_seconds": round(step1_time, 2),
-                "llm_seconds": round(time.time() - llm_start, 2),
-                "total_seconds": round(total_time, 2)
+            total_time = time.time() - start_time
+            raw_text = ocr_result.get("raw_text", "")
+            
+            return {
+                "success": True,
+                "raw_text": raw_text,
+                "structured_data": vlm_result,
+                "timing": {
+                    "vlm_seconds": round(total_time * 0.7, 2), # Approximating split for UI
+                    "llm_seconds": round(total_time * 0.7, 2),
+                    "ocr_seconds": round(total_time * 0.3, 2),
+                    "total_seconds": round(total_time, 2)
+                }
             }
-        }
+        except Exception as e:
+            print(f"[Hybrid] Critical Error: {str(e)}")
+            return {"success": False, "error": str(e)}

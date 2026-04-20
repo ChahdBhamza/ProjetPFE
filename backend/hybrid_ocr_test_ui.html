@@ -224,10 +224,10 @@
                         <div class="dot yellow"></div>
                         <div class="dot green"></div>
                     </div>
-                    <span class="terminal-label">STEP 1: EasyOCR (Text)</span>
-                    <span class="timer-badge" id="ocrTimer">0.00s</span>
+                    <span class="terminal-label">STEP 1: LLM (JSON)</span>
+                    <span class="timer-badge" id="llmTimer">0.00s</span>
                 </div>
-                <pre class="output-box" id="ocrOutput">Waiting for pipeline...</pre>
+                <pre class="output-box" id="llmOutput" style="color: #6EE7B7;">Waiting for pipeline...</pre>
             </div>
 
             <!-- Step 2 Terminal -->
@@ -238,10 +238,10 @@
                         <div class="dot yellow"></div>
                         <div class="dot green"></div>
                     </div>
-                    <span class="terminal-label">STEP 2: LLM (JSON)</span>
-                    <span class="timer-badge" id="llmTimer">0.00s</span>
+                    <span class="terminal-label">STEP 2: EasyOCR (Text)</span>
+                    <span class="timer-badge" id="ocrTimer">0.00s</span>
                 </div>
-                <pre class="output-box" id="llmOutput" style="color: #6EE7B7;">Waiting for Step 1...</pre>
+                <pre class="output-box" id="ocrOutput">Waiting for Step 1...</pre>
             </div>
         </div>
 
@@ -272,41 +272,60 @@
             }
         };
 
-        extractBtn.onclick = async () => {
+        // Wire up the button
+        extractBtn.onclick = runHybridPipeline;
+
+        async function runHybridPipeline() {
+            if (fileInput.files.length === 0) {
+                alert("Please select an image first.");
+                return;
+            }
+
             pipelineGrid.style.display = 'grid';
             extractBtn.disabled = true;
             extractBtn.style.opacity = '0.5';
-            
-            ocrOutput.innerHTML = '<span class="loading-text">> Auto-Scanning multiple languages...</span>';
-            llmOutput.innerHTML = '<span style="color:#64748B;">> Waiting for OCR raw string...</span>';
-            ocrTimer.textContent = "RUNNING";
-            llmTimer.textContent = "STANDBY";
 
-            const file = fileInput.files[0];
+            // UI Reset - Set BOTH to running at the same time
+            document.getElementById('llmTimer').textContent = "RUNNING";
+            document.getElementById('llmTimer').className = "timer-badge running";
+            document.getElementById('llmOutput').textContent = "> Initializing Visual Brain...";
+
+            document.getElementById('ocrTimer').textContent = "RUNNING";
+            document.getElementById('ocrTimer').className = "timer-badge running";
+            document.getElementById('ocrOutput').textContent = "> Auto-Scanning multiple languages...";
+
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('file', fileInput.files[0]);
 
             try {
-                const response = await fetch('/api/ocr/hybrid', { method: 'POST', body: formData });
+                const response = await fetch('/api/ocr/hybrid', {
+                    method: 'POST',
+                    body: formData
+                });
                 const data = await response.json();
                 
                 extractBtn.disabled = false;
                 extractBtn.style.opacity = '1';
 
                 if (data.success) {
-                    ocrOutput.textContent = data.raw_text;
-                    llmOutput.textContent = JSON.stringify(data.structured_data, null, 2);
-                    
-                    ocrTimer.textContent = data.timing.ocr_seconds + "s";
-                    llmTimer.textContent = data.timing.llm_seconds + "s";
+                    // Update LLM Window (Step 1)
+                    document.getElementById('llmOutput').textContent = JSON.stringify(data.structured_data, null, 2);
+                    document.getElementById('llmTimer').textContent = data.timing.llm_seconds + "s";
+                    document.getElementById('llmTimer').className = "timer-badge";
+
+                    // Update OCR Window (Step 2)
+                    document.getElementById('ocrOutput').textContent = data.raw_text || "No text detected.";
+                    document.getElementById('ocrTimer').textContent = data.timing.ocr_seconds + "s";
+                    document.getElementById('ocrTimer').className = "timer-badge";
                 } else {
-                    ocrOutput.textContent = "PROCESS FAILED:\n" + data.error;
-                    llmOutput.textContent = "ABORTED.";
+                    document.getElementById('ocrOutput').textContent = "PROCESS FAILED:\n" + data.error;
+                    document.getElementById('llmOutput').textContent = "ABORTED.";
                 }
 
             } catch (err) {
-                ocrOutput.textContent = "Network Error: Could not connect to Hybrid API.";
-                llmOutput.textContent = "ABORTED.";
+                console.error(err);
+                document.getElementById('ocrOutput').textContent = "Network Error: Could not connect to Hybrid API.";
+                document.getElementById('llmOutput').textContent = "ABORTED.";
                 extractBtn.disabled = false;
                 extractBtn.style.opacity = '1';
             }
