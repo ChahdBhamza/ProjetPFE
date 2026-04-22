@@ -7,8 +7,10 @@ class VectorStore:
     def __init__(self, collection_name="climatiseurs_v2", path="qdrant_db"):
         """Initialize Qdrant Vector Store"""
         self.collection_name = collection_name
-        # Use a local path for persistence instead of just :memory:
-        self.client = QdrantClient(path=path)
+        # Ensure we always use the same database folder in backend/qdrant_db
+        base_dir = Path(__file__).parent.parent.parent
+        db_path = str(base_dir / "backend" / "qdrant_db")
+        self.client = QdrantClient(path=db_path)
         
         # Create collection if it doesn't exist
         try:
