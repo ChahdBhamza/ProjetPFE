@@ -17,6 +17,16 @@ BRAND_CASING = {
     "chaffoteaux": "Chaffoteaux",
 }
 
+# Mapping for Tunisianet French keys to Master Keys
+TUNISIANET_MAP = {
+    "Type": "Mode",
+    "Garantie": "Warranty",
+    "Puissance": "Capacity",
+    "Inverter": "Technology",
+    "Smart": "Smart",
+    "Couleur": "Color"
+}
+
 def clean_brand(brand):
     """Normalize brand name."""
     if not brand or brand == "Not found": return "Other"
@@ -139,14 +149,18 @@ def deep_extraction(product_specs, text):
         "Warranty": r'(\d+)\s*(?:ans|mois)\s*(?:de\s*)?garantie',
         "Gas_Type": r'\b(R410A|R32|R22)\b',
         "Noise_Level": r'(\d+)\s*dB',
+        "Smart": r'\b(Smart|WiFi|Wi-Fi|Wifi)\b',
     }
     
     for key, pattern in patterns.items():
-        if product_specs.get(key) == "Not found":
+        if product_specs.get(key) == "Not found" or (key == "Smart" and product_specs.get(key) == "No"):
             match = re.search(pattern, text, re.I)
             if match:
                 val = match.group(1) if len(match.groups()) > 0 else match.group(0)
-                product_specs[key] = val.strip()
+                if key == "Smart":
+                    product_specs[key] = "Yes"
+                else:
+                    product_specs[key] = val.strip()
 
 def main():
     print("Starting Normalization & Data Fusion Pipeline...")
@@ -172,7 +186,7 @@ def main():
                 raw_desc = product.get("description", "")
                 
                 # Re-detect brand from the raw title (more reliable than stored brand)
-                brand = detect_brand_from_title(raw_title) if raw_title else clean_brand(raw_brand)
+                brand = clean_brand(detect_brand_from_title(raw_title)) if raw_title else clean_brand(raw_brand)
                 norm_ref = clean_reference(raw_ref)
                 
                 # If the scraper failed to find a reference, it's impossible to deduplicate accurately.
@@ -207,6 +221,8 @@ def main():
                             "Weight": "Not found",
                             "Noise_Level": "Not found",
                             "Warranty": "Not found",
+                            "Smart": "No",
+                            "Color": "Not found",
                         }
                     }
                 
@@ -217,8 +233,21 @@ def main():
                 # Data Fusion: Update Specs ONLY if they are currently missing
                 for spec_key in master_catalog[master_key]["specs"].keys():
                     if master_catalog[master_key]["specs"][spec_key] == "Not found":
+                        # Direct check
                         val = specs.get(spec_key, "Not found")
+                        
+                        # Tunisianet Mapping check
+                        if site == "tunisianet":
+                            for fr_key, en_key in TUNISIANET_MAP.items():
+                                if en_key == spec_key:
+                                    val = specs.get(fr_key, val)
+                        
                         if val != "Not found" and str(val).strip() != "":
+                            # Clean "Oui/Non" for Technology/Smart
+                            if spec_key in ["Technology", "Smart"]:
+                                if str(val).lower() in ["oui", "yes", "true"]: val = "Yes" if spec_key == "Smart" else "Inverter"
+                                elif str(val).lower() in ["non", "no", "false"]: val = "No" if spec_key == "Smart" else "Non Inverter"
+
                             master_catalog[master_key]["specs"][spec_key] = val
                             
                 # Deep Extraction: Try to recover missing specs from title + description
@@ -246,7 +275,7 @@ def main():
         import shutil
         for brand_folder in DATA_EQUIPMENT_DIR.iterdir():
             if not brand_folder.is_dir(): continue
-            brand_name = brand_folder.name
+            brand_name = clean_brand(brand_folder.name)
             json_dir = brand_folder / "text"
             if not json_dir.exists(): continue
             
@@ -313,14 +342,16 @@ def main():
                             "Energy_Class": local_data.get("energy_class", "Not found"),
                             "Gas_Type": local_data.get("gas", "Not found"),
                             "Dimensions": "Not found", "Weight": "Not found",
-                            "Noise_Level": "Not found", "Warranty": f"{local_data.get('warranty')} ans" if local_data.get('warranty') else "Not found",
+                            "Noise_Level": "Not found", 
+                            "Warranty": f"{local_data.get('warranty')} ans" if local_data.get('warranty') else "Not found",
+                            "Smart": "Yes" if local_data.get("smart") or local_data.get("wifi") or local_data.get("wifi_connect") else "No",
+                            "Color": local_data.get("color", "Not found")
                         }
                     }
                     # Copy image
                     img_src = brand_folder / "images" / f"{json_file.stem}.jpg"
                     if img_src.exists():
-                        safe_brand = clean_brand(brand_name)
-                        dest_img = BASE_DIR.parent.parent / "Equipment" / "climatiseurs" / safe_brand / "images" / f"{safe_brand}_{ref}.jpg"
+                        dest_img = BASE_DIR.parent.parent / "Equipment" / "climatiseurs" / brand_name / "images" / f"{brand_name}_{ref}.jpg"
                         dest_img.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy(img_src, dest_img)
                         master_catalog[master_key]["primary_image"] = str(dest_img).replace("\\", "/")

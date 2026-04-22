@@ -29,6 +29,9 @@
         "Dimensions": "Int: 270 cm | Ext: 540 cm",
         "Weight": "Not found",
         "Noise_Level": "Not found",
-        "Warranty": "6 ans pour le moteur et 3 ans pour le climatiseur"
-    }
+        "Warranty": "6 ans pour le moteur et 3 ans pour le climatiseur",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL48M3NTC7C.jpg"
 }

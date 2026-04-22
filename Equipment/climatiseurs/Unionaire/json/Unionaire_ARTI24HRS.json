@@ -29,6 +29,9 @@
         "Dimensions": "Not found",
         "Weight": "Not found",
         "Noise_Level": "Not found",
-        "Warranty": "Not found"
-    }
+        "Warranty": "Not found",
+        "Smart": "Yes",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Unionaire/images/Unionaire_ARTI24HRS.jpg"
 }

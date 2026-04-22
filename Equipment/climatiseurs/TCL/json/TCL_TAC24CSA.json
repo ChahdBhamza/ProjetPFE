@@ -22,6 +22,9 @@
         "Dimensions": "1010 x 315 x 220 mm",
         "Weight": "13 kg",
         "Noise_Level": "52 db",
-        "Warranty": "Not found"
-    }
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC24CSA.jpg"
 }

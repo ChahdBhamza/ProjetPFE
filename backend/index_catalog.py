@@ -70,7 +70,9 @@ def main():
                     "local_image_path": product.get("local_image_path"),
                     "local_json_path": product.get("local_json_path"),
                     "tech": product.get("specs", {}).get("Technology"),
-                    "mode": product.get("specs", {}).get("Mode")
+                    "mode": product.get("specs", {}).get("Mode"),
+                    "smart": product.get("specs", {}).get("Smart"),
+                    "color": product.get("specs", {}).get("Color")
                 }
 
                 # Generate a unique ID for this point

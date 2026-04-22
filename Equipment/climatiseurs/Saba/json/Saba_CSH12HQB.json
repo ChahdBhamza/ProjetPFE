@@ -29,6 +29,9 @@
         "Dimensions": "Int: 79*20*27 cm | Ext: 70*54 cm",
         "Weight": "Not found",
         "Noise_Level": "Int: 40 dB | Ext: 52 dB",
-        "Warranty": "3 ans"
-    }
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Saba/images/Saba_CSH12HQB.jpg"
 }

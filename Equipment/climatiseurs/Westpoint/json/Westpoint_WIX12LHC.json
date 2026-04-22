@@ -43,6 +43,9 @@
         "Dimensions": "900x 220x 270mm | 770x300x555mm",
         "Weight": "8kg",
         "Noise_Level": "42",
-        "Warranty": "5 Ans"
-    }
+        "Warranty": "5 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_WIX12LHC.jpg"
 }
