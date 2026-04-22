@@ -23,7 +23,13 @@ def clean_brand(brand):
     key = brand.strip().lower()
     if key in BRAND_CASING:
         return BRAND_CASING[key]
-    return brand.strip().title()
+    
+    # Windows reserved names sanitization
+    reserved = ["CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"]
+    final_brand = brand.strip().title()
+    if final_brand.upper() in reserved:
+        return f"{final_brand}_Brand"
+    return final_brand
 
 def clean_reference(ref):
     """Ruthless normalization to create a solid deduplication key."""
@@ -313,7 +319,8 @@ def main():
                     # Copy image
                     img_src = brand_folder / "images" / f"{json_file.stem}.jpg"
                     if img_src.exists():
-                        dest_img = BASE_DIR.parent.parent / "Equipment" / "climatiseurs" / brand_name / "images" / f"{brand_name}_{ref}.jpg"
+                        safe_brand = clean_brand(brand_name)
+                        dest_img = BASE_DIR.parent.parent / "Equipment" / "climatiseurs" / safe_brand / "images" / f"{safe_brand}_{ref}.jpg"
                         dest_img.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy(img_src, dest_img)
                         master_catalog[master_key]["primary_image"] = str(dest_img).replace("\\", "/")

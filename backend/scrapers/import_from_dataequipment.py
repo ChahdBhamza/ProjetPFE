@@ -96,10 +96,9 @@ def main():
 
             # Prepare directories in Equipment
             dest_img_dir = MASTER_EQUIPMENT_DIR / brand_name / "images"
-            dest_txt_dir = MASTER_EQUIPMENT_DIR / brand_name / "text"
             dest_json_dir = MASTER_EQUIPMENT_DIR / brand_name / "json"
             
-            for d in [dest_img_dir, dest_txt_dir, dest_json_dir]:
+            for d in [dest_img_dir, dest_json_dir]:
                 d.mkdir(parents=True, exist_ok=True)
 
             # Copy Image
@@ -115,18 +114,11 @@ def main():
                     product_obj["local_image_path"] = str(dest_path).replace("\\", "/")
                     found_img = True
 
-            # Generate TXT and JSON in Equipment
-            txt_path = dest_txt_dir / f"{brand_name}_{ref}.txt"
-            with open(txt_path, "w", encoding="utf-8") as f_txt:
-                f_txt.write(f"PRODUCT NAME: {product_obj['clean_title']}\nBRAND: {brand_name}\nREFERENCE: {ref}\n")
-                for k, v in product_obj["specs"].items():
-                    f_txt.write(f"{k}: {v}\n")
-
+            # Save JSON metadata
             json_path = dest_json_dir / f"{brand_name}_{ref}.json"
             with open(json_path, "w", encoding="utf-8") as f_json:
                 json.dump(product_obj, f_json, ensure_ascii=False, indent=4)
 
-            product_obj["local_text_path"] = str(txt_path).replace("\\", "/")
             product_obj["local_json_path"] = str(json_path).replace("\\", "/")
 
             # Add to master catalog

@@ -68,7 +68,6 @@ def main():
                     "clean_title": title,
                     "primary_image": product.get("primary_image"),
                     "local_image_path": product.get("local_image_path"),
-                    "local_text_path": product.get("local_text_path"),
                     "local_json_path": product.get("local_json_path"),
                     "tech": product.get("specs", {}).get("Technology"),
                     "mode": product.get("specs", {}).get("Mode")
