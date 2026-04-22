@@ -1,0 +1,17 @@
+PRODUCT NAME: Brandt Non Inverter 9000 BTU (BTS9TOQC)
+BRAND: Brandt
+REFERENCE: BTS9TOQC
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: GAZ R410
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1419.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/brandt/climatiseur-brandt-alaska-9000btu-chfr)

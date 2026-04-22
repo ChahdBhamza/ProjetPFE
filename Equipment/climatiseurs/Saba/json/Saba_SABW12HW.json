@@ -1,0 +1,41 @@
+{
+    "clean_title": "Saba Non Inverter 12000 BTU (SABW12H-W)",
+    "brand": "Saba",
+    "normalized_reference": "SABW12HW",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/25184-home_default/climatiseur-saba-12000-btu-chaudfroid-blanc-sabw12h-w.jpg",
+    "description": "Climatiseur SABA - Capacité :\n12000 BTU\n- Mode :\nChaud / Froid\n- Débit d'air :\n5\n50\nm³/h\n- Classe énergétique :\n2\n- Surface recommandée :\n30 à 40 m²\n- Niveau sonore (unité intérieure) :\n40 dB(A)\n- Niveau sonore (unité extérieure) :\n52 dBA\n- Type de réfrigérant :\nR410A\n- Puissance absorbée :\n1055W\n- Tension d'alimentation : 220-240V - Fréquence : 50Hz -\nGarantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1299.0,
+            "raw_title": "CLIMATISEUR SABA 12000 BTU CHAUD/FROID / BLANC / SABW12H-W",
+            "url": "https://jumbo.tn/climatiseur/9230-climatiseur-saba-12000-btu-chaudfroid-blanc-sabw12h-w.html",
+            "image_url": "https://jumbo.tn/25184-home_default/climatiseur-saba-12000-btu-chaudfroid-blanc-sabw12h-w.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR SABA 12000 BTU CHAUD/FROID / BLANC / SABW12H-W",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/83953-climatiseur-saba-12000-btu-chaudfroid-blanc-sabw12h-w.html",
+            "image_url": "https://www.tunisianet.com.tn/439532-large/climatiseur-saba-12000-btu-chaudfroid-blanc-sabw12h-w.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 199,000 DT",
+            "raw_title": "Climatiseur Saba SABW12C-IW 12000 BTU Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "2",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "40 db | 52 dba",
+        "Warranty": "3 Ans"
+    }
+}

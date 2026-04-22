@@ -1,0 +1,27 @@
+{
+    "clean_title": "Falcon Non Inverter 18000 BTU (CSH-18CH)",
+    "brand": "Falcon",
+    "normalized_reference": "CSH18CH",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1531820909_468.jpg",
+    "description": "Climatiseur Falcon Chaud & Froid R410A - 18000 BTU - Classe énergétique 3 - EER/COP : 3.04 / 2.98  - Débit d?air: 800 m3/h - Niveaux sonores: 37-44 dB (A) - Dimensions (HxLxP): 795 x 255 x 540 mm - Poids: 1500 g -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1599.0,
+            "raw_title": "FALCON CLIMATISEUR CHAUD & FROID 18000 BTU - CSH-18H",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-falcon-chaud-froid-18000-btu",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1531820909_468.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "3",
+        "Gas_Type": "R410A",
+        "Dimensions": "795 x 255 x 540 mm",
+        "Weight": "Not found",
+        "Noise_Level": "44 db",
+        "Warranty": "Not found"
+    }
+}

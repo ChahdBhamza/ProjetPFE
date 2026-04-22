@@ -1,0 +1,17 @@
+PRODUCT NAME: Hisense Inverter 12000 BTU (AS12UW4AS)
+BRAND: Hisense
+REFERENCE: AS12UW4AS
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: A++
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 1629.0 TND (https://zoom.com.tn/climatiseur/16832-climatiseur-hisense-inverter-12000-btu-r410a-chaud-froid.html)

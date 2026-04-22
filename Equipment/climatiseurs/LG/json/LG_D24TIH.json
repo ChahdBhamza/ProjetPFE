@@ -1,0 +1,34 @@
+{
+    "clean_title": "LG Inverter 24000 BTU (D24TIH)",
+    "brand": "LG",
+    "normalized_reference": "D24TIH",
+    "capacity_btu": 24000,
+    "primary_image": "https://zoom.com.tn/50007-large_default/climatiseur-lg-dualcool-inverter-18-000-btu-chaud-froid-d12tgh.jpg",
+    "description": "Un ventilateur propre pour une brise pure\nÉlimine 99,99%* des bactéries grâce à la lumière LED UV pour garder le ventilateur propre et frais.\nRefroidissement et chauffage\nrapides et puissants\nBénéficiez du confort toute l’année, même lorsque les conditions climatiques sont extrêmes, grâce à notre\ncompresseur DUAL Inverter.\nAllergy Filter\nRéduit les\nallergènes pour un\nair plus sain\nÉlimine les substances allergènes, telles que les acariens, qui\nflottent dans l’air.\nUn contrôle intelligent, une vie plus intelligente\nEN SAVOIR PLUS SUR THINQ\nConnectez-vous et contrôlez l’appare\nL’application LG ThinQ™ vous permet de vous connecter facilement à votre climatiseur comme jamais auparavant. Démarrez votre climatiseur en appuyant simplement sur Le bouton LG ThinQ.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 3999.0,
+            "raw_title": "CLIMATISEUR LG DUALCOOL INVERTER 24 000 BTU CHAUD & FROID - D24TIH",
+            "url": "https://zoom.com.tn/climatiseur/13733-climatiseur-lg-dualcool-inverter-18-000-btu-chaud-froid-d12tgh.html",
+            "image_url": "https://zoom.com.tn/50007-large_default/climatiseur-lg-dualcool-inverter-18-000-btu-chaud-froid-d12tgh.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "5 299,000 DT",
+            "raw_title": "Climatiseur LG 24000 BTU Dual Inverter Artcool Chaud Froid (D24UAH)",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

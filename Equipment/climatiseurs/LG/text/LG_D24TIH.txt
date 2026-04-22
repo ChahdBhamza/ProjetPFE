@@ -1,0 +1,18 @@
+PRODUCT NAME: LG Inverter 24000 BTU (D24TIH)
+BRAND: LG
+REFERENCE: D24TIH
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 3999.0 TND (https://zoom.com.tn/climatiseur/13733-climatiseur-lg-dualcool-inverter-18-000-btu-chaud-froid-d12tgh.html)
+- Local_dataset: 5 299,000 DT TND (local)

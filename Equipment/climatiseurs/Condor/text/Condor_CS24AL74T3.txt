@@ -1,0 +1,18 @@
+PRODUCT NAME: Condor Inverter 24000 BTU (CS24-AL74T3)
+BRAND: Condor
+REFERENCE: CS24AL74T3
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2449.0 TND (https://jumbo.tn/climatiseur/8619-climatiseur-condor-alpha-super-tropical-24-000-btu-chaud-et-froid.html)
+- Local_dataset: 2 599,000 DT TND (local)

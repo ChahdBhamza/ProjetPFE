@@ -1,0 +1,17 @@
+PRODUCT NAME: Falcon Non Inverter 12000 BTU (CSC-12C)
+BRAND: Falcon
+REFERENCE: CSC12C
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: 795 x 255 x 540 mm
+Weight: Not found
+Noise_Level: 40 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1049.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-falcon-12000-btu-chaud-froid-csc-12ch)

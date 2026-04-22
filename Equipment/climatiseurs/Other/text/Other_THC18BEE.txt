@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur Tornado TH-C18BEE 18000 BTU Froid Blanc
+BRAND: Other
+REFERENCE: THC18BEE
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 1 899,000 DT TND (local)

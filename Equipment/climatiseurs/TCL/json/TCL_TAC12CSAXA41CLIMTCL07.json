@@ -1,0 +1,27 @@
+{
+    "clean_title": "TCL  12000 BTU (TAC-12CSA/XA41 CLIM-TCL-07)",
+    "brand": "TCL",
+    "normalized_reference": "TAC12CSAXA41CLIMTCL07",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/32481-large_default/climatiseur-tcl-12000-btu-froid-tac-12csaxa41.jpg",
+    "description": "Climatiseur TCL Froid / Capacité de Refroidissement: 12000 BTU / Refrigerent: R410a / Niveau de bruit: 36/42 dBA / Tension : 198~242 / Dimensions: 777 x 250 x 205 mm / Poids Net: 8 Kg / Garantie: 3 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1499.0,
+            "raw_title": "CLIMATISEUR TCL 12000 BTU FROID (TAC-12CSA/XA41)",
+            "url": "https://zoom.com.tn/climatiseur/5616-climatiseur-tcl-12000-btu-froid-tac-12csaxa41.html",
+            "image_url": "https://zoom.com.tn/32481-large_default/climatiseur-tcl-12000-btu-froid-tac-12csaxa41.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410a",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "42",
+        "Warranty": "3 ans"
+    }
+}

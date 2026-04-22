@@ -1,0 +1,34 @@
+{
+    "clean_title": "Saba Non Inverter 18000 BTU (SABW18C-IW)",
+    "brand": "Saba",
+    "normalized_reference": "SABW18CIW",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/23721-home_default/climatiseur-saba-sabw18c-iw-18000-btu-froid-blanc.jpg",
+    "description": "Climatiseur Saba SABW18C-IW\n-\nCapacité\n: 18000 BTU -\nMode\n: Froid - Mode turbo -\nAfficheur LED\n- Mode Sleep - Silencieux - Capacité de refroidissement :19080BTU/h - Réfrigérant: R410A - Tension nominale:220-240V 50HZ - Isolement: I - Compresseur : T1 - Niveau sonore :44 dB(A)- Dimension: 971x228x321 mm -\nCouleur\n: Blanc -\nGarantie\n: 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1849.0,
+            "raw_title": "CLIMATISEUR SABA SABW18C-IW 18000 BTU FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/8708-climatiseur-saba-sabw18c-iw-18000-btu-froid-blanc.html",
+            "image_url": "https://jumbo.tn/23721-home_default/climatiseur-saba-sabw18c-iw-18000-btu-froid-blanc.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 849,000 DT",
+            "raw_title": "Climatiseur Saba SABW18C-IW 18000 BTU Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "971x228x321 mm",
+        "Weight": "Not found",
+        "Noise_Level": "44 db",
+        "Warranty": "3 Ans"
+    }
+}

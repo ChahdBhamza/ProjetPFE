@@ -1,0 +1,27 @@
+{
+    "clean_title": "TCL Inverter 18000 BTU (TAC-18CHSA/TPGII)",
+    "brand": "TCL",
+    "normalized_reference": "TAC18CHSATPGII",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/23982-home_default/climatiseur-inverter-tcl-18000-btu-chaud-froid-garantie-3-ans.jpg",
+    "description": "Climatiseur TCL 18000 BTU - Inverter - Chaud & Froid - Surface appropriée: 35 m² - Débit d'air: 800 m3/h - Consommation d'énergie 820kwh - Minuterie 24 heures - Niveau sonore 53 dBA - Dimensions: 910 x 292 x 205 mm -\nGarantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2499.0,
+            "raw_title": "CLIMATISEUR INVERTER TCL 18000 BTU CHAUD & FROID / GARANTIE 3 ANS",
+            "url": "https://jumbo.tn/climatiseur/8811-climatiseur-inverter-tcl-18000-btu-chaud-froid-garantie-3-ans.html",
+            "image_url": "https://jumbo.tn/23982-home_default/climatiseur-inverter-tcl-18000-btu-chaud-froid-garantie-3-ans.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "910 x 292 x 205 mm",
+        "Weight": "Not found",
+        "Noise_Level": "53 dba",
+        "Warranty": "3 Ans"
+    }
+}

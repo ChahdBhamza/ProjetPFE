@@ -1,0 +1,17 @@
+PRODUCT NAME: Indesit Inverter 18000 BTU (IAVPN180-IAVPN181)
+BRAND: Indesit
+REFERENCE: IAVPN180IAVPN181
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: 1
+Gas_Type: R32
+Dimensions: 800x560x280 mm | 910x295x225 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2049.0 TND (https://jumbo.tn/climatiseur/11214-climatiseur-indesit-18000-btu-inverter-chaud-froid-blanc.html)

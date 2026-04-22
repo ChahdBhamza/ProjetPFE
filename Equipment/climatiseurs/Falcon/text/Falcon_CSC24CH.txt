@@ -1,0 +1,17 @@
+PRODUCT NAME: Falcon Non Inverter 24000 BTU (CSC-24CH)
+BRAND: Falcon
+REFERENCE: CSC24CH
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud / froid
+Energy_Class: 3
+Gas_Type: R410A
+Dimensions: 850 x 295 x 605 mm
+Weight: Not found
+Noise_Level: 46 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2299.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-24000-btu-chaud-froid-csc-24ch)

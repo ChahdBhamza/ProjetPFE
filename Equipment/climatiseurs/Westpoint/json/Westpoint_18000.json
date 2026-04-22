@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Westpoint Inverter 18000 BTU Chaud & Froid - Blanc",
+    "brand": "Westpoint",
+    "normalized_reference": "18000",
+    "capacity_btu": 18000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_18000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 449,000 DT",
+            "raw_title": "Climatiseur Westpoint Inverter 18000 BTU Chaud & Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "7 ans"
+    }
+}

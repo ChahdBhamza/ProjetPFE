@@ -1,0 +1,27 @@
+{
+    "clean_title": "Unionaire Non 30000 BTU (PRM-30HR)",
+    "brand": "Unionaire",
+    "normalized_reference": "PRM30HR",
+    "capacity_btu": 30000,
+    "primary_image": "https://www.tunisianet.com.tn/342352-large/climatiseur-armoire-unionaire-prm-30hr-30-000-btu-chaud-froid.jpg",
+    "description": "Not found",
+    "availability": [
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR ARMOIRE UNIONAIRE PRM-30HR / 30 000 BTU / CHAUD & FROID",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/70818-climatiseur-armoire-unionaire-prm-30hr-30-000-btu-chaud-froid.html",
+            "image_url": "https://www.tunisianet.com.tn/342352-large/climatiseur-armoire-unionaire-prm-30hr-30-000-btu-chaud-froid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

@@ -1,0 +1,17 @@
+PRODUCT NAME: Orient Non Inverter (OV-1007-TURBO)
+BRAND: Orient
+REFERENCE: OV1007TURBO
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 55.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/orient/ventilateur-sport-turbo-ov-1007-orient)

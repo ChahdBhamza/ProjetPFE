@@ -1,0 +1,18 @@
+PRODUCT NAME: BOSCH Inverter 12000 BTU (BOSCH12000BTUCF)
+BRAND: BOSCH
+REFERENCE: BOSCH12000BTUCF
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 2 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2119.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/bosch/climatiseur-mural-bosch-inverter-12000-btu-chaud-froid)
+- Local_dataset: 1 999,000 DT TND (local)

@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 48000 BTU (CL48GR-DT)
+BRAND: Gree
+REFERENCE: CL48GRDT
+CAPACITY: 48000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: A
+Gas_Type: 410 A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 7559.0 TND (https://jumbo.tn/climatiseur/3817-climatiseur-gree-48000-btu-inverter-gainable-blanc.html)
+- Zoom: None TND (https://zoom.com.tn/climatiseur/15658-climatiseur-gree-48000-btu-inverter-gainable-chaud-froid-cl48gr-dt.html)

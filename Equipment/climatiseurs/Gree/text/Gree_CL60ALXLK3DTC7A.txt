@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Inverter 60000 BTU (CL60ALXL-K3DTC7A)
+BRAND: Gree
+REFERENCE: CL60ALXLK3DTC7A
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: c
+Gas_Type: R410A
+Dimensions: 935×600×380 mm | 333×952×414 mm
+Weight: 52 kg
+Noise_Level: 55 db | 65 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 9199.0 TND (https://jumbo.tn/climatiseur/11003-climatiseur-armoire-gree-60-000-btu-technologie-smart-inverter.html)

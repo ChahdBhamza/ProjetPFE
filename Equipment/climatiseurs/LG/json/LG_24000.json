@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur LG 24000 BTU Dual Inverter Artcool Chaud Froid (D24UAH)",
+    "brand": "LG",
+    "normalized_reference": "24000",
+    "capacity_btu": 24000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_24000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "5 299,000 DT",
+            "raw_title": "Climatiseur LG 24000 BTU Dual Inverter Artcool Chaud Froid (D24UAH)",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 9000 BTU (R410A)
+BRAND: Gree
+REFERENCE: R410A
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: 1
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-inverter-9000-btu-r410a-chaud-froid)
+- Tunisianet: None TND (https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/49564-climatiseur-floor-ceilling-gree-48000-btu-chaud-froid.html)

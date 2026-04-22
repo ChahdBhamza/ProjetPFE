@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Non Inverter 18000 BTU (SP18FR)
+BRAND: Coala
+REFERENCE: SP18FR
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1659.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-coala-r410-18000-btu-froid-sp18fr)

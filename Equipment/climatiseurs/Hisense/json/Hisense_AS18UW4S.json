@@ -1,0 +1,34 @@
+{
+    "clean_title": "Hisense Inverter 18000 BTU (AS-18UW4S)",
+    "brand": "Hisense",
+    "normalized_reference": "AS18UW4S",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/25810-home_default/climatiseur-hisense-18000-btu-inverter-tropicalise-chaud-froid.jpg",
+    "description": "Climatiseur Hisense 18000 Btu INVERTER Tropicalisé\n- Capacité : 18000 BTU - Technologie: On/Off - Mode : Chaud/ Froid - Type de gaz : R410A - Alimentation électrique : 220V-240V/50Hz - Filtre PP lavable - Affichage sur le panneau avant LED - Panneau amovible et lavable - Minuterie 24 heures - Minuterie MARCHE/ARRÊT - Mode silencieux - Fonction de détection intelligente - Dégivrage automatique - Connectivité : Wi-Fi - Couleur : Blanc -\nGarantie : 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2359.0,
+            "raw_title": "CLIMATISEUR HISENSE 18000 BTU INVERTER TROPICALISÉ / CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/9459-climatiseur-hisense-18000-btu-inverter-tropicalise-chaud-froid.html",
+            "image_url": "https://jumbo.tn/25810-home_default/climatiseur-hisense-18000-btu-inverter-tropicalise-chaud-froid.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 299,000 DT",
+            "raw_title": "Climatiseur Hisense Inverter 18000 BTU Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/ froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

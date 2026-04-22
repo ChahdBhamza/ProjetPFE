@@ -1,0 +1,17 @@
+PRODUCT NAME: Orient Non Inverter 18000 BTU (OV-1812ST)
+BRAND: Orient
+REFERENCE: OV1812ST
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 85.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/orient/ventilateur-de-bureau-orient-ov-1812st-sans-minuterie)

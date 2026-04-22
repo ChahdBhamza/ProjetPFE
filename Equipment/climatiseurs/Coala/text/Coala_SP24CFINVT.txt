@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Inverter 24000 BTU (SP24CF-INVT)
+BRAND: Coala
+REFERENCE: SP24CFINVT
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2419.0 TND (https://jumbo.tn/climatiseur/3418-climatiseur-coala-inverter-r410-chaud-froid-24000-btu.html)

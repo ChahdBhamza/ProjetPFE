@@ -1,0 +1,17 @@
+PRODUCT NAME: Condor Inverter 9000 BTU (9000)
+BRAND: Condor
+REFERENCE: 9000
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1399.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/climatiseur-inverter-9000-btu-chaudfroid)

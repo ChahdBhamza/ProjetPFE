@@ -1,0 +1,27 @@
+{
+    "clean_title": "Vega Non Inverter 24000 BTU (VEGA-24000CF)",
+    "brand": "Vega",
+    "normalized_reference": "VEGA24000CF",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657716343_292.jpg",
+    "description": "Climatiseur VEGA  Chaud & Froid  - Capacité:  24000 BTU  - Mode:  Chaud & Froid  - Gaz réfrigérant R410 A - Capacité chauffage: 8700 BTU/h ? Capacité compresseur: 3010 W - Puissance 220-240V 1PH 50HZ",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2129.0,
+            "raw_title": "VEGA CLIMATISEUR 24000 BTU CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/vega/climatiseur-vega-24000-btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657716343_292.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

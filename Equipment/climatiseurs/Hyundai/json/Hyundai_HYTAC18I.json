@@ -1,0 +1,27 @@
+{
+    "clean_title": "Hyundai Inverter 18000 BTU (HY.TAC18I)",
+    "brand": "Hyundai",
+    "normalized_reference": "HYTAC18I",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/b7c07-climatiseur-hyundai-18000-btu-inverter-chaud-froid-blanc.jpg",
+    "description": "Climatiseur Hyundai HY.TAC18I - Technologie: Inverter - Puissance: 18000 BTU - Mode: Chaud et Froid - Classe climatique: T3 - Affichage électronique - Contrôle: Commande - Tension: 220-240V/50 Hz - Type de gaz: 410 A - Température opérationnelle maximale (En mode froid): 16-52° - Température d'ambiance maximale (En mode chaud): -15-24° - Niveau de bruit (unité extérieure): 54 dba - Niveau de bruit (unité intérieure): 35 dba - Dimension extérieure: 780 x 560 x 270 mm - Dimension intérieure: 900 x 220 x 291 mm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2099.0,
+            "raw_title": "HYUNDAI CLIMATISEUR 18000 BTU INVERTER / CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hyundai/climatiseur-hyundai-18000-btu-inverter-chaud-and-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/b7c07-climatiseur-hyundai-18000-btu-inverter-chaud-froid-blanc.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "c",
+        "Gas_Type": "Not found",
+        "Dimensions": "780 x 560 x 270 mm | 900 x 220 x 291 mm",
+        "Weight": "Not found",
+        "Noise_Level": "54 dba | 35 dba",
+        "Warranty": "Not found"
+    }
+}

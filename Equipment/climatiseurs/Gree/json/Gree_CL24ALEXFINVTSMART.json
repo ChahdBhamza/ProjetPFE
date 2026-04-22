@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Inverter 24000 BTU (CL24ALEXF-INVT-SMART)",
+    "brand": "Gree",
+    "normalized_reference": "CL24ALEXFINVTSMART",
+    "capacity_btu": 24000,
+    "primary_image": "https://jumbo.tn/3811-home_default/climatiseur-inverter-gree-tropicalise-24000btu-chaudfroid-smart-garantie-3ans.jpg",
+    "description": "Climatiser Inverter GREE 24000 BTU -\nMode: Chaud/Froid - Tropicalisé stable à 50° - Système T3 (-7~50℃) - Classe énergétique: 1 - Refroidissement rapide en 60s - Double moteur permettant d’obtenir un large angle de distribution d’air - 7 vitesses de ventilation - Sortie d’air \"volets\" entièrement fermée sans poussière, facile à démonter et à nettoyer - Superficie: 50-70m² - un confort dans chaque coin avec la distribution d’air 3D - Connectivité: WiFi - Ultra Silencieux - Respecte l’environnement - Sécurité et fiabilité - Large plage de tension pour le fonctionnement (198~264V) - Garantie: 3 ans (6 ans de garantie sur le compresseur)",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 3099.0,
+            "raw_title": "CLIMATISEUR INVERTER GREE TROPICALISÉ 24000BTU CHAUD/FROID SMART - GARANTIE 3ANS",
+            "url": "https://jumbo.tn/climatiseur/679-climatiseur-inverter-gree-tropicalise-24000btu-chaudfroid-smart-garantie-3ans.html",
+            "image_url": "https://jumbo.tn/3811-home_default/climatiseur-inverter-gree-tropicalise-24000btu-chaudfroid-smart-garantie-3ans.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

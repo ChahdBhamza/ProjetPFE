@@ -1,0 +1,18 @@
+PRODUCT NAME: Maxwell Non Inverter 12000 BTU (MX-CH12CF)
+BRAND: Maxwell
+REFERENCE: MXCH12CF
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud / froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 7 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1529.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/maxwell/climatiseur-maxwell-12-000-btu-chaud-froid)
+- Local_dataset: 1 549,000 DT TND (local)

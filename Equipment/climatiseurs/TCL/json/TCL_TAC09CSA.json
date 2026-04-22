@@ -1,0 +1,27 @@
+{
+    "clean_title": "TCL Non Inverter 9000 BTU (TAC-09CSA)",
+    "brand": "TCL",
+    "normalized_reference": "TAC09CSA",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356283_825.jpg",
+    "description": "Climatiseur TCL 9000 BTU - Froid - Gaz R410a - Niveau de bruit: 36/42 dBA - Smart air flow - Compresseur Toshiba (GMCC) -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1339.0,
+            "raw_title": "TCL CLIMATISEUR 9000 BTU FROID TAC-09CSA/XA41",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-9000-btu-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356283_825.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "GAZ R410",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "42 dba",
+        "Warranty": "Not found"
+    }
+}

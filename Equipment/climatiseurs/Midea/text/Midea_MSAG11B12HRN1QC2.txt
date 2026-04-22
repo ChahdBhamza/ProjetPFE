@@ -1,0 +1,18 @@
+PRODUCT NAME: Midea Non Inverter 12000 BTU (MSAG11B-12HRN1-QC2)
+BRAND: Midea
+REFERENCE: MSAG11B12HRN1QC2
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: 805 x 194 x 285 mm | 770 x 300 x 555 mm
+Weight: Not found
+Noise_Level: 30 db
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1599.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-split-midea-12000-btu-froid-blanc)
+- Local_dataset: 1 599,000 DT TND (local)

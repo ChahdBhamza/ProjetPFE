@@ -1,0 +1,18 @@
+PRODUCT NAME: Maxwell Non Inverter 18000 BTU (MAXWELL-18000-CF)
+BRAND: Maxwell
+REFERENCE: MAXWELL18000CF
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 7 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2049.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/maxwell/climatiseur-maxwell-18-000-btu-chaud-froid)
+- Local_dataset: 2 059,000 DT TND (local)

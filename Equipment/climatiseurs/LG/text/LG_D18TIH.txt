@@ -1,0 +1,18 @@
+PRODUCT NAME: LG Inverter 18000 BTU (D18TIH)
+BRAND: LG
+REFERENCE: D18TIH
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 3399.0 TND (https://zoom.com.tn/climatiseur/13732-climatiseur-lg-dualcool-inverter-18-000-btu-chaud-froid-d12tgh.html)
+- Local_dataset: 4 299,000 DT TND (local)

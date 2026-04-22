@@ -1,0 +1,17 @@
+PRODUCT NAME: DeLonghi Non Inverter (DEX216F)
+BRAND: DeLonghi
+REFERENCE: DEX216F
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 508 x 334 x 220 mm
+Weight: Not found
+Noise_Level: 37 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1050.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/delonghi/deshumidificateur-delonghi-ariadry-compact-dds-capacite-30l-bleu)

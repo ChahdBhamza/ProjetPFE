@@ -1,0 +1,18 @@
+PRODUCT NAME: Biolux Inverter 18000 BTU (BIOLUX 18000BTU)
+BRAND: Biolux
+REFERENCE: BIOLUX18000BTU
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: Unknown
+Gas_Type: R410a
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Int: 40 dB
+Warranty: 5 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 2149.0 TND (https://zoom.com.tn/climatiseur/13810-climatiseur-biolux-18000-btu-chaudfroid.html)
+- Local_dataset: 2 099,000 DT TND (local)

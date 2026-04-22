@@ -1,0 +1,17 @@
+PRODUCT NAME: Biolux Non Inverter 12000 BTU (12000C)
+BRAND: Biolux
+REFERENCE: 12000C
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud&froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1385.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-biolux-tropical-smart-12000btu-chaudfroid)

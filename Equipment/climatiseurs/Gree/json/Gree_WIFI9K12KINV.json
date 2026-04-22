@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Inverter 12000 BTU (WIFI-9K-12K-INV)",
+    "brand": "Gree",
+    "normalized_reference": "WIFI9K12KINV",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/30965-home_default/module-wi-fi-climatiseur-gree-9k-12k-inverter.jpg",
+    "description": "Module Wi-Fi Climatiseur GREE – Contrôle à distance facile\nContrôlez votre climatiseur GREE depuis votre smartphone grâce à l’application intuitive. Activez ou éteignez l’appareil, ajustez la ventilation, le minuteur, l’oscillation d’air, le mode sommeil ou la lumière. Compatible avec les modèles\nGREE 9000 et 12000 BTU Inverter\n.",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 125.0,
+            "raw_title": "MODULE WI-FI CLIMATISEUR GREE 9K - 12K INVERTER",
+            "url": "https://jumbo.tn/accueil/11001-module-wi-fi-climatiseur-gree-9k-12k-inverter.html",
+            "image_url": "https://jumbo.tn/30965-home_default/module-wi-fi-climatiseur-gree-9k-12k-inverter.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

@@ -1,0 +1,34 @@
+{
+    "clean_title": "Hyundai Inverter 18000 BTU (CLIM-HYND-18INV)",
+    "brand": "Hyundai",
+    "normalized_reference": "CLIMHYND18INV",
+    "capacity_btu": 18000,
+    "primary_image": "https://zoom.com.tn/64067-large_default/climatiseur-hyundai-18000-btu-chaud-froid-inverter.jpg",
+    "description": "Climatiseur Hyundai 18000 BTU Chaud Froid Inverter\nPlongez dans un confort sans égal avec le\nClimatiseur Hyundai 18000 BTU Chaud Froid Inverter\n. Sa\ntechnologie inverter\navancée garantit une\nefficacité énergétique maximale\n, vous permettant d'\néconomiser sur vos factures\ntout en profitant d'un environnement frais et agréable. Avec sa\ncapacité de refroidissement de 18000 BTU\n,\nil convient parfaitement aux\nsurfaces de\n24 m² à 30\nm²\n. Son design moderne et sa finition élégante ajoutent une touche de sophistication à n'importe quel intérieur.\nPrenez les rênes de votre confort grâce à la télécommande intuitive, vous permettant de personnaliser les paramètres de fonctionnement selon vos besoins. De plus, son\nsystème de filtration d'air avancé élimine efficacement les impuretés\n, assurant ainsi une\nqualité d'air\noptimale dans votre maison\n.\nSur\nZoom.com.tn\n, vous trouverez\nle meilleur prix en Tunisie\npour cet article, associant\nperformances exceptionnelles et économies durables\n. Profitez de notre livraison rapide et de nos options de paiement flexibles pour une\nexpérience d'achat sans tracas\n. Faites de votre espace de vie un\nrefuge de fraîcheur et de bien-être\navec le\nClimatiseur Hyundai 18000 BTU Chaud Froid Inverter\n.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 2559.0,
+            "raw_title": "CLIMATISEUR HYUNDAI 18000 BTU CHAUD FROID INVERTER",
+            "url": "https://zoom.com.tn/climatiseur/15423-climatiseur-hyundai-18000-btu-chaud-froid-inverter.html",
+            "image_url": "https://zoom.com.tn/64067-large_default/climatiseur-hyundai-18000-btu-chaud-froid-inverter.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2559.0,
+            "raw_title": "HYUNDAI CLIMATISEUR 18000 BTU CHAUD FROID INVERTER",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hyundai/climatiseur-18000-btu-chaud-froid-inverter",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721211397_890.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "3",
+        "Gas_Type": "50 Hz et utilise le gaz 410 A . Il présente un niveau de bruit de 40",
+        "Dimensions": "660 x 530 x 250 mm | 790 x 200 x 270 mm",
+        "Weight": "Not found",
+        "Noise_Level": "34 dba | 36 dba | 34 dba",
+        "Warranty": "3 ans"
+    }
+}

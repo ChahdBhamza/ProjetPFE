@@ -1,0 +1,27 @@
+{
+    "clean_title": "HGE Non Inverter (HGE-MARINA)",
+    "brand": "HGE",
+    "normalized_reference": "HGEMARINA",
+    "capacity_btu": null,
+    "primary_image": "Not found",
+    "description": "Ventilateur Sur Pieds HGE Marina - Type de pose: Sur Pieds  - Nombre de vitesses: 3 vitesses  - Vitesse de Rotation: 710 Tr/min - 1220 Tr/min - Vitesse réglable - Rotation: 90° - Pratique - Couleur: Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 59.9,
+            "raw_title": "HGE VENTILATEUR SUR PIEDS MARINA 35W - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-sur-pieds-hge-marina-35w-blanc",
+            "image_url": "Not found"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

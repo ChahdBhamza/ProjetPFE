@@ -1,0 +1,17 @@
+PRODUCT NAME: Hyundai Inverter 18000 BTU (HY.TAC18I)
+BRAND: Hyundai
+REFERENCE: HYTAC18I
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: c
+Gas_Type: Not found
+Dimensions: 780 x 560 x 270 mm | 900 x 220 x 291 mm
+Weight: Not found
+Noise_Level: 54 dba | 35 dba
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2099.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/hyundai/climatiseur-hyundai-18000-btu-inverter-chaud-and-froid)

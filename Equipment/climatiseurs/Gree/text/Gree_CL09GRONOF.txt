@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Non Inverter 9000 BTU (CL09GR-ONOF)
+BRAND: Gree
+REFERENCE: CL09GRONOF
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/froid
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: 270 x 785 x 198mm | 540 x 710 x 255 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1379.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-on-off-9000-btu-chaud-froid)

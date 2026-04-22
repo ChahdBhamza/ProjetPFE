@@ -1,0 +1,19 @@
+PRODUCT NAME: Westpoint  18000 BTU (WSM-18-LHEC)
+BRAND: Westpoint
+REFERENCE: WSM18LHEC
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/Froid
+Energy_Class: 1
+Gas_Type: R410A
+Dimensions: 715 x 194 x 285 mm
+Weight: 36.5 kg
+Noise_Level: Not found
+Warranty: 7 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 3055.0 TND (https://zoom.com.tn/climatiseur/9321-climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec.html)
+- Mega: 2250.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec)
+- Mega: 2249.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-chaud-froid-r410a-18000-btu)

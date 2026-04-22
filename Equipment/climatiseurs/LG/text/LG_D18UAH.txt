@@ -1,0 +1,17 @@
+PRODUCT NAME: LG Inverter 18000 BTU (D18UAH)
+BRAND: LG
+REFERENCE: D18UAH
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: A++++
+Gas_Type: Not found
+Dimensions: 998 x 330 x 210 mm | 770 x 545 x 288 mm
+Weight: Not found
+Noise_Level: 21 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 4499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-dual-inverter-artcool-18000-btu-chaud-and-froid-noir)

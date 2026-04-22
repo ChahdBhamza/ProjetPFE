@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Inverter 24000 BTU (SP024CF-INV)
+BRAND: Coala
+REFERENCE: SP024CFINV
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-24000-btu-inverter-chaud-froid-blanc)

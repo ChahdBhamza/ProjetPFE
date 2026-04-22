@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 24000 BTU (CL24GR-INVT)
+BRAND: Gree
+REFERENCE: CL24GRINVT
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 3199.0 TND (https://jumbo.tn/climatiseur/10996-climatiseur-gree-24000-btu-inverter-chaud-froid.html)
+- Local_dataset: 3 099,000 DT TND (local)

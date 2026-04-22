@@ -1,0 +1,27 @@
+{
+    "clean_title": "Midea Non Inverter 12000 BTU (MSAG11B-12CRN1-QC2)",
+    "brand": "Midea",
+    "normalized_reference": "MSAG11B12CRN1QC2",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657801341_274.jpg",
+    "description": "Climatiseur Midea - Puissance 12 000 BTU - Froid - Pour des surfaces jusqu'à 21 m² - Gaz R410A écologique - Débit d?air (Hi/Mi/Lo): 574/447/352 m3/h - Niveau de bruit intérieur (Hi/Mi/Lo): 40/34/30 dB(A) -  Dimensions de l'Unité intérieure(LxPxH) 805 x 194 x 285 mm - Dimensions  de l'Unité extérieure (LxPxH) 770 x 300 x 555 mm -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1489.0,
+            "raw_title": "MIDEA CLIMATISEUR 12000 BTU FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-midea-12000-btu-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657801341_274.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "GAZ R410",
+        "Dimensions": "805 x 194 x 285 mm | 770 x 300 x 555 mm",
+        "Weight": "Not found",
+        "Noise_Level": "30 db",
+        "Warranty": "Not found"
+    }
+}

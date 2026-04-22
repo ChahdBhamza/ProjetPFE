@@ -1,0 +1,17 @@
+PRODUCT NAME: HGE Non Inverter 60000 BTU (HGE-V60)
+BRAND: HGE
+REFERENCE: HGEV60
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 85.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-de-table-hge-hge-v60-55w)

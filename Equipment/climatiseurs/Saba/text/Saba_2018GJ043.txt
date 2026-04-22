@@ -1,0 +1,18 @@
+PRODUCT NAME: Saba Non Inverter 60000 BTU (2018-GJ-043)
+BRAND: Saba
+REFERENCE: 2018GJ043
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: 1906 × 581 × 385 mm | 1030 × 1331 × 380 mm
+Weight: Not found
+Noise_Level: 51 db | 63 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 6849.0 TND (https://jumbo.tn/climatiseur/8687-climatiseur-armoire-saba-2018-gj-043-60000-btu-chaud-froid.html)
+- Local_dataset: 7 199,000 DT TND (local)

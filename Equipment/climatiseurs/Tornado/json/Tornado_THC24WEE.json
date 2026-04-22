@@ -1,0 +1,27 @@
+{
+    "clean_title": "Tornado Non Inverter 24000 BTU (TH-C24WEE)",
+    "brand": "Tornado",
+    "normalized_reference": "THC24WEE",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1607623794_662.jpg",
+    "description": "Climatiseur Tornado - Avec Afficheur LED - Puissance 24000 BTU - Froid - Technologie MCHX - Fonction Super Jet - Fonction Turbo - Fonction de redémarrage automatique - Fonction minuterie - Compresseur tropical - Dimensions: 1040 x 325 x 222 mm (Intérieure) / 890 x 645 x 323 (Extérieure)",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2299.0,
+            "raw_title": "TORNADO CLIMATISEUR 24000BTU FROID TH-C24WEE",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tornado/climatiseur-tornado-24000btu-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1607623794_662.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "1040 x 325 x 222 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

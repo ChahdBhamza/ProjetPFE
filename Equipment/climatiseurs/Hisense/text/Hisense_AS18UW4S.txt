@@ -1,0 +1,18 @@
+PRODUCT NAME: Hisense Inverter 18000 BTU (AS-18UW4S)
+BRAND: Hisense
+REFERENCE: AS18UW4S
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/ froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2359.0 TND (https://jumbo.tn/climatiseur/9459-climatiseur-hisense-18000-btu-inverter-tropicalise-chaud-froid.html)
+- Local_dataset: 2 299,000 DT TND (local)

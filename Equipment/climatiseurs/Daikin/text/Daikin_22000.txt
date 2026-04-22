@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur Daikin 22000 BTU Froid - Blanc
+BRAND: Daikin
+REFERENCE: 22000
+CAPACITY: 22000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 2 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 2 899,000 DT TND (local)

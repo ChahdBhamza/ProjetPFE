@@ -1,0 +1,27 @@
+{
+    "clean_title": "Saba  24000 BTU (CSH-24HQB-INT)",
+    "brand": "Saba",
+    "normalized_reference": "CSH24HQBINT",
+    "capacity_btu": 24000,
+    "primary_image": "https://zoom.com.tn/62115-large_default/climatiseur-saba-24000-btu-chaudfroid-csh-24hqb.jpg",
+    "description": "Puissance: 24000 BTU / Type: Chaud&Froid / Niveau sonore: 57 dB(A) / Respecte l’environnement / Consommation minimale d’énergie / Résiste aux températures Extrêmes / Nettoyage automatique / Dimensions: 700 x 542 x 266 mm / Couleur: blanc / Garantie: 3 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 2850.0,
+            "raw_title": "CLIMATISEUR SABA 24000 BTU CHAUD/FROID ( CSH-24HQB)",
+            "url": "https://zoom.com.tn/climatiseur/6033-climatiseur-saba-24000-btu-chaudfroid-csh-24hqb.html",
+            "image_url": "https://zoom.com.tn/62115-large_default/climatiseur-saba-24000-btu-chaudfroid-csh-24hqb.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "57",
+        "Warranty": "3 ans"
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Tornado TH-C18BEE 18000 BTU Froid Blanc",
+    "brand": "Other",
+    "normalized_reference": "THC18BEE",
+    "capacity_btu": 18000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Other/images/Other_THC18BEE.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 899,000 DT",
+            "raw_title": "Climatiseur Tornado TH-C18BEE 18000 BTU Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

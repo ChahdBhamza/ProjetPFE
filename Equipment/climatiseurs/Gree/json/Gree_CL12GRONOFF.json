@@ -1,0 +1,41 @@
+{
+    "clean_title": "Gree Non Inverter 12000 BTU (CL12GR-ONOFF)",
+    "brand": "Gree",
+    "normalized_reference": "CL12GRONOFF",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/30962-home_default/climatiseur-gree-12000btu-onoff-chaud-froid.jpg",
+    "description": "CLIMATISEUR Gree 12000 ON OFF TROPICALISE CHAUD/FROID\nDécouvrez le\nclimatiseur Gree 12000 BTU ON/OFF Tropicalisé\n, conçu pour offrir une performance optimale même dans les conditions climatiques les plus extrêmes.\nCe système T3\nfonctionne efficacement dans une plage de\ntempérature allant de -7°C à 50°C\n, assurant un confort maximal toute l'année. Grâce à sa\nlarge plage de tension (185~264V)\n, ce climatiseur s'\nadapte facilement aux fluctuations de courant\n, garantissant un fonctionnement stable et fiable.\nÉquipé d'un\nventilateur à 7 vitesses\n, il permet d'ajuster la circulation de l'air selon vos besoins. La technologie de soufflage longue distance permet une\ndistribution d'air homogène jusqu'à 12 mètres\n, offrant un confort dans chaque coin avec la\ndistribution d’air 3D\n. Pour les jours de forte chaleur, profitez de la fonction de refroidissement rapide qui vous assure une\nfraîcheur immédiate en seulement 60 secondes\n.\nEn plus de sa performance, ce climatiseur offre une tranquillité d'esprit avec une garantie solide :\n6 ans pour le compresseur\net\n3 ans pour les\nautres pièces\n. Disponible également en différentes capacités telles que\n9000 BTU\n,\n18000 BTU\n, et\n24000 BTU\n, ce modèle s'adapte à tous vos besoins.\nProfitez du\nmeilleur prix en Tunisie\navec\ndes facilités de paiement\n, pour un achat sans souci. Optez pour notre\nclimatiseur Gree 12000 BTU ON/OFF Tropicalisé\net\nvivez dans un confort optimal toute l'année.",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1559.0,
+            "raw_title": "CLIMATISEUR GREE 12000BTU ON/OFF CHAUD-FROID",
+            "url": "https://jumbo.tn/climatiseur/10998-climatiseur-gree-12000btu-onoff-chaud-froid.html",
+            "image_url": "https://jumbo.tn/30962-home_default/climatiseur-gree-12000btu-onoff-chaud-froid.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 1629.0,
+            "raw_title": "CLIMATISEUR GREE 12000 BTU ON OFF TROPICALISÉ CHAUD/FROID (CL12AQCXB-ONOFF)",
+            "url": "https://zoom.com.tn/climatiseur/8260-climatiseur-gree-12000-btu-on-off-tropicalise-chaudfroid-cl12aqcxb-onoff.html",
+            "image_url": "https://zoom.com.tn/69847-large_default/climatiseur-gree-12000-btu-on-off-tropicalise-chaudfroid-cl12aqcxb-onoff.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1499.0,
+            "raw_title": "GREE CLIMATISEUR GREE SPLIT 12000BTU CL12GR-ONOF CHAUD /FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-12000-btu-chaud-froid-on-off",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1530727225_856.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

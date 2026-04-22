@@ -1,0 +1,17 @@
+PRODUCT NAME: Condor Inverter 18000 BTU (CS18-AL84ST3)
+BRAND: Condor
+REFERENCE: CS18AL84ST3
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: A
+Gas_Type: R410A
+Dimensions: 965x215x319 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2199.0 TND (https://jumbo.tn/climatiseur/9073-climatiseur-condor-cs18-al84t3-18000-btu-alpha-smart-inverter-chaud-froid.html)

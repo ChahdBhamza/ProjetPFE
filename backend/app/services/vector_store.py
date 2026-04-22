@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 class VectorStore:
-    def __init__(self, collection_name="climatiseurs", path="qdrant_db"):
+    def __init__(self, collection_name="climatiseurs_v2", path="qdrant_db"):
         """Initialize Qdrant Vector Store"""
         self.collection_name = collection_name
         # Use a local path for persistence instead of just :memory:

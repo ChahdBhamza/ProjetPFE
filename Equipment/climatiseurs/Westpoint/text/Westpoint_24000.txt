@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur Westpoint Inverter 24000 BTU Chaud & Froid - Blanc
+BRAND: Westpoint
+REFERENCE: 24000
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 7 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 2 999,000 DT TND (local)

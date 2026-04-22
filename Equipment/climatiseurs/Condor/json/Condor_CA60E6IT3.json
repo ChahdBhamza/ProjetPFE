@@ -1,0 +1,34 @@
+{
+    "clean_title": "Condor Inverter 60000 BTU (CA60-E6IT3)",
+    "brand": "Condor",
+    "normalized_reference": "CA60E6IT3",
+    "capacity_btu": 60000,
+    "primary_image": "https://jumbo.tn/32010-home_default/climatiseur-armoire-condor-50000-btu-tropical-inverter-chaud-froid-blanc.jpg",
+    "description": "Climatiseur Armoire\n-\nCapacité\n:\n60\n000 BTU\n-\nMode\n:\nChaud & Froid\n-\nCompresseur Inverter\n-\nTropical T3\n- Poids Net : 55 / 67kg - Réfrigérant:  R410a - Volume de déshumidification (L/h): 5 - Idéal pour grands espaces comme salons, bureaux ou halls - Adaptée aux environnements très chauds jusqu’à 54 °C - Economie d’énergie allant jusqu’à 50 % - Design vertical robuste  - Dimensions : 587×394×1882 mm -\nCouleur\n:\nBlanc\n-\nGarantie\n:\n3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 7599.0,
+            "raw_title": "COPY OF CLIMATISEUR ARMOIRE CONDOR 50000 BTU TROPICAL INVERTER CHAUD FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/11290-climatiseur-armoire-condor-50000-btu-tropical-inverter-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/32010-home_default/climatiseur-armoire-condor-50000-btu-tropical-inverter-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "7 599,000 DT",
+            "raw_title": "Climatiseur Armoire Condor 60000 BTU Tropical Inverter Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "587×394×1882 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

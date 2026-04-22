@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Non Inverter (RAD-SB)
+BRAND: Coala
+REFERENCE: RADSB
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 75.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/radiateur-electrique-coala-pour-sale-de-bain-1500w)

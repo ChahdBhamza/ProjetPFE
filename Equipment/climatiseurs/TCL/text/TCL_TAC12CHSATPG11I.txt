@@ -1,0 +1,18 @@
+PRODUCT NAME: TCL Inverter 12000 BTU (TAC-12CHSA/TPG11I)
+BRAND: TCL
+REFERENCE: TAC12CHSATPG11I
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: A+
+Gas_Type: Not found
+Dimensions: 777 x 250 x 205 mm
+Weight: Not found
+Noise_Level: 39 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1559.0 TND (https://jumbo.tn/climatiseur/7008-climatiseur-inverter-tcl-12000-btu-chaud-froid-garantie-3-ans.html)
+- Local_dataset: 1 529,000 DT TND (local)

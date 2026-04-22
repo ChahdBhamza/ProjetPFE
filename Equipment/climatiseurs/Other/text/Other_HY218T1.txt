@@ -1,0 +1,18 @@
+PRODUCT NAME: Other Non Inverter 18000 BTU (HY2-18T1)
+BRAND: Other
+REFERENCE: HY218T1
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: 16-43°
+Energy_Class: T1
+Gas_Type: R410A / 1.05KG
+Dimensions: 853 x 602 x 349 mm | 910 x 206 x 294 mm
+Weight: Not found
+Noise_Level: 54 dba | 46 dba
+Warranty: 2 ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2099.0 TND (https://jumbo.tn/climatiseur/1577-climatiseur-chaud-froid-18000-btu-classe-eneg-2-.html)
+- Local_dataset: 2 029,000 DT TND (local)

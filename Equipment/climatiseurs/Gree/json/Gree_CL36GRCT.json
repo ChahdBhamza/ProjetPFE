@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Inverter 36000 BTU (CL36GR-CT)",
+    "brand": "Gree",
+    "normalized_reference": "CL36GRCT",
+    "capacity_btu": 36000,
+    "primary_image": "https://zoom.com.tn/64997-large_default/climatiseur-cassette-gree-36000-btu-inverter-chaud-froid-cl36gr-ct.jpg",
+    "description": "Climatiseur Cassette GREE Inverter / Puissance: 36000 BTU / Mode: Chaud/Froid / Réfrigérant: R410 / Niveau sonore: 41/43/45 dB / Mode de performance amélioré / Système de filtration d'air / Dégivrage automatique / Autodiagnostic / Mode silencieux / Economique / Pompe de vidange intégrée / Source de courant: 220-240V / 50Hz / Garantie : 3ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR CASSETTE GREE 36000 BTU INVERTER | CHAUD & FROID | CL36GR-CT",
+            "url": "https://zoom.com.tn/climatiseur/15648-climatiseur-cassette-gree-36000-btu-inverter-chaud-froid-cl36gr-ct.html",
+            "image_url": "https://zoom.com.tn/64997-large_default/climatiseur-cassette-gree-36000-btu-inverter-chaud-froid-cl36gr-ct.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "45",
+        "Warranty": "3ans"
+    }
+}

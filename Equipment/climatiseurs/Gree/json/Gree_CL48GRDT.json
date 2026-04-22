@@ -1,0 +1,34 @@
+{
+    "clean_title": "Gree Inverter 48000 BTU (CL48GR-DT)",
+    "brand": "Gree",
+    "normalized_reference": "CL48GRDT",
+    "capacity_btu": 48000,
+    "primary_image": "https://jumbo.tn/9811-home_default/climatiseur-gree-48000-btu-inverter-gainable-blanc.jpg",
+    "description": "Climatiseur Gree Inverter Gainable\n-\nCapacité\n: 48000 BTU -\nMode\n: Chaud & Froid - Classe énergétique : A - Type de gaz : 410 A - Pression statique réglable jusqu'à : 200 Pa pour des réseaux plus longs - Tous les composants sont Inverter à haut rendement et économie d'énergie -  Le ventilateur se règle en fonction de la pression statique du gainable installé -\nCouleur\n: Blanc -\nGarantie\n: 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 7559.0,
+            "raw_title": "CLIMATISEUR GREE 48000 BTU INVERTER GAINABLE BLANC",
+            "url": "https://jumbo.tn/climatiseur/3817-climatiseur-gree-48000-btu-inverter-gainable-blanc.html",
+            "image_url": "https://jumbo.tn/9811-home_default/climatiseur-gree-48000-btu-inverter-gainable-blanc.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR GREE 48000 BTU INVERTER GAINABLE| CHAUD & FROID | CL48GR-DT",
+            "url": "https://zoom.com.tn/climatiseur/15658-climatiseur-gree-48000-btu-inverter-gainable-chaud-froid-cl48gr-dt.html",
+            "image_url": "https://zoom.com.tn/57489-large_default/climatiseur-gree-48000-btu-inverter-gainable-chaud-froid-cl48gr-dt.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A",
+        "Gas_Type": "410 A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

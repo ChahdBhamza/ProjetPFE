@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Armoire Saba 48000 BTU Chaud Froid - Blanc",
+    "brand": "Saba",
+    "normalized_reference": "48000",
+    "capacity_btu": 48000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Saba/images/Saba_48000.jpg",
+    "description": "Local product: Armoire",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "6 299,000 DT",
+            "raw_title": "Climatiseur Armoire Saba 48000 BTU Chaud Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

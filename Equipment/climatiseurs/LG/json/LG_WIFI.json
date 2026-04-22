@@ -1,0 +1,27 @@
+{
+    "clean_title": "LG Inverter 12000 BTU (WI-FI)",
+    "brand": "LG",
+    "normalized_reference": "WIFI",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.tunisianet.com.tn/437849-large/climatiseur-lg-12000-btu-artcool-mirror-uv-nano-wi-fi-chaudfroid-inverter.jpg",
+    "description": "Not found",
+    "availability": [
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR LG 12000 BTU ARTCOOL MIRROR UV NANO WI-FI / CHAUD/FROID / INVERTER",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/57198-climatiseur-lg-12000-btu-artcool-mirror-uv-nano-wi-fi-chaudfroid-inverter.html",
+            "image_url": "https://www.tunisianet.com.tn/437849-large/climatiseur-lg-12000-btu-artcool-mirror-uv-nano-wi-fi-chaudfroid-inverter.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

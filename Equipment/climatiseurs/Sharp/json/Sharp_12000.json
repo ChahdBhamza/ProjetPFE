@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Sharp Split Inverter 12000 BTU Chaud Froid AY-XP12UHE",
+    "brand": "Sharp",
+    "normalized_reference": "12000",
+    "capacity_btu": 12000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Sharp/images/Sharp_12000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 899,000 DT",
+            "raw_title": "Climatiseur Sharp Split Inverter 12000 BTU Chaud Froid AY-XP12UHE",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

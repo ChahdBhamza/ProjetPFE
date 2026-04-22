@@ -1,0 +1,18 @@
+PRODUCT NAME: Biolux Non Inverter 9000 BTU (M-91CFTS)
+BRAND: Biolux
+REFERENCE: M91CFTS
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 5ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1199.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-biolux-tropicalise-9000btu-chaud-froid-smart-garantie-5ans)
+- Local_dataset: 1 449,000 DT TND (local)

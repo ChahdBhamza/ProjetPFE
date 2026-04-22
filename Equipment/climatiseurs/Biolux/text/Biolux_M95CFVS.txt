@@ -1,0 +1,17 @@
+PRODUCT NAME: Biolux Inverter 9000 BTU (M-95CFVS)
+BRAND: Biolux
+REFERENCE: M95CFVS
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 5ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1399.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-inverter-biolux-9000btu-chaud-froid-smart-garantie-5ans)

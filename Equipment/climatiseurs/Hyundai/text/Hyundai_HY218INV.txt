@@ -1,0 +1,17 @@
+PRODUCT NAME: Hyundai Inverter 18000 BTU (HY2-18-INV)
+BRAND: Hyundai
+REFERENCE: HY218INV
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: C
+Gas_Type: R410A
+Dimensions: 1010 x 315 x 220 mm | 853 x 349 x 602 mm
+Weight: Not found
+Noise_Level: 29 db | 60 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2239.0 TND (https://jumbo.tn/climatiseur/9333-climatiseur-hyundai-inverter-18000-btu-chaud-froid-hy2-18inv.html)

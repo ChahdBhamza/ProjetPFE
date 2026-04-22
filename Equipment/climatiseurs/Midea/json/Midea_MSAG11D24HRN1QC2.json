@@ -1,0 +1,34 @@
+{
+    "clean_title": "Midea Non Inverter 24000 BTU (MSAG11D-24HRN1-QC2)",
+    "brand": "Midea",
+    "normalized_reference": "MSAG11D24HRN1QC2",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304651_175.webp",
+    "description": "Capacité : 24000 BTU \r\nMode : Chaud Froid \r\nNiveau Sonore unité intérieure (Hi/Mi/Lo)/dB(A) : 48/45/42 \r\nTaux de déshumidification : 2.3 L/H\r\nDimension unité intérieure : 1030 x 221 x 313mm \r\nDimension unité extérieure : 845 x 335 x 695 mm \r\nPoids Net unité intérieure : 17 à 21 kg \r\nPoids Net unité extérieure : 52 à 56 kg \r\nCouleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2699.0,
+            "raw_title": "MIDEA CLIMATISEUR SPLIT 24000 BTU CHAUD ET FROID - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-split-24000-btu-chaud-et-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304651_175.webp"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 699,000 DT",
+            "raw_title": "Climatiseur Midea Smart Inverter 24000 BTU Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "1030 x 221 x 313mm | 845 x 335 x 695 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

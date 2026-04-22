@@ -1,0 +1,17 @@
+PRODUCT NAME: Hisense Non Inverter 24000 BTU (AS-24HW4)
+BRAND: Hisense
+REFERENCE: AS24HW4
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/ froid
+Energy_Class: A++
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2399.0 TND (https://jumbo.tn/climatiseur/3429-climatiseur-hisense-tropicalise-24000-btu-chaudfroid-garantie-3ans.html)

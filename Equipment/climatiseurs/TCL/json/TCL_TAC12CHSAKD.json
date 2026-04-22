@@ -1,0 +1,27 @@
+{
+    "clean_title": "TCL Non Inverter 12000 BTU (TAC-12CHSA-KD)",
+    "brand": "TCL",
+    "normalized_reference": "TAC12CHSAKD",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495708_247.jpg",
+    "description": "Climatiseur TCL Chaud/Froid - Modéle: TAC-12CHSA-KD - Capacité de Refroidissement: 12000 BTU  - Refrigerent: R410 - Superficie: entre 15 et 23 m²  - Puissance absorbée: 1055 - Niveaux sonore: 44/40/36 - Dimensions: 770 x 240 x 180 mm - Poids: 28 Kg",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1499.0,
+            "raw_title": "TCL CLIMATISEUR 12000 BTU CHAUD - FROID - TAC-12CHSA-KD",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-12000btu-chaud-froid-tac-12chsa-kd",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495708_247.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "770 x 240 x 180 mm",
+        "Weight": "28 kg",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

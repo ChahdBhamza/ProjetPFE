@@ -1,0 +1,17 @@
+PRODUCT NAME: Samsung Non Inverter 12000 BTU (AR12TQHQLSI2TN)
+BRAND: Samsung
+REFERENCE: AR12TQHQLSI2TN
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud et froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2359.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/samsung/samsung-ar12tqhqlsi2tn-climatiseur-chaud-froid-a-12000-btu)

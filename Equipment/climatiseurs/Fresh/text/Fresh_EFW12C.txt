@@ -1,0 +1,17 @@
+PRODUCT NAME: Fresh Non Inverter 12000 BTU (EFW12C)
+BRAND: Fresh
+REFERENCE: EFW12C
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1129.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/fresh/climatiseur-12000-btu-froid)

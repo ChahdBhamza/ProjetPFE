@@ -1,0 +1,17 @@
+PRODUCT NAME: Orient Non Inverter 18000 BTU (OV-1812M)
+BRAND: Orient
+REFERENCE: OV1812M
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 69.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/orient/ventilateur-mural-orient-ov-1812m-sans-minuterie)

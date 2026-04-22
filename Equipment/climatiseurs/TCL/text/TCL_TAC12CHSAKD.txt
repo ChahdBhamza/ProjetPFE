@@ -1,0 +1,17 @@
+PRODUCT NAME: TCL Non Inverter 12000 BTU (TAC-12CHSA-KD)
+BRAND: TCL
+REFERENCE: TAC12CHSAKD
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 770 x 240 x 180 mm
+Weight: 28 kg
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-12000btu-chaud-froid-tac-12chsa-kd)

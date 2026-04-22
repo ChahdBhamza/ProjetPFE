@@ -1,0 +1,18 @@
+PRODUCT NAME: Hyundai Inverter 18000 BTU (CLIM-HYND-18INV)
+BRAND: Hyundai
+REFERENCE: CLIMHYND18INV
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: 3
+Gas_Type: 50 Hz et utilise le gaz 410 A . Il présente un niveau de bruit de 40
+Dimensions: 660 x 530 x 250 mm | 790 x 200 x 270 mm
+Weight: Not found
+Noise_Level: 34 dba | 36 dba | 34 dba
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 2559.0 TND (https://zoom.com.tn/climatiseur/15423-climatiseur-hyundai-18000-btu-chaud-froid-inverter.html)
+- Mega: 2559.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/hyundai/climatiseur-18000-btu-chaud-froid-inverter)

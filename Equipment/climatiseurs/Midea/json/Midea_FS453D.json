@@ -1,0 +1,27 @@
+{
+    "clean_title": "Midea Non Inverter (FS45-3D)",
+    "brand": "Midea",
+    "normalized_reference": "FS453D",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1595938955_878.jpg",
+    "description": "Fabriquant: MideaCouleur: blancPuissance : 60 WHauteur ajustableNiveau de vitesse : 3Nombre de pales : 3",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 145.0,
+            "raw_title": "MIDEA VENTILATEUR A PIEDS 18\"/3 HELICES",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/ventilateur-a-pieds-midea-18-3-helices",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1595938955_878.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

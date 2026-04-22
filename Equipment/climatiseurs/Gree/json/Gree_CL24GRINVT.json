@@ -1,0 +1,34 @@
+{
+    "clean_title": "Gree Inverter 24000 BTU (CL24GR-INVT)",
+    "brand": "Gree",
+    "normalized_reference": "CL24GRINVT",
+    "capacity_btu": 24000,
+    "primary_image": "https://jumbo.tn/30960-home_default/climatiseur-gree-24000-btu-inverter-chaud-froid.jpg",
+    "description": "Climatiseur Gree\nInverter\n– Modèle CL09GR-INV-CF –\nCapacité 24000 BTU\n–\nMode Chaud & Froid\n–\nClasse énergétique 1\n– Technologie Inverter –\nMode Turbo\n– Ultra silencieux – Fonction I Feel – Respectueux de l’environnement –\nFaible consommation d’énergie\n– Résistant aux températures extrêmes – Nettoyage automatique\nGarantie 3 ans + 6 ans moteur",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 3199.0,
+            "raw_title": "CLIMATISEUR GREE 24000 BTU INVERTER CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/10996-climatiseur-gree-24000-btu-inverter-chaud-froid.html",
+            "image_url": "https://jumbo.tn/30960-home_default/climatiseur-gree-24000-btu-inverter-chaud-froid.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "3 099,000 DT",
+            "raw_title": "Climatiseur Gree Inverter Smart Tropicalisé 24000 BTU Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

@@ -1,0 +1,17 @@
+PRODUCT NAME: TCL Non Inverter 24000 BTU (TAC-24CSA)
+BRAND: TCL
+REFERENCE: TAC24CSA
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: 3
+Gas_Type: Not found
+Dimensions: 1010 x 315 x 220 mm
+Weight: 13 kg
+Noise_Level: 52 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2599.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-24000-btu-froid-on-off)

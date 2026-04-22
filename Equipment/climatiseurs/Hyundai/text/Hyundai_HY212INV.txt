@@ -1,0 +1,17 @@
+PRODUCT NAME: Hyundai Inverter 12000 BTU (HY2-12-INV)
+BRAND: Hyundai
+REFERENCE: HY212INV
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: C
+Gas_Type: R410A
+Dimensions: 811 x 203 x 292 mm | 777 x 498 x 290 mm
+Weight: Not found
+Noise_Level: 29 db | 58 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1539.0 TND (https://jumbo.tn/climatiseur/9334-climatiseur-hyundai-inverter-12000-btu-chaud-froid-hy2-12inv.html)

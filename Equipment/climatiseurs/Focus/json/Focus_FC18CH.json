@@ -1,0 +1,27 @@
+{
+    "clean_title": "Focus Inverter 18000 BTU (FC-18CH)",
+    "brand": "Focus",
+    "normalized_reference": "FC18CH",
+    "capacity_btu": 18000,
+    "primary_image": "https://zoom.com.tn/73907-large_default/climatiseur-focus-smart-inverter-18-000-btu-tropicalise-chaudfroid.jpg",
+    "description": "Le Climatiseur FOCUS FC-18CH Smart Inverter 18000 BTU offre une puissance élevée idéale pour les grands espaces, avec une technologie Inverter qui réduit la consommation d’énergie tout en assurant une température stable. Grâce à son système tropicalisé T3 , il fonctionne efficacement même en fortes chaleurs. Silencieux et performant, il garantit un confort optimal en mode chaud comme en mode froid. Type : Climatiseur split mural / Technologie : Smart Inverter (économie d’énergie et stabilité de température) / Mode : Chaud, Froid / Capacité : 18000 BTU / Tropicalisé : Classe T3 / Gaz réfrigérant : R410A / Niveau sonore : 44dB ( fonctionnement silencieux ) / Afficheur digital / Redémarrage automatique / Détection intelligente de température / Dimensions : 1000 x 390 x 315 mm / Couleur : Blanc / Garantie : 3 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 2099.0,
+            "raw_title": "CLIMATISEUR FOCUS SMART INVERTER 18 000 BTU TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18447-climatiseur-focus-smart-inverter-18-000-btu-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73907-large_default/climatiseur-focus-smart-inverter-18-000-btu-tropicalise-chaudfroid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "1000 x 390 x 315 mm",
+        "Weight": "Not found",
+        "Noise_Level": "44",
+        "Warranty": "3 ans"
+    }
+}

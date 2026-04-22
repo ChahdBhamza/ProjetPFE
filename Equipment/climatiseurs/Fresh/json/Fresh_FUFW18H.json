@@ -1,0 +1,27 @@
+{
+    "clean_title": "Fresh Non Inverter 18000 BTU (FUFW18H)",
+    "brand": "Fresh",
+    "normalized_reference": "FUFW18H",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121019_821.jpg",
+    "description": "Climatiseur Fresh - Capacité : 18000 BTU - Mode : Chaud & Froid - Réfrigérant: R410a ? Afficheur LED ? Mode veille ÉCO ? Balayage automatique à 2 voies ? Mode technologie de capteur ? Fonction turbo de refroidissement rapide ? Superficie: 25-35m² ? Opération automatique ? Minuterie marche/arrêt ? Fonction sèche ? Filtre à poussière ? Unité extérieure anti-corrosion ? + Télécommande - Couleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1749.0,
+            "raw_title": "FRESH CLIMATISEUR 18000 BTU CHAUD FROID BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/fresh/climatiseur-18000-btu-chaud-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121019_821.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

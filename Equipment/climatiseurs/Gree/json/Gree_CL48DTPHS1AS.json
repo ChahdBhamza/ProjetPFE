@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Inverter 48000 BTU (CL48DT-PHS1/A-S)",
+    "brand": "Gree",
+    "normalized_reference": "CL48DTPHS1AS",
+    "capacity_btu": 48000,
+    "primary_image": "https://jumbo.tn/31195-home_default/climatiseur-gainable-gree-48-000-btu-inverter.jpg",
+    "description": "climatiseur armoire GREE 48 000 BTU\noffre une performance élevée en refroidissement et en chauffage, avec une capacité de 14,1 kW en mode froid et 15,5 kW en mode chaud, un débit d’air puissant de 2 200 m³/h et une technologie\nInverter\nassurant une consommation maîtrisée de 4,8 kW en froid et 4,9 kW en chaud. Conçu pour les climats extrêmes, il appartient à la\nclasse climatique T3\net fonctionne efficacement jusqu’à 52°C grâce au gaz réfrigérant\nR410A\n. Son niveau sonore reste confortable avec 52 dB pour l’unité intérieure et 58 dB pour l’unité extérieure. Robuste et fiable, il dispose d’une garantie de\n3 ans sur l’appareil et 6 ans sur le compresseur Inverter\n, ce qui en fait une solution idéale pour les grands espaces professionnels et commerciaux.",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 7399.0,
+            "raw_title": "CLIMATISEUR GAINABLE GREE 48 000 BTU INVERTER",
+            "url": "https://jumbo.tn/climatiseur/11068-climatiseur-gainable-gree-48-000-btu-inverter.html",
+            "image_url": "https://jumbo.tn/31195-home_default/climatiseur-gainable-gree-48-000-btu-inverter.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Froid",
+        "Energy_Class": "c",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "52 db | 58 db",
+        "Warranty": "3 Ans"
+    }
+}

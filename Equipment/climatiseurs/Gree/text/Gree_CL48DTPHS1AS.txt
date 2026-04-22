@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Inverter 48000 BTU (CL48DT-PHS1/A-S)
+BRAND: Gree
+REFERENCE: CL48DTPHS1AS
+CAPACITY: 48000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Froid
+Energy_Class: c
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 52 db | 58 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 7399.0 TND (https://jumbo.tn/climatiseur/11068-climatiseur-gainable-gree-48-000-btu-inverter.html)

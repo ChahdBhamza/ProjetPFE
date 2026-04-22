@@ -1,0 +1,18 @@
+PRODUCT NAME: Condor Inverter 60000 BTU (CA60-E6IT3)
+BRAND: Condor
+REFERENCE: CA60E6IT3
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: 587×394×1882 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 7599.0 TND (https://jumbo.tn/climatiseur/11290-climatiseur-armoire-condor-50000-btu-tropical-inverter-chaud-froid-blanc.html)
+- Local_dataset: 7 599,000 DT TND (local)

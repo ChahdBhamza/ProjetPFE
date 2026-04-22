@@ -1,0 +1,17 @@
+PRODUCT NAME: TCL  9000 BTU (CLIM-TCL-10)
+BRAND: TCL
+REFERENCE: CLIMTCL10
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Not found
+Mode: Chaud/Froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 1449.0 TND (https://zoom.com.tn/climatiseur/8300-climatiseur-tcl-9000-btu-chaudfroid-tac-09chsaxa91.html)

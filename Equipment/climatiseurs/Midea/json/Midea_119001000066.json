@@ -1,0 +1,27 @@
+{
+    "clean_title": "Midea Non Inverter 18000 BTU (119001000066)",
+    "brand": "Midea",
+    "normalized_reference": "119001000066",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721223721_315.jpg",
+    "description": "Climatiseur Midea - Puissance 18 000 BTU - Froid - Pour des surfaces jusqu'à 21 m² - Gaz R410A écologique - Débit d?air (Hi/Mi/Lo): 574/447/352 m3/h - Niveau de bruit intérieur (Hi/Mi/Lo): 40/34/30 dB(A) - Dimensions de l'Unité intérieure(LxPxH) 805 x 194 x 285 mm - Dimensions de l'Unité extérieure (LxPxH) 770 x 300 x 555 mm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2049.0,
+            "raw_title": "MIDEA CLIMATISEUR 18000 BTU FROID (MSAG-11C-18CRN1-PC2)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-18000-btu-froid-msag-11c-18crn1-pc2",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721223721_315.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "GAZ R410",
+        "Dimensions": "805 x 194 x 285 mm | 770 x 300 x 555 mm",
+        "Weight": "Not found",
+        "Noise_Level": "30 db",
+        "Warranty": "Not found"
+    }
+}

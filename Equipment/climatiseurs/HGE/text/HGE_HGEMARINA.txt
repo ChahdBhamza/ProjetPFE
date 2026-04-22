@@ -1,0 +1,17 @@
+PRODUCT NAME: HGE Non Inverter (HGE-MARINA)
+BRAND: HGE
+REFERENCE: HGEMARINA
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 59.9 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-sur-pieds-hge-marina-35w-blanc)

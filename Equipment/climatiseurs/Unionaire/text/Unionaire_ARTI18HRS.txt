@@ -1,0 +1,17 @@
+PRODUCT NAME: Unionaire Non Inverter 18000 BTU (ARTI.18HRS)
+BRAND: Unionaire
+REFERENCE: ARTI18HRS
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 815 x 289 x 196 mm | 677 x 531 x 282 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1659.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/climatiseur-unionaire-artify-18-000-btu-chaud-froid-arti18hrs)

@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Armoire LG 54000 BTU Chaud Froid Inverter Blanc",
+    "brand": "LG",
+    "normalized_reference": "54000",
+    "capacity_btu": 54000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_54000.jpg",
+    "description": "Local product: Armoire",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "16 149,000 DT",
+            "raw_title": "Climatiseur Armoire LG 54000 BTU Chaud Froid Inverter Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "clean_title": "Condor Inverter 18000 BTU (CS18-AL84ST3)",
+    "brand": "Condor",
+    "normalized_reference": "CS18AL84ST3",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/24786-home_default/climatiseur-condor-cs18-al84t3-18000-btu-alpha-smart-inverter-chaud-froid.jpg",
+    "description": "Climatiseur Condor CS18-AL84T3\n-\nCapacité\n: 18000 BTU -\nMode\n: Chaud & Froid -\nClasse énergétique\n: A -\nCompresseur Inverter\n- Réfrigérant : R410a - Super Tropical - Plage de températures, de -15°C en hiver à +60°C en été - Jusqu’à 40% d’économies - Silencieux - Volume de déshumidification : 1.9 L/h - Options: Eco-gear, Full DC, Low voltage 134v, Dépoussiérage intelligent 360° - Idéale pour des espaces de taille moyenne, tels que des salons, chambres ou bureaux - Compact et ergonomique -\nWifi\n- Un design sobre et élégant - Poids: 11.1 / 14.4 kg - Dimensions: 965x215x319 mm -\nCouleur\n: Blanc -\nGarantie\n: 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2199.0,
+            "raw_title": "CLIMATISEUR CONDOR CS18-AL84T3 18000 BTU ALPHA SMART INVERTER CHAUD FROID",
+            "url": "https://jumbo.tn/climatiseur/9073-climatiseur-condor-cs18-al84t3-18000-btu-alpha-smart-inverter-chaud-froid.html",
+            "image_url": "https://jumbo.tn/24786-home_default/climatiseur-condor-cs18-al84t3-18000-btu-alpha-smart-inverter-chaud-froid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A",
+        "Gas_Type": "R410A",
+        "Dimensions": "965x215x319 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

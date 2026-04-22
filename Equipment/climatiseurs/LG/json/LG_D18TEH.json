@@ -1,0 +1,27 @@
+{
+    "clean_title": "LG Inverter 18000 BTU (D18TEH)",
+    "brand": "LG",
+    "normalized_reference": "D18TEH",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1523987956_704.jpg",
+    "description": "Climatiseur Inverter V , 18000btu C&F",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 3699.0,
+            "raw_title": "LG CLIMATISEUR INVERTER V D18TEH 18000 BTU CHAUD/FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/lg-d18teh",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1523987956_704.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Inverter 24000 BTU (CL24ALEXF-INVT)
+BRAND: Gree
+REFERENCE: CL24ALEXFINVT
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 6 ans pour le compresseur et 3 ans pour les autres pièces
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 3099.0 TND (https://zoom.com.tn/climatiseur/13050-climatiseur-gree-inverter-24000-btu-cl24gr-chaud-froid.html)

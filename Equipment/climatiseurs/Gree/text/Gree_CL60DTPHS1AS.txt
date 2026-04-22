@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Inverter 60000 BTU (CL60DT-PHS1/A-S)
+BRAND: Gree
+REFERENCE: CL60DTPHS1AS
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: C
+Gas_Type: R410A
+Dimensions: 1150×790×460 mm | 940×1360×320 mm
+Weight: 95 kg
+Noise_Level: 54 db | 60 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 8299.0 TND (https://jumbo.tn/climatiseur/11071-climatiseur-gainable-gree-60-000-btu-inverter.html)

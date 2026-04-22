@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Armoire Westpoint 60000 BTU OnOff Chaud Froid WAA-6021.H",
+    "brand": "Westpoint",
+    "normalized_reference": "60000",
+    "capacity_btu": 60000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_60000.jpg",
+    "description": "Local product: Armoire",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "8 399,000 DT",
+            "raw_title": "Climatiseur Armoire Westpoint 60000 BTU OnOff Chaud Froid WAA-6021.H",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "7 ans"
+    }
+}

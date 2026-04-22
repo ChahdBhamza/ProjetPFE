@@ -1,0 +1,19 @@
+PRODUCT NAME: Gree Non Inverter 48000 BTU (CL48GR-FC)
+BRAND: Gree
+REFERENCE: CL48GRFC
+CAPACITY: 48000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: A
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 9799.0 TND (https://jumbo.tn/climatiseur/3819-climatiseur-gree-floor-ceilling-48000-btu-chaud-froid.html)
+- Zoom: None TND (https://zoom.com.tn/climatiseur/15659-climatiseur-gree-48000-btu-inverter-floor-ceilling-chaud-froid-cl48gr-fc.html)
+- Local_dataset: 10 199,000 DT TND (local)

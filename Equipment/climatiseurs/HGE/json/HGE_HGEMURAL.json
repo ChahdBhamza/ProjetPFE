@@ -1,0 +1,27 @@
+{
+    "clean_title": "HGE Non Inverter (HGE-MURAL)",
+    "brand": "HGE",
+    "normalized_reference": "HGEMURAL",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657787725_863.jpg",
+    "description": "Ventilateur mural HGE avec commande - Puissance: 34 Watts - Vitesse de Rotation: 1220 Tr/min - 3 Vitesses réglables - Oscillation 90° - Ampérage: 0.2A-0.26A - Alimentation: 220V - 50Hz - Ventilateur avec grille tournante - Allure élégante - Ventilation harmonieuse ajustable verticalement - Normale / breeze / sleeping mode sélection - Ventilation silencieuse avec double protection contre le sur échauffement et la surtension électrique - Economie d?energie - Avec dispositif de sécurité - Sleeping mode pour la sécurité au sommeil - Position variable",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 85.0,
+            "raw_title": "HGE VENTILATEUR MURAL -MURAL",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-mural-hge-hge-mural",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657787725_863.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

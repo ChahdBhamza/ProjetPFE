@@ -1,0 +1,27 @@
+{
+    "clean_title": "Coala Non Inverter (V45IN)",
+    "brand": "Coala",
+    "normalized_reference": "V45IN",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1590020590_340.jpg",
+    "description": "Ventilateur de bureau COALA V45 IND  - Puissance:  90 Watts   - Intensité: 0.35A - Vitesse: :760-1192 tr/min",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 155.0,
+            "raw_title": "COALA VENTILATEUR DE BUREAU V45 IN - 90W",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/ventilateur-de-bureau-coala-v45-in-90w",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1590020590_340.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

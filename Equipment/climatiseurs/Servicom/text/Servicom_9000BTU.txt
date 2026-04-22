@@ -1,0 +1,17 @@
+PRODUCT NAME: Servicom Inverter 9000 BTU (9000BTU)
+BRAND: Servicom
+REFERENCE: 9000BTU
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1399.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/servicom/servicom-split-mural-inverter-9000-btu)

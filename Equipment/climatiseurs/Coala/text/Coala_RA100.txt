@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Non Inverter (RA100)
+BRAND: Coala
+REFERENCE: RA100
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 429.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/rideau-dair-coala-100cm-blanc-r-a100)

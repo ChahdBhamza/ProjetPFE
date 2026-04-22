@@ -1,0 +1,17 @@
+PRODUCT NAME: Beko  24000 BTU (BAFDA240)
+BRAND: Beko
+REFERENCE: BAFDA240
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Not found
+Mode: Chaud/Froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans et Garantie 7 ans sur le compresseur
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 2999.0 TND (https://zoom.com.tn/climatiseur/4264-climatiseur-beko-24000-btu-chaudfroid.html)

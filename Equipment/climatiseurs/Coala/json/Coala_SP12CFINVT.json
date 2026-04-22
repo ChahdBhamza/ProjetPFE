@@ -1,0 +1,27 @@
+{
+    "clean_title": "Coala Inverter 12000 BTU (SP12CF-INVT)",
+    "brand": "Coala",
+    "normalized_reference": "SP12CFINVT",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1616344617_905.jpg",
+    "description": "Climatiseur Coala Inverter R410 Chaud & Froid - 12000 BTU - Filtre Plazma - Auto Nettoyage : Nettoyage automatique du climatiseur - Economie d' énergie jusqu'a 40 % - Niveau sonore réduit",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1349.0,
+            "raw_title": "COALA CLIMATISEUR INVERTER R410 CHAUD & FROID 12000 BTU",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-coala-inverter-r410-chaud-froid-12000-btu",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1616344617_905.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

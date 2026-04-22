@@ -1,0 +1,17 @@
+PRODUCT NAME: Midea Inverter 9000 BTU (MSAG11A-09HRND1)
+BRAND: Midea
+REFERENCE: MSAG11A09HRND1
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 39 db | 47 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1399.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-9000-btu-inverter-chaud-and-froid-blanc)

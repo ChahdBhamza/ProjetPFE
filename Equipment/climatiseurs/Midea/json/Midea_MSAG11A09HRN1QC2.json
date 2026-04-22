@@ -1,0 +1,27 @@
+{
+    "clean_title": "Midea Non Inverter 9000 BTU (MSAG11A-09HRN1-QC2)",
+    "brand": "Midea",
+    "normalized_reference": "MSAG11A09HRN1QC2",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657710413_770.jpg",
+    "description": "Climatiseur Midea Puissance : 9000 BTU Chaud et Froid Tension d' alimentation 220~240 50/1 Niveau sonore unité interieure 41 / 36 / 32  Niveau sonore unité exterieure 55 Dimension unité intérieure : 1030 x 221 x 313mm Dimension unité extérieure : 845 x 335 x 695 mm  Poids Net unité intérieure de:  17 à 21 kg Poids Net unité extérieure de 52 à 56 kg",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1199.0,
+            "raw_title": "MIDEA CLIMATISEUR SPLIT 9000 BTU CHAUD ET FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-split-midea-9000-btu-chaud-et-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657710413_770.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "1030 x 221 x 313mm | 845 x 335 x 695 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

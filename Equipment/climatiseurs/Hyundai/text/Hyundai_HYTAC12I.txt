@@ -1,0 +1,17 @@
+PRODUCT NAME: Hyundai Inverter 12000 BTU (HY.TAC12I)
+BRAND: Hyundai
+REFERENCE: HYTAC12I
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: c
+Gas_Type: Not found
+Dimensions: 660 x 530 x 250 mm | 790 x 200 x 270 mm
+Weight: Not found
+Noise_Level: 50 dba | 36 dba
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/hyundai/climatiseur-h-12000-btu-inverter-chaud-and-froid)

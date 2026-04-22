@@ -1,0 +1,48 @@
+{
+    "clean_title": "Westpoint Inverter 18000 BTU (WIX-18.LHC)",
+    "brand": "Westpoint",
+    "normalized_reference": "WIX18LHC",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/24304-home_default/climatiseur-westpoint-inverter-18000-btu-chaud-froid.jpg",
+    "description": "Le climatiseur Westpoint WIX-18.LHC (18 000 BTU, Inverter, réversible) est une solution de climatisation puissante, idéale pour les grandes pièces (salons, bureaux ou grands espaces) allant généralement de 30 à 45 m² , selon l'isolation et l'exposition. Technologie Inverter : Son compresseur module sa puissance en continu pour maintenir une température constante. Cette technologie permet des économies d'énergie significatives (pouvant atteindre 50% selon les conditions d'utilisation) par rapport aux modèles classiques. Performance Tropicalisée : Conçu pour les climats exigeants, il reste opérationnel et efficace même lorsque la température extérieure atteint des niveaux élevés (jusqu'à 50°C ). Système Réversible (Chaud/Froid) : Il assure un confort thermique toute l'année : rafraîchissement performant en été et chauffage efficace en hiver. Type : Climatiseur split mural / Technologie : Inverter / Mode : Chaud, Froid / Capacité : 18 000 BTU / Surface recommandée : 30 à 45 m² / Tropicalisé / Gaz réfrigérant : R410A / Pression sonore : 46dBA (Haut), 37dBA (Bas) / Fonctions : Auto-nettoyage, mode silence, économie d’énergie / Affichage : LED / Dimensions intérieure ( Hx Lx P ) : 223 x 1030 x 319 mm / Dimensions extérieure ( Hx Lx P ) : 560 x 780 x 270 mm / Couleur : Blanc / Garantie : 7 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2379.0,
+            "raw_title": "CLIMATISEUR WESTPOINT INVERTER 18000 BTU / CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/8922-climatiseur-westpoint-inverter-18000-btu-chaud-froid.html",
+            "image_url": "https://jumbo.tn/24304-home_default/climatiseur-westpoint-inverter-18000-btu-chaud-froid.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 2359.0,
+            "raw_title": "CLIMATISEUR WESTPOINT WIX-18.LHC 18000 BTU INVERTER TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18456-climatiseur-westpoint-wix-18lhc-18000-btu-inverter-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73934-large_default/climatiseur-westpoint-wix-18lhc-18000-btu-inverter-tropicalise-chaudfroid.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2389.0,
+            "raw_title": "WESTPOINT CLIMATISEUR INVERTER 18000 BTU CHAUD & FROID BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-inverter-18000-btu-chaud-and-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723102357_133.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 449,000 DT",
+            "raw_title": "Climatiseur Westpoint Inverter 18000 BTU Chaud & Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "900x 220x 291mm | 780x 560x 270mm",
+        "Weight": "11.5 kg",
+        "Noise_Level": "46",
+        "Warranty": "5 Ans"
+    }
+}

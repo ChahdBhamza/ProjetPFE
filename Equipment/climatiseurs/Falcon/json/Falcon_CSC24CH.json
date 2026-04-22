@@ -1,0 +1,27 @@
+{
+    "clean_title": "Falcon Non Inverter 24000 BTU (CSC-24CH)",
+    "brand": "Falcon",
+    "normalized_reference": "CSC24CH",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495368_825.jpg",
+    "description": "Climatiseur Falcon Chaud / Froid  - 24000 BTU - Classe énergétique 3 - EER/COP : 3.12 / 3.15 - Débit d'air: 900 m3/h - Niveaux sonores: 42-46 dB (A) - Dimensions (HxLxP): 850 x 295 x 605 mm - Poids: 1900 g",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2299.0,
+            "raw_title": "FALCON CLIMATISEUR R410A CHAUD & FROID - 24000 BTU - CSC-24CH",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-24000-btu-chaud-froid-csc-24ch",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495368_825.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "3",
+        "Gas_Type": "R410A",
+        "Dimensions": "850 x 295 x 605 mm",
+        "Weight": "Not found",
+        "Noise_Level": "46 db",
+        "Warranty": "Not found"
+    }
+}

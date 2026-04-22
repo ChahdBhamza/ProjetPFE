@@ -1,0 +1,17 @@
+PRODUCT NAME: Indesit Inverter 24000 BTU (IAVPN240-IAVPN241)
+BRAND: Indesit
+REFERENCE: IAVPN240IAVPN241
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: 1
+Gas_Type: R32
+Dimensions: 1030x319x237 mm | 840x635x320 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2799.0 TND (https://jumbo.tn/climatiseur/11216-climatiseur-indesit-24000-btu-inverter-chaud-froid-blanc.html)

@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur Armoire LG 54000 BTU Chaud Froid Inverter Blanc
+BRAND: LG
+REFERENCE: 54000
+CAPACITY: 54000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 16 149,000 DT TND (local)

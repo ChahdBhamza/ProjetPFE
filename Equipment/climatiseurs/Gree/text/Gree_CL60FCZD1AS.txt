@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Inverter 60000 BTU (CL60FC-ZD1/A-S)
+BRAND: Gree
+REFERENCE: CL60FCZD1AS
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: C
+Gas_Type: R410A
+Dimensions: 1650×680×235 mm | 940×1360×320 mm
+Weight: 95 kg
+Noise_Level: 53 db | 60 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 8099.0 TND (https://jumbo.tn/climatiseur/11072-climatiseur-plafonnier-gree-60-000-btu-inverter.html)

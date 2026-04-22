@@ -1,0 +1,18 @@
+PRODUCT NAME: Hisense Non Inverter 9000 BTU (AS-09HW4)
+BRAND: Hisense
+REFERENCE: AS09HW4
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/ froid
+Energy_Class: 3
+Gas_Type: R410A
+Dimensions: Not found
+Weight: 8,5kg
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1339.0 TND (https://jumbo.tn/climatiseur/3425-climatiseur-hisense-9000-btu-chaud-froid.html)
+- Local_dataset: 1 349,000 DT TND (local)

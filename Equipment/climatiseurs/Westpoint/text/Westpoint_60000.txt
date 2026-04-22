@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur Armoire Westpoint 60000 BTU OnOff Chaud Froid WAA-6021.H
+BRAND: Westpoint
+REFERENCE: 60000
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 7 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 8 399,000 DT TND (local)

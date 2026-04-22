@@ -1,0 +1,27 @@
+{
+    "clean_title": "Saba Non Inverter 12000 BTU (CSC-120A)",
+    "brand": "Saba",
+    "normalized_reference": "CSC120A",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1655159969_797.jpg",
+    "description": "Climatiseur SABA 12 000 BTU - Froid - Intensité de démarrage: 4.9A - Calibre disjoncteur (IEC60335): 6.4A - Puissance absorbée: 1055W - Puissance absorbée Max (IEC60335): 1375W - Débit d'air: 550 m3/h - Tension minimale: 4.5MPa - Niveau de bruit: 50 dB(A) - Tension: 220-240V - Fréquence: 50Hz - Surface appropriée: 30-40 m2 - Classe Énergétique: 2",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1249.0,
+            "raw_title": "SABA CLIMATISEUR CSC-120A 12000 BTU FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/saba/climatiseur-saba-12000-btu-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1655159969_797.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "2",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "50 db",
+        "Warranty": "Not found"
+    }
+}

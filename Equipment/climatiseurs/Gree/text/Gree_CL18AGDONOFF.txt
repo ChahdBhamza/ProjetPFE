@@ -1,0 +1,20 @@
+PRODUCT NAME: Gree Non Inverter 18000 BTU (CL18AGD-ONOFF)
+BRAND: Gree
+REFERENCE: CL18AGDONOFF
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud / froid
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: 982×311×221mm | 802×555×350mm
+Weight: Not found
+Noise_Level: 54db | 63db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2229.0 TND (https://jumbo.tn/climatiseur/8049-climatiseur-gree-18000-btu-chaud-froid-tropicalise-onoff.html)
+- Zoom: 2089.0 TND (https://zoom.com.tn/climatiseur/8261-climatiseur-gree-18000-btu-on-of-tropicalise-chaudfroid-cl18gr-onoff.html)
+- Mega: 2049.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-tropicalise-18000-btu-chaud-froid-blanc)
+- Local_dataset: 2 229,000 DT TND (local)

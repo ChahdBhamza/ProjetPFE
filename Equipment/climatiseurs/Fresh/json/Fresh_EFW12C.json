@@ -1,0 +1,27 @@
+{
+    "clean_title": "Fresh Non Inverter 12000 BTU (EFW12C)",
+    "brand": "Fresh",
+    "normalized_reference": "EFW12C",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121180_616.webp",
+    "description": "Climatiseur FRESH\r\nMode: Froid\r\nPuissance: 12000 BTU\r\nRéfrigérant: R410a\r\nClasse énergétique: 2\r\nAfficheur LED\r\nMode veille ÉCO\r\nBalayage automatique à 2 voies\r\nMode technologie de capteur\r\nFonction turbo de refroidissement rapide\r\nOpération automatique\r\nMinuterie marche/arrêt\r\nFonction sèche\r\nFiltre à poussière\r\nUnité extérieure anti-corrosion\r\nTélécommande incluse\r\nCouleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1129.0,
+            "raw_title": "FRESH CLIMATISEUR 12000 BTU FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/fresh/climatiseur-12000-btu-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121180_616.webp"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Froid",
+        "Energy_Class": "2",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

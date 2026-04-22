@@ -1,0 +1,34 @@
+{
+    "clean_title": "Hisense Non Inverter 12000 BTU (AS-12HW4)",
+    "brand": "Hisense",
+    "normalized_reference": "AS12HW4",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/8767-home_default/climatiseur-hisense-12000-btu-chaud-froid.jpg",
+    "description": "Climatiseur Hisense - Capacité : 12000 BTU - Technologie: On/Off - Mode : Chaud/ Froid - Classe énergétique : A++ - Type de gaz : R410A - Alimentation électrique : 220V-240V/50Hz - Filtre PP lavable - Affichage sur le panneau avant LED - Panneau amovible et lavable - Minuterie 24 heures - Minuterie MARCHE/ARRÊT - Mode silencieux - Fonction de détection intelligente - Dégivrage automatique - Connectivité : Wi-Fi - Couleur : Blanc - Garantie : 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1479.0,
+            "raw_title": "CLIMATISEUR HISENSE 12000 BTU / CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/3426-climatiseur-hisense-12000-btu-chaud-froid.html",
+            "image_url": "https://jumbo.tn/8767-home_default/climatiseur-hisense-12000-btu-chaud-froid.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 589,000 DT",
+            "raw_title": "Climatiseur Hisense 12000 BTU Chaud Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/ froid",
+        "Energy_Class": "A++",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

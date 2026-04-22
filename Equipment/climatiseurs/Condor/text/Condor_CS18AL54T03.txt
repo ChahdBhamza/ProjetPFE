@@ -1,0 +1,17 @@
+PRODUCT NAME: Condor Non Inverter 18000 BTU (CS18-AL54T03)
+BRAND: Condor
+REFERENCE: CS18AL54T03
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2129.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/split-condor-18000btu-chfr)

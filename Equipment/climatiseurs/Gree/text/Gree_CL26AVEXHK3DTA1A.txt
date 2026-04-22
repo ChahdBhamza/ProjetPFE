@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter (CL26AVEXH-K3DTA1A)
+BRAND: Gree
+REFERENCE: CL26AVEXHK3DTA1A
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: c
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 27 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 3599.0 TND (https://jumbo.tn/climatiseur/11089-climatiseur-gree-g-boost-smart-inverter-tropicalise-26-000-btu.html)
+- Zoom: 3549.0 TND (https://zoom.com.tn/climatiseur/18334-climatiseur-gree-g-boost-smart-inverter-26000-btu-tropicalise-chaudfroid.html)

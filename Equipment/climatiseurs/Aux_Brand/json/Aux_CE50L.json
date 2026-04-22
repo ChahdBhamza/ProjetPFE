@@ -1,0 +1,27 @@
+{
+    "clean_title": "Aux Non Inverter (CE-50L)",
+    "brand": "Aux",
+    "normalized_reference": "CE50L",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657717205_355.jpg",
+    "description": "Chauffe Eau Électrique CHAFFOTEAUX - Type: Électrique - Capacité d'eau: 50 Litres - Réglage facile de la température de l?eau - Forme compacte avec un design élégant",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 449.0,
+            "raw_title": "CHAFFOTEAUX CHAUFFE EAU ÉLECTRIQUE 50 LITRES - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/chaffoteaux/chauffe-eau-electrique-chaffoteaux-50-litres",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657717205_355.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

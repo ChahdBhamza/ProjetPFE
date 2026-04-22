@@ -1,0 +1,17 @@
+PRODUCT NAME: Coala Non Inverter (V40M)
+BRAND: Coala
+REFERENCE: V40M
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: 2.5kg
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 79.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/ventilateur-coala-v40m-fixation-murale-blanc)

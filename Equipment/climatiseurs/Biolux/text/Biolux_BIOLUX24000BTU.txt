@@ -1,0 +1,18 @@
+PRODUCT NAME: Biolux Inverter 24000 BTU (BIOLUX 24000BTU)
+BRAND: Biolux
+REFERENCE: BIOLUX24000BTU
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/Froid
+Energy_Class: Unknown
+Gas_Type: R410a
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Int: 40 dB
+Warranty: 5 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 2949.0 TND (https://zoom.com.tn/climatiseur/13811-climatiseur-biolux-24000-btu-chaudfroid-tropical-smart.html)
+- Local_dataset: 2 949,000 DT TND (local)

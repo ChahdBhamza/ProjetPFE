@@ -1,0 +1,27 @@
+{
+    "clean_title": "Biolux Non Inverter (RB2503)",
+    "brand": "Biolux",
+    "normalized_reference": "RB2503",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721221431_630.jpg",
+    "description": "Puissance 2500W 11 éléments radiants Thermostat réglable Protection de surchauffe Interrupteur avec indicateur lumineux Roulette souple pour mouvement facile Cache câble Dimensions: 52* 16* 64,5 cm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 239.0,
+            "raw_title": "BIOLUX RADIATEUR BAIN D'HUILE 11 ÉLÉMENTS",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/radiateur-bain-d039huile-biolux-11-elements",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721221431_630.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

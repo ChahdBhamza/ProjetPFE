@@ -1,0 +1,19 @@
+PRODUCT NAME: Gree Inverter 18000 BTU (CL18AVDXF-K3DTA1)
+BRAND: Gree
+REFERENCE: CL18AVDXFK3DTA1
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: T3
+Gas_Type: R410A
+Dimensions: 970x347x257mm
+Weight: Not found
+Noise_Level: 27db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2699.0 TND (https://jumbo.tn/climatiseur/3811-climatiseur-gree-g-boost-inverter-smart-tropicalise-18000-btu-chaud-froid-blanc.html)
+- Zoom: 2699.0 TND (https://zoom.com.tn/climatiseur/18332-climatiseur-gree-g-boost-smart-inverter-18000-btu-tropicalise-chaudfroid.html)
+- Mega: 2835.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-inverter-18000-g-boost-tropicalise-smart)

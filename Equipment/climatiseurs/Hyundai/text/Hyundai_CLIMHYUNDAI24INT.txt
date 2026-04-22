@@ -1,0 +1,17 @@
+PRODUCT NAME: Hyundai On/Off 24000 BTU (CLIM-HYUNDAI-24INT)
+BRAND: Hyundai
+REFERENCE: CLIMHYUNDAI24INT
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: On/Off
+Mode: Chaud/Froid
+Energy_Class: Not found
+Gas_Type: 50 Hz et utilise le gaz 410 A . Il présente un niveau de bruit de 40
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 2 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 2829.0 TND (https://zoom.com.tn/climatiseur/15152-climatiseur-hyundai-24-000-btu-chaud-froid-onoff.html)

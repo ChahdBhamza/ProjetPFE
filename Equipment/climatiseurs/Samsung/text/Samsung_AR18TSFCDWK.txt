@@ -1,0 +1,18 @@
+PRODUCT NAME: Samsung Inverter 18000 BTU (AR18TSFCDWK)
+BRAND: Samsung
+REFERENCE: AR18TSFCDWK
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: 1055 x 299 x 215 mm | 880 x 638 x 310 mm
+Weight: 13.2 kg
+Noise_Level: 51 dba
+Warranty: 5 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 3299.0 TND (https://jumbo.tn/climatiseur/3442-climatiseur-samsung-18000-btu-inverter-chaud-froid-wifi-technologie-windfree.html)
+- Local_dataset: 3 699,000 DT TND (local)

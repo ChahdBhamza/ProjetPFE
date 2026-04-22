@@ -1,0 +1,17 @@
+PRODUCT NAME: Gree Non Inverter (CLIMEUR)
+BRAND: Gree
+REFERENCE: CLIMEUR
+CAPACITY: None BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 395 x 405 x 980mm
+Weight: Not found
+Noise_Level: 76db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 259.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climeur-mobile-air-cooler-40l-blanc)

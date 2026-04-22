@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Focus FC-24CH Inverter Tropicalisé 24000 BTU Chaud & Froid Blanc",
+    "brand": "Other",
+    "normalized_reference": "FC24CH",
+    "capacity_btu": 24000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Other/images/Other_FC24CH.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 899,000 DT",
+            "raw_title": "Climatiseur Focus FC-24CH Inverter Tropicalisé 24000 BTU Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

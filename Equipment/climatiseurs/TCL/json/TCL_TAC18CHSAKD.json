@@ -1,0 +1,27 @@
+{
+    "clean_title": "TCL Non Inverter 18000 BTU (TAC-18CHSA-KD)",
+    "brand": "TCL",
+    "normalized_reference": "TAC18CHSAKD",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1655158489_983.jpg",
+    "description": "Climatiseur TCL Chaud/Froid - Split - Modéle: TAC-18CHSA-KD - Capacité de Refroidissement: 18000 BTU   - Refrigerent: R410 - Superficie: entre 20 et 35 m² - Puissance absorbée: 1740 - Niveaux sonore: 52/48/44 - Dimensions: 900 x 280 x 202 mm - Poids: 38 Kg",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2099.0,
+            "raw_title": "TCL CLIMATISEUR 18000 BTU CHAUD - FROID - TAC-18CHSA-KD",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-18000-btu-chaud-froid-tac-18chsa-kd",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1655158489_983.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "900 x 280 x 202 mm",
+        "Weight": "38 kg",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

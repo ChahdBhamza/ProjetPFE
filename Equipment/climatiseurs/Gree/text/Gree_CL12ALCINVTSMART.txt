@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 12000 BTU (CL12ALC-INVT-SMART)
+BRAND: Gree
+REFERENCE: CL12ALCINVTSMART
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: 2
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 63 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1679.0 TND (https://jumbo.tn/climatiseur/3421-climatiseur-gree-12000btu-inverter-tropicalise-smart-chaud-froid.html)
+- Zoom: 1679.0 TND (https://zoom.com.tn/climatiseur/16613-climatiseur-gree-smart-inverter-12000-btu-tropicalise-r410a-chaud-froid.html)

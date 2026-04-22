@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Inverter 60000 BTU (CL60ALXL-K3DTC7A)",
+    "brand": "Gree",
+    "normalized_reference": "CL60ALXLK3DTC7A",
+    "capacity_btu": 60000,
+    "primary_image": "https://jumbo.tn/30967-home_default/climatiseur-armoire-gree-60-000-btu-technologie-smart-inverter.jpg",
+    "description": "Climatiseur Armoire GREE –\n60000 BTU/h Smart Inverter\n– Débit d’air :\n2 300 m³/h\n– Classe climatique :\nT3\n– Désertique (fonctionne jusqu’à 52 °C) – Capacité de refroidissement :\n14,0 kW\n– Capacité de chauffage :\n15,5 kW\n– Consommation électrique :\n5,6 kW (froid) / 6,0 kW (chaud)\n– Type de gaz réfrigérant : R410A – Niveau sonore :\n55 dB (unité intérieure) / 65 dB (unité extérieure)\n– Poids : 52 kg (unité intérieure) / 95 kg (unité extérieure) – Dimensions (HxLxP) : 1 935×600×380 mm (intérieure) / 1 333×952×414 mm (extérieure) – Garantie : 3 ans + 6 ans sur le compresseur INVERTER.",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 9199.0,
+            "raw_title": "CLIMATISEUR ARMOIRE GREE 60 000 BTU – TECHNOLOGIE SMART INVERTER",
+            "url": "https://jumbo.tn/climatiseur/11003-climatiseur-armoire-gree-60-000-btu-technologie-smart-inverter.html",
+            "image_url": "https://jumbo.tn/30967-home_default/climatiseur-armoire-gree-60-000-btu-technologie-smart-inverter.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "c",
+        "Gas_Type": "R410A",
+        "Dimensions": "935×600×380 mm | 333×952×414 mm",
+        "Weight": "52 kg",
+        "Noise_Level": "55 db | 65 db",
+        "Warranty": "3 Ans"
+    }
+}

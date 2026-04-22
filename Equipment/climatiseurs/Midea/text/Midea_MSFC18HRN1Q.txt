@@ -1,0 +1,18 @@
+PRODUCT NAME: Midea Non Inverter 18000 BTU (MSFC-18HRN1-Q)
+BRAND: Midea
+REFERENCE: MSFC18HRN1Q
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: 780 x 250 x 540 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2495.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-midea-split-18000-btu-chaud-et-froid-msfc-18hrn1-q)
+- Local_dataset: 2 199,000 DT TND (local)

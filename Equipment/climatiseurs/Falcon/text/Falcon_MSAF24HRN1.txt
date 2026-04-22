@@ -1,0 +1,17 @@
+PRODUCT NAME: Falcon Non Inverter 24000 BTU (MSAF-24HRN1)
+BRAND: Falcon
+REFERENCE: MSAF24HRN1
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: 3
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 46 db | 54db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2430.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-falcon-24000btu-chaud-froid)

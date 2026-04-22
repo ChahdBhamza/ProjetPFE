@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 48000 BTU (CL48ALXL-K3DTC7A)
+BRAND: Gree
+REFERENCE: CL48ALXLK3DTC7A
+CAPACITY: 48000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Not found
+Energy_Class: c
+Gas_Type: R410A
+Dimensions: 935×600×380 mm | 333×952×414 mm
+Weight: 52 kg
+Noise_Level: 55 db | 65 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 7299.0 TND (https://jumbo.tn/climatiseur/11002-climatiseur-armoire-gree-48-000-btu-technologie-smart-inverter.html)
+- Local_dataset: 7 299,000 DT TND (local)

@@ -1,0 +1,18 @@
+PRODUCT NAME: Biolux Non Inverter 24000 BTU (24000)
+BRAND: Biolux
+REFERENCE: 24000
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-biolux-24000-btu-chaud-froid)
+- Local_dataset: 2 899,000 DT TND (local)

@@ -1,0 +1,20 @@
+PRODUCT NAME: Westpoint Inverter 24000 BTU (WIX-24.LHC)
+BRAND: Westpoint
+REFERENCE: WIX24LHC
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: 1025x 320x 235mm | 860x 720x 320mm
+Weight: 14kg
+Noise_Level: 46
+Warranty: 5 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 3085.0 TND (https://jumbo.tn/climatiseur/8923-climatiseur-westpoint-inverter-24000-btu-chaud-froid.html)
+- Zoom: 3059.0 TND (https://zoom.com.tn/climatiseur/18452-climatiseur-westpoint-wix-24lhc-24000-btu-inverter-tropicalise-chaudfroid.html)
+- Mega: 2989.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-inverter-24000-btu-chaud-and-froid-blanc)
+- Local_dataset: 2 999,000 DT TND (local)

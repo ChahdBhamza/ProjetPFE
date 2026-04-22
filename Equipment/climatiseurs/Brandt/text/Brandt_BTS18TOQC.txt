@@ -1,0 +1,17 @@
+PRODUCT NAME: Brandt Non Inverter 18000 BTU (BTS18TOQC)
+BRAND: Brandt
+REFERENCE: BTS18TOQC
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: A
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2199.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/brandt/climatiseur-18000-btu-chaud-and-froid-blanc)

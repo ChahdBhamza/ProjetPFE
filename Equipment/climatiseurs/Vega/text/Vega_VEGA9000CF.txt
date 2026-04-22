@@ -1,0 +1,17 @@
+PRODUCT NAME: Vega Non Inverter 9000 BTU (VEGA-9000CF)
+BRAND: Vega
+REFERENCE: VEGA9000CF
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1299.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/vega/climatiseur-vega-9000-btu-chaud-froid)

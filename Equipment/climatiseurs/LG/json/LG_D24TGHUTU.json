@@ -1,0 +1,27 @@
+{
+    "clean_title": "LG Inverter 24000 BTU (D24TGH-UTU)",
+    "brand": "LG",
+    "normalized_reference": "D24TGHUTU",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1625141859_833.jpg",
+    "description": "Climatiseur LG DUALCOOL E LOOK - Capacité: 24000 BTU  - Mode: Chaud & Froid  - Dual Inverter Compressor - Purification de l'air - Nettoyage automatique - Autodiagnostic - Démarage à chaud - Niveau de bruit: Max. 41 dBA (Intérieur) / Max. 50 dBA (Extérieur) - Dimensions: 998 x 330 x 210 mm (Intérieur) / 870 x 655 x 320 mm (Extérieur) - Poids: 12.6 kg (Intérieur) / 46 kg (Extérieur) - Couleur: Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 3899.0,
+            "raw_title": "LG CLIMATISEUR DUAL INVERTER 24000 BTU CHAUD & FROID - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-lg-dual-inverter-24000-btu-chaud-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1625141859_833.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "998 x 330 x 210 mm | 870 x 655 x 320 mm",
+        "Weight": "12.6 kg",
+        "Noise_Level": "41 dba | 50 dba",
+        "Warranty": "Not found"
+    }
+}

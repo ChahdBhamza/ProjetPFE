@@ -1,0 +1,18 @@
+PRODUCT NAME: Sharp Inverter 12000 BTU (AY-XP12UHE)
+BRAND: Sharp
+REFERENCE: AYXP12UHE
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: Unknown
+Gas_Type: Not found
+Dimensions: 920 x 290 x 240 mm | 760 x 540 x 265 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2199.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/sharp/climatiseur-sharp-split-inverter-12000-btu-chaud-froid-silver)
+- Local_dataset: 1 899,000 DT TND (local)

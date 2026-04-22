@@ -1,0 +1,18 @@
+PRODUCT NAME: Unionaire Non Inverter 24000 BTU (ARTI24HRS)
+BRAND: Unionaire
+REFERENCE: ARTI24HRS
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1999.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/climatiseur-unionaire-smart-artify-24000btu-chaud-froid-blanc-arti24hrs)
+- Mega: 2099.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/climatiseur-unionaire-artify-24000-btu-blanc-arti24hrs)

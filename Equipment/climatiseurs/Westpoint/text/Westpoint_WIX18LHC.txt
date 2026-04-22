@@ -1,0 +1,20 @@
+PRODUCT NAME: Westpoint Inverter 18000 BTU (WIX-18.LHC)
+BRAND: Westpoint
+REFERENCE: WIX18LHC
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: 900x 220x 291mm | 780x 560x 270mm
+Weight: 11.5 kg
+Noise_Level: 46
+Warranty: 5 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2379.0 TND (https://jumbo.tn/climatiseur/8922-climatiseur-westpoint-inverter-18000-btu-chaud-froid.html)
+- Zoom: 2359.0 TND (https://zoom.com.tn/climatiseur/18456-climatiseur-westpoint-wix-18lhc-18000-btu-inverter-tropicalise-chaudfroid.html)
+- Mega: 2389.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-inverter-18000-btu-chaud-and-froid-blanc)
+- Local_dataset: 2 449,000 DT TND (local)

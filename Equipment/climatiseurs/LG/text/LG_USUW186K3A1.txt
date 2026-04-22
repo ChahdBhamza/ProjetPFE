@@ -1,0 +1,17 @@
+PRODUCT NAME: LG Inverter 24000 BTU (USUW186K3A1)
+BRAND: LG
+REFERENCE: USUW186K3A1
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud/froid
+Energy_Class: A
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 3999.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-lg-dual-inverter-24-000-btu-chaud-froid)

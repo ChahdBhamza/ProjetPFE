@@ -1,0 +1,18 @@
+PRODUCT NAME: Condor Inverter 9000 BTU (CS09-AL84T3)
+BRAND: Condor
+REFERENCE: CS09AL84T3
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud / froid
+Energy_Class: C
+Gas_Type: R410A
+Dimensions: 965 x 215 x 319 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1399.0 TND (https://jumbo.tn/climatiseur/11286-climatiseur-condor-9000-btu-alpha-inverter-super-tropical.html)
+- Local_dataset: 1 459,000 DT TND (local)

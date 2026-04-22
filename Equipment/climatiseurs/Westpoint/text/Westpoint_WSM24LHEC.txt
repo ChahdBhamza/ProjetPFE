@@ -1,0 +1,18 @@
+PRODUCT NAME: Westpoint Non Inverter 24000 BTU (WSM-24.LHEC)
+BRAND: Westpoint
+REFERENCE: WSM24LHEC
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: 1
+Gas_Type: R410A
+Dimensions: 845 x 363 x 702 mm
+Weight: 49 kg
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2999.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-chaud-froid-r410a-24000-btu)
+- Mega: 2999.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-24000-btu-chaud-froid-wsm-24-lhec)

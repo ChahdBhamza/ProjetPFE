@@ -1,0 +1,19 @@
+PRODUCT NAME: Coala Inverter 9000 BTU (SP09CF-INVT)
+BRAND: Coala
+REFERENCE: SP09CFINVT
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1219.0 TND (https://jumbo.tn/climatiseur/3411-climatiseur-coala-inverter-r410-chaud-froid-9000-btu.html)
+- Zoom: 1219.0 TND (https://zoom.com.tn/climatiseur/17722-climatiseur-coala-inverter-r410-chaud-froid-9000-btu.html)
+- Mega: 1199.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-coala-inverter-r410-chaud-froid-9000-btu)

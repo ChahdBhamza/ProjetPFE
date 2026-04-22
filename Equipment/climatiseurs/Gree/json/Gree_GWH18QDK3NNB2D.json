@@ -1,0 +1,27 @@
+{
+    "clean_title": "Gree Non Inverter 18000 BTU (GWH18QD-K3NNB2D)",
+    "brand": "Gree",
+    "normalized_reference": "GWH18QDK3NNB2D",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559357379_358.jpg",
+    "description": "Climatiseur GREE ON OFF Economique Classe energetique 1",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2199.0,
+            "raw_title": "GREE CLIMATISEUR 18000 BTU CH/F ON/OFF GWH18QD-K3NNB2D",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-18000-btu-ch-f-on-off-gwh18qd-k3nnb2d",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559357379_358.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

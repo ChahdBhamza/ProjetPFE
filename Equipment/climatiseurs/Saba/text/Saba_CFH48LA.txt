@@ -1,0 +1,19 @@
+PRODUCT NAME: Saba Non Inverter 48000 BTU (CFH-48LA)
+BRAND: Saba
+REFERENCE: CFH48LA
+CAPACITY: 48000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/ froid
+Energy_Class: 2
+Gas_Type: Not found
+Dimensions: 1059 x 577 x 453 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 5689.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/saba/climatiseur-armoire-48000-btu-chaud-et-froid-blanc)
+- Tunisianet: None TND (https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/65109-climatiseur-armoire-saba-cfh-48la-48000-btu-chaud-froid.html)
+- Local_dataset: 6 299,000 DT TND (local)

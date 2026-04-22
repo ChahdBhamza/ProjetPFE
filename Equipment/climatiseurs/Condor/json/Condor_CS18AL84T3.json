@@ -1,0 +1,34 @@
+{
+    "clean_title": "Condor Inverter 18000 BTU (CS18-AL84T3)",
+    "brand": "Condor",
+    "normalized_reference": "CS18AL84T3",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/32005-home_default/climatiseur-condor-18000-btu-alpha-inverter-super-tropical.jpg",
+    "description": "Climatiseur CONDOR INVERTER Tropicalisé -\nPuissance : 18000 BTU/H - Mode de refroidissement : Chaud / Froid -\nClasse Climatique : T3 - Type de Gaz : R410A - Dimensions : 965 x 215 x 319 mm - Smart : Non - Garantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2099.0,
+            "raw_title": "CLIMATISEUR CONDOR 18000 BTU ALPHA INVERTER SUPER TROPICAL",
+            "url": "https://jumbo.tn/climatiseur/11288-climatiseur-condor-18000-btu-alpha-inverter-super-tropical.html",
+            "image_url": "https://jumbo.tn/32005-home_default/climatiseur-condor-18000-btu-alpha-inverter-super-tropical.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 099,000 DT",
+            "raw_title": "Climatiseur Condor CS18-AL84T3 18000 BTU Alpha Smart Inverter Chaud Froid",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "C",
+        "Gas_Type": "R410A",
+        "Dimensions": "965 x 215 x 319 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans"
+    }
+}

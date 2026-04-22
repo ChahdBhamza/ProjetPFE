@@ -1,0 +1,27 @@
+{
+    "clean_title": "Hyundai Inverter 18000 BTU (HY2-18-INV)",
+    "brand": "Hyundai",
+    "normalized_reference": "HY218INV",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/25506-home_default/climatiseur-hyundai-inverter-18000-btu-chaud-froid-hy2-18inv.jpg",
+    "description": "Climatiseur HYUNDAI\nINVERTER\n- Capacité :\n18000 BTU/H\n- Mode :\nChaud et Froid\n- Classe Climatique :\nT3\n- Température opérationnelle maximale :\n16-52C°\n(En mode froid) - Température d'ambiance maximale :\n-15-24C°\n(En mode chaud) - Affichage électronique - Contrôle : Commande - Type de gaz :\nR410A\n- Niveau de bruit (unité intérieure) :\n58/44/38/29\ndB\n- Niveau de bruit (unité extérieure) :\n60 dB\n- Dimension Unité intérieure (LxHxP) :\n1010 x 315 x 220 mm\n, Unité Extérieure : 853 x 349 x 602 mm - Couleur : Blanc -\nGarantie 3ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2239.0,
+            "raw_title": "CLIMATISEUR HYUNDAI INVERTER 18000 BTU CHAUD / FROID / HY2-18.INV",
+            "url": "https://jumbo.tn/climatiseur/9333-climatiseur-hyundai-inverter-18000-btu-chaud-froid-hy2-18inv.html",
+            "image_url": "https://jumbo.tn/25506-home_default/climatiseur-hyundai-inverter-18000-btu-chaud-froid-hy2-18inv.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "C",
+        "Gas_Type": "R410A",
+        "Dimensions": "1010 x 315 x 220 mm | 853 x 349 x 602 mm",
+        "Weight": "Not found",
+        "Noise_Level": "29 db | 60 db",
+        "Warranty": "3 Ans"
+    }
+}

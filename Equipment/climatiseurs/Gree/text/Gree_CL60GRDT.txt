@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Inverter 60000 BTU (CL60GR-DT)
+BRAND: Gree
+REFERENCE: CL60GRDT
+CAPACITY: 60000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud & froid
+Energy_Class: A
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 9599.0 TND (https://jumbo.tn/climatiseur/11004-climatiseur-gree-60000-btu-inverter-gainable.html)
+- Mega: 9779.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-60000btu-inverter-gainable-cl60gr-dt)

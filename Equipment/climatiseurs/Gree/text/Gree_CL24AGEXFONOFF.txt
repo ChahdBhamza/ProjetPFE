@@ -1,0 +1,18 @@
+PRODUCT NAME: Gree Non Inverter 24000 BTU (CL24AGEXF-ONOFF)
+BRAND: Gree
+REFERENCE: CL24AGEXFONOFF
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: 63 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 2999.0 TND (https://jumbo.tn/climatiseur/3424-climatiseur-gree-24000btu-on-off-tropicalise-r410a-chaud-froid.html)
+- Zoom: 2999.0 TND (https://zoom.com.tn/climatiseur/17636-climatiseur-gree-inverter-24000-btu-on-off.html)

@@ -1,0 +1,17 @@
+PRODUCT NAME: Condor Inverter 24000 BTU (CS24-AL24T3)
+BRAND: Condor
+REFERENCE: CS24AL24T3
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud et froid
+Energy_Class: 3
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 3019.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/climatiseur-condor-alpha-inverter-24000btu-chaud-froid)

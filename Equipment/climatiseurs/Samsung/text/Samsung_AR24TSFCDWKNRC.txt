@@ -1,0 +1,18 @@
+PRODUCT NAME: Samsung Inverter 24000 BTU (AR24TSFCDWKNRC)
+BRAND: Samsung
+REFERENCE: AR24TSFCDWKNRC
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: 828 x 267 x 265 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 6599.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/samsung/climatiseur-samsung-24000-btu-digital-inverter)
+- Local_dataset: 4 199,000 DT TND (local)

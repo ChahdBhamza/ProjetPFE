@@ -1,0 +1,17 @@
+PRODUCT NAME: Midea Non Inverter 18000 BTU (MSAG11C-18HRN1-QC2)
+BRAND: Midea
+REFERENCE: MSAG11C18HRN1QC2
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud et froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 1030 x 221 x 313mm | 845 x 335 x 695 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2199.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/midea/climatiseur-split-midea-18000-btu-chaud-et-froid)

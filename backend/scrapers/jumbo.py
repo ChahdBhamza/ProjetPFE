@@ -46,7 +46,7 @@ class JumboScraper(BaseScraper):
                 product["title"] = title_tag.get_text(strip=True).upper()
                 product["brand"] = self.detect_brand(product["title"])
 
-            # 2. Price Discovery (JSON-LD + Meta + Scripts)
+            # 2. Price & Image Discovery (JSON-LD + Meta + Scripts)
             scripts = soup.find_all('script', type='application/ld+json')
             for script in scripts:
                 try:
@@ -60,6 +60,12 @@ class JumboScraper(BaseScraper):
                             if p: product["price"] = f"{p} TND"
                         sku = item.get('sku') or item.get('mpn')
                         if sku: product["specs"]["Reference"] = str(sku).upper()
+                        # Extract image from JSON-LD
+                        img_ld = item.get('image')
+                        if img_ld and product["image_url"] == "Not found":
+                            if isinstance(img_ld, list): img_ld = img_ld[0]
+                            if isinstance(img_ld, str) and img_ld.startswith("http"):
+                                product["image_url"] = img_ld
                         if product["price"] != "Not found": break
                 except: continue
 
@@ -69,13 +75,14 @@ class JumboScraper(BaseScraper):
                     val = price_meta.get('content', '0').replace(',', '.')
                     if float(val) > 0: product["price"] = f"{val} TND"
 
-            # 3. Image
-            img_tag = soup.select_one('.product-cover img, [itemprop="image"], #product-main-image')
-            if img_tag:
-                img_url = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('srcset', '').split(' ')[0]
-                if img_url:
-                    if not img_url.startswith("http"): img_url = "https://jumbo.tn" + img_url
-                    product["image_url"] = img_url
+            # 3. Image (fallback if JSON-LD didn't provide it)
+            if product["image_url"] == "Not found":
+                img_tag = soup.select_one('.elementor-carousel-image, .product-cover img, [itemprop="image"]')
+                if img_tag:
+                    img_url = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('srcset', '').split(' ')[0]
+                    if img_url:
+                        if not img_url.startswith("http"): img_url = "https://jumbo.tn" + img_url
+                        product["image_url"] = img_url
 
             # 4. Description
             # Scope to main product block to avoid extracting text from 'related products' miniatures

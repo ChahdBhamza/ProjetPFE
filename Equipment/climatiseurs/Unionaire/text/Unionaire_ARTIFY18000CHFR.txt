@@ -1,0 +1,17 @@
+PRODUCT NAME: Unionaire Non Inverter 18000 BTU (ARTIFY_18000_CH_FR)
+BRAND: Unionaire
+REFERENCE: ARTIFY18000CHFR
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/froid
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1149.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/unionaire-clim-artify-18000-ch-fr)

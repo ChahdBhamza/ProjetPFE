@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Armoire Biolux ECO36CF 36000BTU Chaud Froid - Blanc",
+    "brand": "Biolux",
+    "normalized_reference": "ECO36CF",
+    "capacity_btu": 36000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Biolux/images/Biolux_ECO36CF.jpg",
+    "description": "Local product: Armoire",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "5 449,000 DT",
+            "raw_title": "Climatiseur Armoire Biolux ECO36CF 36000BTU Chaud Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

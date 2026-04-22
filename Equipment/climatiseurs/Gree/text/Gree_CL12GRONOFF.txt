@@ -1,0 +1,19 @@
+PRODUCT NAME: Gree Non Inverter 12000 BTU (CL12GR-ONOFF)
+BRAND: Gree
+REFERENCE: CL12GRONOFF
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: 1
+Gas_Type: Not found
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1559.0 TND (https://jumbo.tn/climatiseur/10998-climatiseur-gree-12000btu-onoff-chaud-froid.html)
+- Zoom: 1629.0 TND (https://zoom.com.tn/climatiseur/8260-climatiseur-gree-12000-btu-on-off-tropicalise-chaudfroid-cl12aqcxb-onoff.html)
+- Mega: 1499.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-12000-btu-chaud-froid-on-off)

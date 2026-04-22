@@ -1,0 +1,41 @@
+{
+    "clean_title": "Gree Inverter 18000 BTU (CL18AVDXF-K3DTA1)",
+    "brand": "Gree",
+    "normalized_reference": "CL18AVDXFK3DTA1",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/31261-home_default/climatiseur-gree-g-boost-inverter-smart-tropicalise-18000-btu-chaud-froid-blanc.jpg",
+    "description": "Le Climatiseur Gree G-Boost Smart Inverter 18000 BTU Tropicalisé assure un confort optimal toute l’année, même dans les environnements à fortes températures. Grâce à la technologie Smart Inverter , il adapte automatiquement sa puissance pour offrir un fonctionnement silencieux , stable et économe en énergie . La fonction G-Boost permet d’atteindre rapidement la température souhaitée en augmentant temporairement la performance du compresseur , garantissant ainsi un refroidissement ou un chauffage rapide dès le démarrage. Ses modes chaud, froid, déshumidification et ventilation, combinés à des fonctionnalités pratiques comme minuterie programmable et auto‑diagnostic, garantissent une utilisation simple et efficace. Capacité : 18000 BTU / Mode : Chaud/Froid / Technologie : Smart Inverter / Fonction G‑Boost : refroidissement ou chauffage rapide (en 60 secondes ) / Classe climatique : T3 / Gaz réfrigérant : R410A / Tropicalisé : stable jusqu’à 50 °C / Longue distance de soufflage Jusqu’à 12 m / Minuterie programmable / Ultra silencieux : 27 dB / Auto-diagnostic intelligent / Nettoyage automatique / Affichage : LED / Connectivité : Wi‑Fi / Couleur : Blanc / Garantie : 3 ans + 6 ans sur le compresseur",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2699.0,
+            "raw_title": "CLIMATISEUR GREE G-BOOST INVERTER SMART TROPICALISÉ 18000 BTU CHAUD FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/3811-climatiseur-gree-g-boost-inverter-smart-tropicalise-18000-btu-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/31261-home_default/climatiseur-gree-g-boost-inverter-smart-tropicalise-18000-btu-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 2699.0,
+            "raw_title": "CLIMATISEUR GREE G-BOOST SMART INVERTER 18000 BTU TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18332-climatiseur-gree-g-boost-smart-inverter-18000-btu-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73364-large_default/climatiseur-gree-g-boost-smart-inverter-18000-btu-tropicalise-chaudfroid.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2835.0,
+            "raw_title": "GREE CLIMATISEUR INVERTER 18000 G-BOOST TROPICALISÉ SMART",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-inverter-18000-g-boost-tropicalise-smart",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721292578_547.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "T3",
+        "Gas_Type": "R410A",
+        "Dimensions": "970x347x257mm",
+        "Weight": "Not found",
+        "Noise_Level": "27db",
+        "Warranty": "3 Ans"
+    }
+}

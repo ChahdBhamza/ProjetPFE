@@ -1,0 +1,17 @@
+PRODUCT NAME: Climatiseur LG 24000 BTU Dual Inverter Artcool Chaud Froid (D24UAH)
+BRAND: LG
+REFERENCE: 24000
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Inverter
+Mode: Chaud-Froid
+Energy_Class: Unknown
+Gas_Type: Unknown
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Local_dataset: 5 299,000 DT TND (local)

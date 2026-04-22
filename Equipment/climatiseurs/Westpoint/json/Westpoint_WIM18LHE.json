@@ -1,0 +1,27 @@
+{
+    "clean_title": "Westpoint Inverter 18000 BTU (WIM-18.LHE)",
+    "brand": "Westpoint",
+    "normalized_reference": "WIM18LHE",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1546260549_757.jpg",
+    "description": "Climatiseur Westpoint Chaud & Froid R410A - 18000 BTU - Classe énergétique 1 - Intensité du courant froid/chaud: 7.1/6.7 A - Déshumidification: 1.4 litre/h - Débit d?air (L/M/H): 442/664/799 m3/h - Niveaux sonores (L/M/H): 30/37/44.5 Décibels - Dimensions (HxLxP): 770 x 300 x 555 mm - Poids: 36.5 Kg",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2399.0,
+            "raw_title": "WESTPOINT CLIMATISEUR 18000 BTU CHAUD/FROID R410A INVERTER WIM-18.LHE",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-18000-btu-chaud-froid-r410a-inverter",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1546260549_757.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R410A",
+        "Dimensions": "770 x 300 x 555 mm",
+        "Weight": "36.5 kg",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

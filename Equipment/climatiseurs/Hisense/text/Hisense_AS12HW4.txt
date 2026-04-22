@@ -1,0 +1,18 @@
+PRODUCT NAME: Hisense Non Inverter 12000 BTU (AS-12HW4)
+BRAND: Hisense
+REFERENCE: AS12HW4
+CAPACITY: 12000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/ froid
+Energy_Class: A++
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1479.0 TND (https://jumbo.tn/climatiseur/3426-climatiseur-hisense-12000-btu-chaud-froid.html)
+- Local_dataset: 1 589,000 DT TND (local)

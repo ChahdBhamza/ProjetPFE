@@ -1,0 +1,18 @@
+PRODUCT NAME: Saba Non Inverter 18000 BTU (SABW18C-IW)
+BRAND: Saba
+REFERENCE: SABW18CIW
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: Unknown
+Gas_Type: R410A
+Dimensions: 971x228x321 mm
+Weight: Not found
+Noise_Level: 44 db
+Warranty: 3 Ans
+
+=== AVAILABILITY & PRICING ===
+- Jumbo: 1849.0 TND (https://jumbo.tn/climatiseur/8708-climatiseur-saba-sabw18c-iw-18000-btu-froid-blanc.html)
+- Local_dataset: 1 849,000 DT TND (local)

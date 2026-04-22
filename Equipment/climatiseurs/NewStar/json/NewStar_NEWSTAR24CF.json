@@ -1,0 +1,27 @@
+{
+    "clean_title": "NewStar Non Inverter 24000 BTU (NEWSTAR-24CF)",
+    "brand": "NewStar",
+    "normalized_reference": "NEWSTAR24CF",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623315307_201.gif",
+    "description": "Climatiseur NEWSTAR-24CF - La consommation annuelle d?électricité : 786Kwh/an -  Gas réfrigérant R410a - Classe énergétique 2 - Dimension unité intérieure 790x205x270 - Afficheur LED / Mode veille",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2525.0,
+            "raw_title": "NEWSTAR CLIMATISEUR 24000 BTU CHAUD & FROID (NEWSTAR-24CF)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/newstar/climatiseur-newstar-24000-btu-chaud-froid-newstar-24cf",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623315307_201.gif"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "2",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found"
+    }
+}

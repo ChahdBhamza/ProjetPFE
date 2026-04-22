@@ -1,0 +1,17 @@
+PRODUCT NAME: Fresh Non Inverter 18000 BTU (FUFW18H)
+BRAND: Fresh
+REFERENCE: FUFW18H
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1749.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/fresh/climatiseur-18000-btu-chaud-froid-blanc)

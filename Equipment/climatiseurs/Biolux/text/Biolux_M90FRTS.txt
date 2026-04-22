@@ -1,0 +1,17 @@
+PRODUCT NAME: Biolux Non Inverter 9000 BTU (M-90FRTS)
+BRAND: Biolux
+REFERENCE: M90FRTS
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: Not found
+Weight: Not found
+Noise_Level: Not found
+Warranty: 5ans
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1149.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-biolux-tropicalise-9000btu-froid-smart-garantie-5ans)

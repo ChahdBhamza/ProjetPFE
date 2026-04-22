@@ -1,0 +1,18 @@
+PRODUCT NAME: Saba  18000 BTU (CSH-18HQB)
+BRAND: Saba
+REFERENCE: CSH18HQB
+CAPACITY: 18000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud/Froid
+Energy_Class: Not found
+Gas_Type: R410A
+Dimensions: 782 x 580 x 287 mm
+Weight: Not found
+Noise_Level: 45
+Warranty: 3 ans
+
+=== AVAILABILITY & PRICING ===
+- Zoom: 1929.0 TND (https://zoom.com.tn/climatiseur/17726-climatiseur-saba-18000-btu-chaudfroid-blanc.html)
+- Mega: 1849.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/saba/climatiseur-saba-18000-btu-chaudfroid)

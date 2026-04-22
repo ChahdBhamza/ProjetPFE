@@ -1,0 +1,17 @@
+PRODUCT NAME: Tornado Non Inverter 24000 BTU (TH-C24WEE)
+BRAND: Tornado
+REFERENCE: THC24WEE
+CAPACITY: 24000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Not found
+Energy_Class: Not found
+Gas_Type: Not found
+Dimensions: 1040 x 325 x 222 mm
+Weight: Not found
+Noise_Level: Not found
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 2299.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/tornado/climatiseur-tornado-24000btu-froid)

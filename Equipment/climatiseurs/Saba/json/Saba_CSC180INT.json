@@ -1,0 +1,27 @@
+{
+    "clean_title": "Saba Non Inverter 18000 BTU (CSC-180INT)",
+    "brand": "Saba",
+    "normalized_reference": "CSC180INT",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623315770_624.jpg",
+    "description": "Mode: 18000  Froid / Puissance 18000 btu / Design très moderne / Ultra Silencieuse / Démarrage avec balayage de la main / Compresseur à bas niveau sonore et haute efficacité / Tension: 220-240V / Fréquence: 50Hz / Dimensions: 700 x 542 x 266 mm / Surface appropriée: 40-60m²/ Débit d'air: 800m3/h / Niveau de bruit: 50 dB(A) /",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1985.0,
+            "raw_title": "SABA CLIMATISEUR 18000 BTU FROID ( CSC-180A)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/saba/climatiseur-saba-18000-btu-froid-csc-180a",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623315770_624.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "700 x 542 x 266 mm",
+        "Weight": "Not found",
+        "Noise_Level": "50 db",
+        "Warranty": "Not found"
+    }
+}

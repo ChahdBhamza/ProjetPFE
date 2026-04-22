@@ -17,7 +17,8 @@ class BaseScraper:
             "Saba", "Montblanc", "Biolux", "BOSCH", "Maxwell", "Westpoint", "Hisense", "Haier", 
             "Sharp", "Panasonic", "Toshiba", "Carrier", "Daikin", "Trane", "York", "Aux", "Iris", 
             "Brandt", "NewStar", "Vega", "Fresh", "Tornado", "Focus", "Coala", "Hyundai", 
-            "Comfee", "Orient", "General Gold", "Servicom", "Airwell", "Manta", "Sabra", "Galanz", "Indesit"
+            "Comfee", "Orient", "General Gold", "Servicom", "Airwell", "Manta", "Sabra", "Galanz", "Indesit",
+            "Falcon", "HGE", "Techwood", "Tristar", "Luxell", "Delonghi", "Chaffoteaux"
         ]
         self.standard_keys = [
             "Reference", "Model", "Capacity", "Technology", "Mode", 
@@ -50,6 +51,9 @@ class BaseScraper:
         for brand in self.known_brands:
             if re.search(rf'\b{re.escape(brand)}\b', title, re.I):
                 return brand
+        # Hyundai products sometimes only show model codes like HY2-xxxx
+        if re.search(r'\bHY2[-\s]', title, re.I):
+            return "Hyundai"
         return "Other"
 
     def clean_text(self, text):
@@ -92,6 +96,7 @@ class BaseScraper:
         t = self.clean_text(text).lower()
         
         desc_patterns = {
+            "Capacity": [r"([0-9]{4,5}\s*btu)" , r"capacit[ée]\s*(?::|->)?\s*([0-9]{4,5}\s*btu)"],
             "Gas_Type": [r"(r410a|r32|r22|gaz\s*r\d+)"],
             "Mode": [r"mode\s*(?::|->)?\s*(chaud\s*(?:&|/|et)\s*froid|froid|chaud)", r"(chaud\s*(?:&|/|et)\s*froid)"],
             "Voltage": [r"([0-9]{3}\s*(?:v|volt|hz)[a-z0-9\-/ \~]*?)"],
@@ -100,7 +105,7 @@ class BaseScraper:
             "Noise_Level": [r"([0-9]+\s*db[a]?)"],
             "Warranty": [r"garantie\s*(?::|->)?\s*([0-9]+\s*ans?)"],
             "Color": [r"couleur\s*(?::|->)?\s*([^/,\-\.\n]{3,20})", r"\b(blanc|noir|silver|gris)\b"],
-            "Energy_Class": [r"classe\s*énergétique\s*(?::|->)?\s*([a-z0-9+]+)"],
+            "Energy_Class": [r"classe\s*[eé]nerg[eé]tique\s*(?::|->)?\s*([a-z0-9+]+)"],
             "Air_Flow": [r"débit\s*d.air\s*(?:intérieur)?\s*(?::|->)?\s*([0-9,.]+\s*m.?.h)"],
             "Dehumidification": [r"élimination\s*de\s*l.humidité\s*(?::|->)?\s*([0-9.]+\s*litres?/h)"],
             "Max_Temp_Hot": [r"température\s*ambiante\s*(?::|->)?\s*([^.\n]+)"]

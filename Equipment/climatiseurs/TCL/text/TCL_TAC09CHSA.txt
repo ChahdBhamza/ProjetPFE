@@ -1,0 +1,18 @@
+PRODUCT NAME: TCL Non Inverter 9000 BTU (TAC-09CHSA)
+BRAND: TCL
+REFERENCE: TAC09CHSA
+CAPACITY: 9000 BTU
+
+=== TECHNICAL SPECIFICATIONS ===
+Technology: Non Inverter
+Mode: Chaud & froid
+Energy_Class: A+
+Gas_Type: Not found
+Dimensions: 777 x 250 x 205 mm
+Weight: Not found
+Noise_Level: 24 db
+Warranty: Not found
+
+=== AVAILABILITY & PRICING ===
+- Mega: 1349.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-9000-btu-chaud-froid)
+- Mega: 1449.0 TND (https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-9000-btu-chaud-froid-garantie-3-ans)

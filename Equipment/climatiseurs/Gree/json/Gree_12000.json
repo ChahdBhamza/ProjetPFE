@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Gree Tropicalisé Inverter Smart 12000 BTU Chaud Froid Blanc",
+    "brand": "Gree",
+    "normalized_reference": "12000",
+    "capacity_btu": 12000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_12000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 679,000 DT",
+            "raw_title": "Climatiseur Gree Tropicalisé Inverter Smart 12000 BTU Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}
