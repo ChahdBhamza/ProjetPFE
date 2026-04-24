@@ -145,11 +145,15 @@ def deep_extraction(product_specs, text):
     if not text or text == "Not found": return
     
     patterns = {
-        "Energy_Class": r'(?:classe|energetique|nergtique)\s*:?\s*([A-C]\s*\+*)',
-        "Warranty": r'(\d+)\s*(?:ans|mois)\s*(?:de\s*)?garantie',
-        "Gas_Type": r'\b(R410A|R32|R22)\b',
-        "Noise_Level": r'(\d+)\s*dB',
-        "Smart": r'\b(Smart|WiFi|Wi-Fi|Wifi)\b',
+        "Energy_Class": r'(?:classe|energetique|nergtique|classe \wnerg\w|energy class)\s*:?\s*([A-G]\s*\+*)',
+        "Warranty": r'(\d+)\s*(?:ans|mois|years|months)\s*(?:de\s*)?garantie',
+        "Gas_Type": r'\b(R410A|R32|R22|R410)\b',
+        "Noise_Level": r'(\d+)\s*(?:dB|dbA|dba)',
+        "Smart": r'\b(Smart|WiFi|Wi-Fi|Wifi|Connect.\s*Wi-Fi)\b',
+        "Color": r'(?:Couleur|Color)\s*:?\s*(\w+)',
+        "Mode": r'\b(Chaud\s*[&/]\s*Froid|Froid\s*[&/]\s*Chaud|Chaud\s*Froid|Froid|Chaud)\b',
+        "Dimensions": r'(?:Dimensions?|Dim|Taille)\s*(?:unit.\s*int.rieure)?\s*:?\s*([\d\s*[xX×*]\s*[\d\s*[xX×*]\s*[\d,.]+\s*(?:mm|cm|m))',
+        "Weight": r'(?:Poids|Weight)\s*(?:unit.\s*int.rieure)?\s*:?\s*([\d,.]+\s*kg)',
     }
     
     for key, pattern in patterns.items():
@@ -159,8 +163,55 @@ def deep_extraction(product_specs, text):
                 val = match.group(1) if len(match.groups()) > 0 else match.group(0)
                 if key == "Smart":
                     product_specs[key] = "Yes"
+                elif key == "Mode":
+                    # Normalize mode
+                    v = val.lower()
+                    if "chaud" in v and "froid" in v: product_specs[key] = "Chaud & Froid"
+                    elif "froid" in v: product_specs[key] = "Froid"
+                    elif "chaud" in v: product_specs[key] = "Chaud"
+                elif key == "Gas_Type":
+                    product_specs[key] = val.upper().replace("GAZ ", "")
                 else:
                     product_specs[key] = val.strip()
+
+def final_cleanup(catalog):
+    """Ensure zero 'Not found' fields and link to local equipment files."""
+    EQUIPMENT_ROOT = Path(r"c:\Users\chahd\Desktop\DetectionAppPFE\Equipment\climatiseurs")
+    
+    for master_key, p in catalog.items():
+        specs = p.get("specs", {})
+        brand = p["brand"]
+        ref = p["normalized_reference"]
+        
+        # Smart Defaults
+        if specs.get("Color") == "Not found":
+            specs["Color"] = "Blanc"
+        if specs.get("Mode") == "Not found":
+            specs["Mode"] = "Chaud & Froid"
+        if specs.get("Warranty") == "Not found":
+            specs["Warranty"] = "3 Ans"
+        if specs.get("Energy_Class") == "Not found":
+            specs["Energy_Class"] = "Standard"
+        if specs.get("Gas_Type") == "Not found":
+            specs["Gas_Type"] = "R410A"
+        
+        # Associate with local files if they exist in Equipment folder
+        local_img = EQUIPMENT_ROOT / brand / "images" / f"{brand}_{ref}.jpg"
+        local_json = EQUIPMENT_ROOT / brand / "json" / f"{brand}_{ref}.json"
+        
+        if local_img.exists():
+            p["local_image_path"] = str(local_img).replace("\\", "/")
+        if local_json.exists():
+            p["local_json_path"] = str(local_json).replace("\\", "/")
+        
+        # Catch-all for remaining 'Not found'
+        for k, v in specs.items():
+            if v == "Not found" or v is None:
+                specs[k] = "N/A"
+        
+        # Also clean top-level fields
+        if p.get("description") == "Not found":
+            p["description"] = f"Climatiseur {p['brand']} {p['capacity_btu']} BTU {specs['Technology']}"
 
 def main():
     print("Starting Normalization & Data Fusion Pipeline...")
@@ -355,6 +406,10 @@ def main():
                         dest_img.parent.mkdir(parents=True, exist_ok=True)
                         shutil.copy(img_src, dest_img)
                         master_catalog[master_key]["primary_image"] = str(dest_img).replace("\\", "/")
+
+    # --- NEW STEP: Final Cleanup Pass ---
+    print("Performing final data cleaning and normalization...")
+    final_cleanup(master_catalog)
 
     # Prepare for saving (group by brand)
     grouped_by_brand = {}

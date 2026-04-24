@@ -25,16 +25,35 @@ class LocalVLMService:
         return buffered.getvalue()
 
     def extract_specs(self, pil_image):
-        """Ultra-Fast Extraction using reduced resolution and short prompt"""
+        """Enhanced Extraction for RAG: Captures Brand, BTU, Model, and Tech features"""
         img_bytes = self._img_to_bytes(pil_image)
         
-        # Highly optimized prompt for speed + accuracy
-        prompt = """Identify the air conditioner BRAND logo in this image (e.g., IRIS, LG, Condor, Gree, etc.). 
-Look for tiny logos or stylized letters. 
-Return ONLY a valid JSON object: {"brand": "detected_name"}"""
+        # Comprehensive expert-level prompt for high-precision extraction
+        prompt = """You are an expert product recognition system specialized in air conditioning units.
+Carefully analyze the provided image and extract the following information with high precision.
+
+EXTRACTION RULES:
+- Prioritize text visible on physical stickers, labels, or embossed markings over visual inference.
+- If a field is not clearly visible or confidently identifiable, return null — do NOT guess.
+- For brand detection: look for logos, wordmarks, or model codes that imply a manufacturer.
+  Do not limit yourself to a known list — extract whatever brand is present.
+- For BTU: common values are 9000, 12000, 18000, 24000, 36000 — but extract the exact value if visible.
+- For model: extract full alphanumeric codes or series names exactly as printed.
+- For technology: classify as "Inverter" or "On/Off" based on labels or visual cues.
+- For color: describe the main chassis color (e.g., White, Silver, Black, Beige).
+- Confidence: your overall certainty across all fields (0.0 = no data, 1.0 = fully legible).
+
+Return ONLY a valid JSON object, with no explanation or markdown:
+{
+  "brand": "string or null",
+  "btu": "string or null",
+  "model": "string or null",
+  "inverter": true | false | null,
+  "color": "string or null",
+  "confidence": 0.0
+}"""
         
         try:
-            # options and format="json" help ensure the model finishes fast and correctly
             response = ollama.chat(
                 model=self.model_name,
                 messages=[{
@@ -43,31 +62,40 @@ Return ONLY a valid JSON object: {"brand": "detected_name"}"""
                     'images': [img_bytes]
                 }],
                 options={
-                    "num_predict": 20,   # Stop after 20 words (enough for brand)
-                    "num_ctx": 1024      # Smaller context is faster
+                    "num_predict": 150,  # Increased for more detailed info
+                    "temperature": 0.1,  # Low temperature for extraction accuracy
+                    "num_ctx": 2048
                 }
             )
             
             raw_response = response.get("message", {}).get("content", "").strip()
             print(f"[LocalVLM] Raw Output: {raw_response}")
             
-            # Find JSON
+            # Extract JSON from potential markdown wrappers
             start = raw_response.find("{")
             end = raw_response.rfind("}")
             if start != -1 and end != -1:
                 data = json.loads(raw_response[start:end+1])
+                # Ensure keys exist for downstream compatibility
+                for key in ["brand", "btu", "model", "inverter"]:
+                    if key not in data: data[key] = None
                 return data
             
-            # Keyword Fallback
-            for brand in ["LG", "Samsung", "Condor", "IRIS", "Gree", "TCL", "Midea"]:
+            # Keyword Fallback (More robust)
+            detected = {"brand": None, "btu": None, "model": None, "inverter": None}
+            for brand in ["LG", "Samsung", "Condor", "IRIS", "Gree", "TCL", "Midea", "Aux", "Biolux", "Brandt", "Haier"]:
                 if brand.lower() in raw_response.lower():
-                    return {"brand": brand}
+                    detected["brand"] = brand
+                    break
+            
+            if "inverter" in raw_response.lower():
+                detected["inverter"] = True
                 
-            return {"brand": "Unknown"}
+            return detected
             
         except Exception as e:
             print(f"[LocalVLM] Library Error: {e}")
-            return {"brand": "Unknown", "btu": "Unknown", "is_inverter": False, "raw_text": str(e)}
+            return {"brand": "Unknown", "btu": "Unknown", "inverter": False, "raw_text": str(e)}
 
     def verify_match(self, pil_image, db_match):
         """Verify if the photo matches the database retrieved data locally"""

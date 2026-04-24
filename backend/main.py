@@ -12,6 +12,7 @@ from app.services.vision_rag_service import VisionRAGService
 from app.services.web_search_service import WebSearchService
 from app.services.local_vlm_service import LocalVLMService
 from app.services.ocr_service import OCRService
+from app.services.openai_rag_service import OpenAIRAGService
 from app.api.endpoints import router as api_router, init_services
 
 # 1. Initialize FastAPI
@@ -27,19 +28,21 @@ vision_service = None
 web_service = None
 local_vlm = None
 ocr_service = None
+openai_service = None
 
 # ... logic ...
 
 # 4. Startup Logic
 @app.on_event("startup")
 async def startup_event():
-    global embedder, vector_store, vision_service, web_service, local_vlm, ocr_service
+    global embedder, vector_store, vision_service, web_service, local_vlm, ocr_service, openai_service
     
     print("[Main] Starting services...")
     embedder = CLIPEmbedder()
     vector_store = VectorStore(path="qdrant_db")
     vision_service = VisionRAGService()
     web_service = WebSearchService()
+    openai_service = OpenAIRAGService()
     
     # Optional Local VLM
     try:
@@ -58,7 +61,7 @@ async def startup_event():
         ocr_service = None
     
     # Inject into the router
-    init_services(embedder, vector_store, vision_service, web_service, local_vlm, ocr_service)
+    init_services(embedder, vector_store, vision_service, web_service, local_vlm, ocr_service, openai_service)
     
     # Build the database if empty
     base_dir = Path("../dataequipment/climatiseurs").resolve()

@@ -72,7 +72,14 @@ def main():
                     "tech": product.get("specs", {}).get("Technology"),
                     "mode": product.get("specs", {}).get("Mode"),
                     "smart": product.get("specs", {}).get("Smart"),
-                    "color": product.get("specs", {}).get("Color")
+                    "color": product.get("specs", {}).get("Color"),
+                    "energy_class": product.get("specs", {}).get("Energy_Class"),
+                    "gas_type": product.get("specs", {}).get("Gas_Type"),
+                    "dimensions": product.get("specs", {}).get("Dimensions"),
+                    "weight": product.get("specs", {}).get("Weight"),
+                    "noise_level": product.get("specs", {}).get("Noise_Level"),
+                    "warranty": product.get("specs", {}).get("Warranty"),
+                    "description": product.get("description")
                 }
 
                 # Generate a unique ID for this point

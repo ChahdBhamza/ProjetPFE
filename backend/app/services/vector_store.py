@@ -19,6 +19,30 @@ class VectorStore:
                 vectors_config=VectorParams(size=512, distance=Distance.COSINE),
             )
             print(f"Collection '{collection_name}' created")
+            
+            # Configure Full-Text Search Indexes for better RAG accuracy
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="clean_title",
+                field_schema=models.TextIndexParams(
+                    type="text",
+                    tokenizer=models.TokenizerType.WORD,
+                    min_token_len=2,
+                    max_token_len=15,
+                    lowercase=True,
+                )
+            )
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="normalized_reference",
+                field_schema=models.TextIndexParams(
+                    type="text",
+                    tokenizer=models.TokenizerType.WORD,
+                    min_token_len=2,
+                    max_token_len=15,
+                    lowercase=True,
+                )
+            )
         except Exception:
             # Collection likely already exists
             print(f"Using existing collection '{collection_name}'")
@@ -67,6 +91,61 @@ class VectorStore:
             query_filter=query_filter,
             limit=limit
         ).points
+
+    def keyword_search(self, text_query, limit=3):
+        """Perform exact keyword matching on titles and references"""
+        return self.client.query_points(
+            collection_name=self.collection_name,
+            query=None, # No vector search, just filtering
+            query_filter=models.Filter(
+                should=[
+                    models.FieldCondition(
+                        key="clean_title",
+                        match=models.MatchText(text=text_query)
+                    ),
+                    models.FieldCondition(
+                        key="normalized_reference",
+                        match=models.MatchText(text=text_query)
+                    )
+                ]
+            ),
+            limit=limit
+        ).points
+
+    def hybrid_search(self, query_vector, text_query, limit=3, brand_filter=None, btu_filter=None):
+        """Combine Vector Search and Manual Keyword Reranking for maximum RAG accuracy"""
+        # 1. Get a larger pool of vector results (e.g., top 20)
+        vector_results = self.search(query_vector, limit=20, brand_filter=brand_filter, btu_filter=btu_filter)
+        
+        if not text_query:
+            return vector_results[:limit]
+            
+        # 2. Manual Reranking based on text_query (OCR extracted text)
+        # We split the OCR text into keywords to find matches
+        keywords = [k.lower() for k in text_query.replace("\n", " ").split() if len(k) > 2]
+        
+        scored_results = []
+        for res in vector_results:
+            payload = res.payload
+            title = payload.get("clean_title", "").lower()
+            ref = payload.get("normalized_reference", "").lower()
+            desc = payload.get("description", "").lower()
+            
+            # Count how many keywords match
+            match_count = 0
+            for kw in keywords:
+                if kw in title or kw in ref or kw in desc:
+                    match_count += 1
+            
+            # Boost score based on matches
+            # A single keyword match is a strong signal for AC models
+            boost = match_count * 0.5
+            res.score = res.score + boost
+            scored_results.append(res)
+            
+        # 3. Sort and return top N
+        scored_results.sort(key=lambda x: x.score, reverse=True)
+        return scored_results[:limit]
 
     def persist(self):
         """Qdrant local storage persists automatically on every upsert, but we can keep this for compatibility"""
