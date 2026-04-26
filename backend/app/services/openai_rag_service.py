@@ -80,31 +80,31 @@ class OpenAIRAGService:
             return {"error": str(e), "is_match_verified": False}
 
     def identify_from_raw_image(self, image_data):
-        """Pre-Search Visual Identification to guide the RAG filters"""
+        """Pure Visual Identification for RAG filtering"""
         base64_image = self._encode_image(image_data)
         
-        prompt = """You are an expert product recognition system specialized in air conditioning units.
-Carefully analyze the provided image and extract the following information with high precision.
+        prompt = """You are an Expert HVAC Forensic Analyst. Your task is to decode the technical specifications from the image.
 
-EXTRACTION RULES:
-- Prioritize text visible on physical stickers, labels, or embossed markings over visual inference.
-- If a field is not clearly visible or confidently identifiable, return null — do NOT guess.
-- For brand detection: look for logos, wordmarks, or model codes that imply a manufacturer.
-  Do not limit yourself to a known list — extract whatever brand is present.
-- For BTU: common values are 9000, 12000, 18000, 24000, 36000 — but extract the exact value if visible.
-- For model: extract full alphanumeric codes or series names exactly as printed.
-- For technology: classify as "Inverter" or "On/Off" based on labels or visual cues.
-- For color: describe the main chassis color (e.g., White, Silver, Black, Beige).
-- Confidence: your overall certainty across all fields (0.0 = no data, 1.0 = fully legible).
+EXTRACTION STRATEGY:
+1. BRAND: Identify the manufacturer (e.g., GREE, LG, Samsung, Condor, Iris). Look for stylized logos or embossed text.
+2. BTU: Extract capacity (9, 12, 18, 24) or decode from model strings.
+3. MODEL REFERENCE: Extract the alphanumeric reference exactly as printed on the label.
+4. SERIES: Identify marketing series names (e.g., 'Artcool', 'Pular').
 
-Return ONLY a valid JSON object, with no explanation or markdown:
+STRICT RULES:
+- Focus on pixel-perfect reading of labels and logos.
+- If the brand is not 100% identifiable, return null. DO NOT GUESS.
+- Return ONLY JSON.
+
+JSON STRUCTURE:
 {
-  "brand": "string or null",
-  "btu": "string or null",
-  "model": "string or null",
-  "inverter": true | false | null,
-  "color": "string or null",
-  "confidence": 0.0
+  "brand": "string | null",
+  "btu": "string | null",
+  "model_reference": "string | null",
+  "series_name": "string | null",
+  "technology": "string | null",
+  "confidence": 0.0,
+  "visual_markers": ["list labels found"]
 }"""
         try:
             response = self.client.chat.completions.create(
@@ -128,4 +128,4 @@ Return ONLY a valid JSON object, with no explanation or markdown:
             return json.loads(response.choices[0].message.content)
         except Exception as e:
             print(f"[OpenAI RAG] Raw identification failed: {e}")
-            return {"brand": None, "model": None, "btu": None}
+            return {"brand": None, "model_reference": None, "btu": None}

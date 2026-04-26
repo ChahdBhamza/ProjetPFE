@@ -27,6 +27,23 @@ def init_services(embedder, vector_store, vision_service, web_service, local_vlm
     _ocr_service = ocr_service
     _openai_service = openai_service
 
+def normalize_btu(btu_str):
+    """Normalize '12' or '12k' to '12000' for reliable DB filtering"""
+    if not btu_str or btu_str == "null" or btu_str == "None": 
+        return None
+    import re
+    # Extract numbers
+    nums = re.findall(r'\d+', str(btu_str))
+    if not nums: return None
+    val = int(nums[0])
+    # If they said '12' or '18', convert to '12000'
+    if val in [9, 12, 18, 24, 30, 36, 48, 60]:
+        return str(val * 1000)
+    # If they said '12000', return as is
+    if val >= 7000:
+        return str(val)
+    return str(val)
+
 @router.post("/search")
 async def search_endpoint(
     file: UploadFile = File(...),
@@ -37,40 +54,41 @@ async def search_endpoint(
         contents = await file.read()
         image = Image.open(BytesIO(contents))
         
-        # --- IMPROVED HYBRID SEARCH LOGIC ---
-        # 1. Fast OCR pass to extract keywords (for exact model/brand matching)
-        ocr_text = ""
-        try:
-            classic_ocr = ClassicOCRService()
-            ocr_result = classic_ocr.process_image(image)
-            ocr_text = ocr_result.get("raw_text", "")
-            print(f"[Backend] OCR Keywords extracted: {ocr_text[:50]}...")
-        except Exception as e:
-            print(f"[Backend] OCR keyword extraction failed: {e}")
-
         # 2. Embed the image
         query_vector = _embedder.embed_image(image)
         
-        # 3. Apply AI Routing / Pre-filtering
+        # 3. Apply AI Routing / Pre-filtering (Pure VLM Mode)
         v_brand = None
         v_btu = None
         local_vlm_analysis = {"status": "AI Pre-filtering Disabled"}
+        ocr_text = "N/A (VLM-Only Mode)"
 
         # OPTION A: Enhanced GPT-4o Pre-filtering (High Accuracy)
         if use_openai and _openai_service:
-            print("[Endpoints] Using GPT-4o for Pre-Search routing...")
+            print("[Endpoints] Using GPT-4o for Pre-Search routing (Pure VLM)...")
             openai_prediction = _openai_service.identify_from_raw_image(contents)
             v_brand = openai_prediction.get("brand")
-            v_btu = openai_prediction.get("btu")
-            local_vlm_analysis = openai_prediction # Reuse for UI display
+            v_btu = normalize_btu(openai_prediction.get("btu"))
+            local_vlm_analysis = openai_prediction 
             print(f"[Endpoints] GPT-4o Predicted: Brand={v_brand}, BTU={v_btu}")
+            print(f"[DEBUG] Raw OpenAI Perception: {json.dumps(openai_prediction, indent=2)}")
 
-        # OPTION B: Local VLM Pre-filtering (Edge Mode)
+        # OPTION B: Gemini Pre-filtering (Google AI)
+        elif not use_openai and not use_vlm and _vision_service:
+            print("[Endpoints] Using Gemini for Pre-Search routing...")
+            gemini_prediction = _vision_service.identify_from_raw_image(contents)
+            v_brand = gemini_prediction.get("brand")
+            v_btu = normalize_btu(gemini_prediction.get("btu"))
+            local_vlm_analysis = gemini_prediction
+            print(f"[Endpoints] Gemini Predicted: Brand={v_brand}, BTU={v_btu}")
+            print(f"[DEBUG] Raw Gemini Perception: {json.dumps(gemini_prediction, indent=2)}")
+
+        # OPTION C: Local VLM Pre-filtering (Edge Mode)
         elif use_vlm and _local_vlm:
             print("[Backend] Using Local Edge-AI for Brand Routing...")
             local_vlm_analysis = _local_vlm.extract_specs(image)
             v_brand = local_vlm_analysis.get("brand")
-            v_btu = local_vlm_analysis.get("btu")
+            v_btu = normalize_btu(local_vlm_analysis.get("btu"))
 
         # 4. Core Hybrid Search (Semantic + Keywords + AI Filters)
         matches = _vector_store.hybrid_search(
@@ -137,6 +155,7 @@ async def search_endpoint(
 
         return {
             "success": True,
+            "raw_ai_perception": local_vlm_analysis, # <-- WHAT GEMINI SEES RAW
             "vector_match": {
                 "item": best_match,
                 "confidence": similarity_score

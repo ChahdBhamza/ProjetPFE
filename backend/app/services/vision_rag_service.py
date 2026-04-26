@@ -122,15 +122,30 @@ class VisionRAGService:
                         break # Move to next model
         
     def identify_from_raw_image(self, image_data):
-        """Pure Visual Identification (Zero DB)"""
-        prompt = """
-        Analyze this air conditioner image. 
-        1. Identify the Brand (LG, Samsung, etc).
-        2. Extract the specific Model Number or Series name.
-        3. Estimate the BTU capacity if visible.
+        """High-Precision Visual Identification for RAG filtering"""
+        # Using Pro model for better logo/text reading accuracy
+        model_name = 'gemini-1.5-pro' 
         
-        Return ONLY a JSON: {"brand": "...", "model": "...", "btu": "..."}
-        """
+        prompt = """You are a Forensic HVAC Logo & Brand Analyst.
+Your mission is to identify the BRAND of an air conditioner with 100% precision to guide a database search.
+
+STRICT PROTOCOL:
+1. LOGO INSPECTION: Look specifically for brand wordmarks (Samsung, Gree, LG, Condor, Midea). These are usually in the center or bottom-right of the indoor unit.
+2. TEXT VERIFICATION: Do NOT guess based on the white plastic shape. Many brands use the same chassis. You must find the literal text or a unique stylized logo.
+3. BRAND LIST: Look for common brands: Samsung (rounded text), Gree (stylized 'G'), LG (face logo), Condor (bold text).
+4. BTU DECODING: Look for numbers like '9', '12', '18', '24' on side stickers or in model codes.
+
+Return ONLY JSON:
+{
+  "brand": "string | null",
+  "btu": "string | null",
+  "model_reference": "string | null",
+  "technology": "Inverter" | "On/Off" | null,
+  "confidence": 0.0-1.0,
+  "analysis": "Describe the EXACT visual evidence (e.g., 'Saw the Samsung logo in the center')"
+}
+
+If you are not 80% sure about the brand, return "brand": null."""
         try:
             # Correctly wrap the image bytes
             image_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")

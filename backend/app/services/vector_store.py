@@ -76,9 +76,11 @@ class VectorStore:
             ))
             
         if btu_filter and btu_filter != "Unknown":
-            conditions.append(models.FieldCondition(
-                key="btu",
-                match=models.MatchValue(value=btu_filter)
+            conditions.append(models.Filter(
+                should=[
+                    models.FieldCondition(key="btu", match=models.MatchValue(value=btu_filter)),
+                    models.FieldCondition(key="capacity_btu", match=models.MatchValue(value=btu_filter))
+                ]
             ))
             
         if conditions:
