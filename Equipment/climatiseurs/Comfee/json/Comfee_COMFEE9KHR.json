@@ -1,0 +1,30 @@
+{
+    "clean_title": "Comfee  9000 BTU (COMFEE-9KHR)",
+    "brand": "Comfee",
+    "normalized_reference": "COMFEE9KHR",
+    "capacity_btu": 9000,
+    "primary_image": "https://zoom.com.tn/62122-large_default/climatiseur-comfee-smart-9000-btu-chaudfroid-comfee-9khr.jpg",
+    "description": "Climatiseur Comfee 9000BTU SMART Chaud-Froid / Capacité: 9000 BTU / Puissance absorbée mode Froid : 823 / Puissance absorbée mode Chaud : 726 / Capacité en mode chaud (Btu/h) : 8700 / Capacité électrique mode Froid(A) : 3,65 / Capacité électrique mode chaud (B) 3,22 / Connectivité: WIFI / Couleur: Blanc / Dimensions : 805 x 194 x 285mm / Garantie: 5 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1549.0,
+            "raw_title": "CLIMATISEUR COMFEE SMART 9000 BTU  CHAUD/FROID (COMFEE-9KHR)",
+            "url": "https://zoom.com.tn/climatiseur/15382-climatiseur-comfee-smart-9000-btu-chaudfroid-comfee-9khr.html",
+            "image_url": "https://zoom.com.tn/62122-large_default/climatiseur-comfee-smart-9000-btu-chaudfroid-comfee-9khr.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "5 ans",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Comfee/images/Comfee_COMFEE9KHR.jpg"
+}

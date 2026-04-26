@@ -1,0 +1,37 @@
+{
+    "clean_title": "Gree Inverter 60000 BTU (CL60GR-DT)",
+    "brand": "Gree",
+    "normalized_reference": "CL60GRDT",
+    "capacity_btu": 60000,
+    "primary_image": "https://jumbo.tn/30970-home_default/climatiseur-gree-60000-btu-inverter-gainable.jpg",
+    "description": "Climatiseur Gree Inverter Gainable\n-\nCapacité\n: 60000 BTU -\nMode\n: Chaud & Froid - Classe énergétique : A - Type de gaz : 410 A - Pression statique réglable jusqu'à : 200 Pa pour des réseaux plus longs - Tous les composants sont Inverter à haut rendement et économie d'énergie -  Le ventilateur se règle en fonction de la pression statique du gainable installé -\nCouleur\n: Blanc -\nGarantie\n: 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 9599.0,
+            "raw_title": "CLIMATISEUR GREE 60000 BTU INVERTER GAINABLE",
+            "url": "https://jumbo.tn/climatiseur/11004-climatiseur-gree-60000-btu-inverter-gainable.html",
+            "image_url": "https://jumbo.tn/30970-home_default/climatiseur-gree-60000-btu-inverter-gainable.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 9779.0,
+            "raw_title": "GREE CLIMATISEUR 60000BTU INVERTER GAINABLE (CL60GR-DT)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-60000btu-inverter-gainable-cl60gr-dt",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1616334714_896.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL60GRDT.jpg"
+}

@@ -1,0 +1,37 @@
+{
+    "clean_title": "Samsung Inverter 12000 BTU (AR13TSFCDWK)",
+    "brand": "Samsung",
+    "normalized_reference": "AR13TSFCDWK",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/8807-home_default/climatiseur-samsung-12000-btu-inverter-chaud-froid-wifi-technologie-windfree.jpg",
+    "description": "Climatiseur Samsung Inverter -\nPuissance 12 000 BTU\n- Chaud & Froid - Capacité en refroidissement 12000 (BTU/h) - avec Technologie WindFree - Contrôle Wi-Fi - Niveau sonore (unité intérieure /unité extérieure) 39/46 dBA -  Circulation d'air (refroidissement, m3 / min) 10.7 - Easy Filter Plus - Nettoyage automatique - Refroidissement automatique intelligent - Minuterie 24 heures - Contrôle automatique de la direction de l'air haut / bas - Mode Sommeil paisible - Déshumidification - Dimension Unité Intérieure 820 x 299 x 215‎ mm- Dimension Unité Extérieure 720 x 548 x 265‎ mm - Poids 9.2 Kg -\nGarantie 5 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2599.0,
+            "raw_title": "CLIMATISEUR SAMSUNG 12000 BTU / INVERTER / CHAUD FROID / WIFI / TECHNOLOGIE WINDFREE",
+            "url": "https://jumbo.tn/climatiseur/3441-climatiseur-samsung-12000-btu-inverter-chaud-froid-wifi-technologie-windfree.html",
+            "image_url": "https://jumbo.tn/8807-home_default/climatiseur-samsung-12000-btu-inverter-chaud-froid-wifi-technologie-windfree.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 799,000 DT",
+            "raw_title": "Climatiseur Samsung WindFree Smart Inverter 12000 BTU Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "820 x 299 x 215 mm | 720 x 548 x 265 mm",
+        "Weight": "9.2 kg",
+        "Noise_Level": "46 dba",
+        "Warranty": "5 Ans",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Samsung/images/Samsung_AR13TSFCDWK.jpg"
+}

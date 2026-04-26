@@ -1,0 +1,30 @@
+{
+    "clean_title": "Focus Inverter 12000 BTU (FC-12CH)",
+    "brand": "Focus",
+    "normalized_reference": "FC12CH",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/73906-large_default/climatiseur-focus-smart-inverter-12000-btu-tropicalise-chaudfroid.jpg",
+    "description": "Le Climatiseur FOCUS FC-12CH Smart Inverter 12000 BTU assure un confort optimal toute l’année grâce à sa technologie Inverter , qui réduit la consommation d’énergie et maintient une température stable. Adapté aux climats chauds avec son système tropicalisé T3, il offre un refroidissement efficace et un fonctionnement silencieux. Type : Climatiseur split mural / Technologie : Smart Inverter (économie d’énergie et stabilité de température) / Mode : Chaud, Froid / Capacité : 12000 BTU / Tropicalisé : Classe T3 / Gaz réfrigérant : R410A / Niveau sonore : 39dB ( fonctionnement silencieux ) / Afficheur digital / Redémarrage automatique / Détection intelligente de température / Dimensions : 870 x 335 x 265 mm / Couleur : Blanc / Garantie : 3 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1549.0,
+            "raw_title": "CLIMATISEUR FOCUS SMART INVERTER 12000 BTU TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18446-climatiseur-focus-smart-inverter-12000-btu-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73906-large_default/climatiseur-focus-smart-inverter-12000-btu-tropicalise-chaudfroid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "870 x 335 x 265 mm",
+        "Weight": "Not found",
+        "Noise_Level": "39",
+        "Warranty": "3 ans",
+        "Smart": "Yes",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Focus/images/Focus_FC12CH.jpg"
+}

@@ -1,0 +1,30 @@
+{
+    "clean_title": "Hisense Non Inverter 24000 BTU (AS-24HW4)",
+    "brand": "Hisense",
+    "normalized_reference": "AS24HW4",
+    "capacity_btu": 24000,
+    "primary_image": "https://jumbo.tn/8777-home_default/climatiseur-hisense-tropicalise-24000-btu-chaudfroid-garantie-3ans.jpg",
+    "description": "Climatiseur Hisense - Capacité : 24000 BTU - Technologie: On/Off -\nMode : Chaud/ Froid - Classe énergétique : A++\n- Type de gaz : R410A - Alimentation électrique : 220V-240V/50Hz - Filtre PP lavable - Affichage sur le panneau avant LED - Panneau amovible et lavable - Minuterie 24 heures - Minuterie MARCHE/ARRÊT - Mode silencieux -\nTropicalisé\n-\nFonction de détection intelligente - Dégivrage automatique - Connectivité : Wi-Fi - Couleur : Blanc -\nGarantie : 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2399.0,
+            "raw_title": "CLIMATISEUR HISENSE TROPICALISÉ 24000 BTU CHAUD/FROID / GARANTIE 3ANS",
+            "url": "https://jumbo.tn/climatiseur/3429-climatiseur-hisense-tropicalise-24000-btu-chaudfroid-garantie-3ans.html",
+            "image_url": "https://jumbo.tn/8777-home_default/climatiseur-hisense-tropicalise-24000-btu-chaudfroid-garantie-3ans.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/ froid",
+        "Energy_Class": "A++",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "Yes",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Hisense/images/Hisense_AS24HW4.jpg"
+}

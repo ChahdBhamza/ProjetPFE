@@ -1,0 +1,30 @@
+{
+    "clean_title": "Unionaire Non Inverter 18000 BTU (ARTI.18HRS)",
+    "brand": "Unionaire",
+    "normalized_reference": "ARTI18HRS",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623313553_959.jpg",
+    "description": "Climatiseur Unionaire Artify - Puissance 18 000 BTU - Chaud & Froid - Ultra Silencieux - Design moderne - Système de purification d'air (Ionizer Filter) - Minuterie programmable jusqu'à 24 heures - Protection Basse/Haute Pression - Dimensions: 815 x 289 x 196 mm (Intérieur)/ 677 x 531 x 282 mm (Extérieur)",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1659.0,
+            "raw_title": "UNIONAIRE CLIMATISEUR ARTIFY 18 000 BTU CHAUD & FROID (ARTI.18HRS)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/climatiseur-unionaire-artify-18-000-btu-chaud-froid-arti18hrs",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623313553_959.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "815 x 289 x 196 mm | 677 x 531 x 282 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Unionaire/images/Unionaire_ARTI18HRS.jpg"
+}

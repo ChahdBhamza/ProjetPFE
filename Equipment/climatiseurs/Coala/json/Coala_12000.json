@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Inverter 12000 BTU (12000)",
+    "brand": "Coala",
+    "normalized_reference": "12000",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721045948_406.jpg",
+    "description": "Le climatiseur Coala INVERTER 12000 BTU Chaud/Froid (SP12CF-INVT) est une solution de climatisation de pointe, classée énergétique 1, idéale pour maintenir un environnement confortable tout au long de l'année. Fonctionnant avec le gaz écologique R410a.\r\n\r\nGrâce à la technologie Inverter, le split COALA permet de réaliser jusqu?à 40 % d?économie d?énergie, garantissant ainsi une utilisation plus économique et respectueuse de l?environnement. De plus, le délai nécessaire pour refroidir ou réchauffer une pièce est réduit de 50 % par rapport aux systèmes traditionnels ON/OFF, offrant une performance rapide et efficace.\r\n\r\nle climatiseur Coala INVERTER 12000 BTU est accompagné d?une garantie de 3 ans, offrant ainsi une tranquillité d?esprit et une assurance de qualité pour les utilisateurs.\r\n\r\nClimatiseur COALA, Modèle:SP12CF-INVT /Capacité: 12000 BTU / Mode: chaud & Froid / Filtre Plazma / Auto Nettoyage : Nettoyage automatique du climatiseur / Economie d' énergie jusqu'a 40 % / Niveau sonore réduit",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1249.0,
+            "raw_title": "COALA CLIMATISEUR INVERTER 12000 BTU CHAUD/FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-inverter-12000-btu-chaudfroid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721045948_406.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_12000.jpg"
+}

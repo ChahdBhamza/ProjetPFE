@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Inverter 24000 BTU (CL24ALEXF-INVT)",
+    "brand": "Gree",
+    "normalized_reference": "CL24ALEXFINVT",
+    "capacity_btu": 24000,
+    "primary_image": "https://zoom.com.tn/64784-large_default/climatiseur-gree-inverter-24000-btu-cl24gr-chaud-froid.jpg",
+    "description": "le climatiseur Gree 24000 BTU Inverter Smart tropicalisé , une solution de climatisation haut de gamme conçue pour offrir un confort optimal dans les conditions les plus extrêmes. Climatiseur Gree Inverter CL24GR-INVT Tropicalisé / Capacité: 24000 BTU / Mode Turbo / Ultra Silencieux / Fonction: I feel / Respecte l’environnement / Consommation minimale d’énergie / Résiste aux températures Extrêmes / Nettoyage automatique / Garantie 6 ans pour le compresseur et 3 ans pour les autres pièces Système T3 (-7~50℃) : Fonctionne parfaitement dans une large plage de températures, de -7℃ à 50℃ , idéal pour les climats tropicaux / Large plage de tension (198~264V) : Assure une performance stable même avec des variations de tension, offrant ainsi une fiabilité supérieure / Ventilateur à 7 vitesses : Ajustable pour répondre à vos besoins de confort spécifiques, garantissant une circulation d'air optimale.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 3099.0,
+            "raw_title": "CLIMATISEUR GREE INVERTER SMART TROPICALISE - 24000 BTU - CL24GR CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/13050-climatiseur-gree-inverter-24000-btu-cl24gr-chaud-froid.html",
+            "image_url": "https://zoom.com.tn/64784-large_default/climatiseur-gree-inverter-24000-btu-cl24gr-chaud-froid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "6 ans pour le compresseur et 3 ans pour les autres pièces",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL24ALEXFINVT.jpg"
+}

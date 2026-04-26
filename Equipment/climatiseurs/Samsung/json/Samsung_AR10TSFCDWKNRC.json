@@ -1,0 +1,30 @@
+{
+    "clean_title": "Samsung Inverter 9000 BTU (AR10TSFCDWKNRC)",
+    "brand": "Samsung",
+    "normalized_reference": "AR10TSFCDWKNRC",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1616346137_584.jpg",
+    "description": "Climatiseur Samsung Digital Inverter  -  Capacité 9000 BTU   Mode : Chaud-Froid  - Superficie de 40 à 60 m² - Niveau sonore (unité intérieure /unité extérieure) 38/20 - Dimension Unité Interieure 828 x 267 x 265 mm - Avec afficheur - Classe énergétique 1 -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 3499.0,
+            "raw_title": "SAMSUNG CLIMATISEUR 9000 BTU DIGITAL INVERTER",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/samsung/climatiseur-samsung-9000-btu-digital-inverter",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1616346137_584.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "828 x 267 x 265 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Samsung/images/Samsung_AR10TSFCDWKNRC.jpg"
+}

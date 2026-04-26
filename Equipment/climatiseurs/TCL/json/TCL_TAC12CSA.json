@@ -1,0 +1,30 @@
+{
+    "clean_title": "TCL Non Inverter 12000 BTU (TAC-12CSA)",
+    "brand": "TCL",
+    "normalized_reference": "TAC12CSA",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356447_619.jpg",
+    "description": "Climatiseur TCL ON / OFF- Type: Froid- Puissance: 12000 BTU- Gamme de tension: 198~242-Classe Energetique:  2- Niveau sonore: 42 dB(A)- Dimensions nettes (L x H x P): 777 x 250 x 205 mm- Poids Net: 8 Kg- Couleur: Blanc-",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1479.0,
+            "raw_title": "TCL CLIMATISEUR 12000 BTU FROID ON/OFF TAC-12CSA/XA41",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-12000-btu-froid-on-off",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356447_619.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "2",
+        "Gas_Type": "Not found",
+        "Dimensions": "777 x 250 x 205 mm",
+        "Weight": "8 kg",
+        "Noise_Level": "42 db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC12CSA.jpg"
+}

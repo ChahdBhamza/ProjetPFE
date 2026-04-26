@@ -1,0 +1,30 @@
+{
+    "clean_title": "Indesit Inverter 12000 BTU (IAVPN120-IAVPN121)",
+    "brand": "Indesit",
+    "normalized_reference": "IAVPN120IAVPN121",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/31772-home_default/climatiseur-indesit-12000-btu-inverter-chaud-froid-blanc.jpg",
+    "description": "Optez pour un confort thermique supérieur avec le climatiseur\nIndesit\nde\n12000 BTU\n, idéal pour climatiser efficacement des espaces de 25 à 35 m². Grâce à son mode chaud et froid, il assure une utilisation optimale en toute saison. Doté de la technologie Inverter et d’une classe énergétique 1, il garantit une performance élevée avec une consommation d’énergie réduite. Son système Split associé au réfrigérant R32 offre une efficacité écologique et durable. Pratique au quotidien, il intègre une fonction d’auto-nettoyage pour maintenir un air sain et pur. Avec ses dimensions compactes (unité intérieure : 805 x 270 x 197 mm / unité extérieure : 680 x 527 x 197 mm) et son design moderne en blanc, il s’adapte facilement à tous les intérieurs. Fiable et performant, ce climatiseur est couvert par une\ngarantie de 3 ans\npour une tranquillité d’utilisation",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1529.0,
+            "raw_title": "CLIMATISEUR INDESIT 12000 BTU INVERTER CHAUD FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/11213-climatiseur-indesit-12000-btu-inverter-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/31772-home_default/climatiseur-indesit-12000-btu-inverter-chaud-froid-blanc.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R32",
+        "Dimensions": "805 x 270 x 197 mm | 680 x 527 x 197 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Indesit/images/Indesit_IAVPN120IAVPN121.jpg"
+}

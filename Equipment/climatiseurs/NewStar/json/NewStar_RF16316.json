@@ -1,0 +1,30 @@
+{
+    "clean_title": "NewStar Non Inverter (RF16-316)",
+    "brand": "NewStar",
+    "normalized_reference": "RF16316",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1659448575_753.jpg",
+    "description": "Ventilateur de Bureau 16 Pouces - Vent Fort",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 97.0,
+            "raw_title": "NEWSTAR VENTILATEUR BUREAU BEIGE TF16-316 16\"",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/newstar/ventilateur-bureau-beige-newstar-tf16-316-16",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1659448575_753.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/NewStar/images/NewStar_RF16316.jpg"
+}

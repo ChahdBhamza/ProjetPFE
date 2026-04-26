@@ -1,0 +1,30 @@
+{
+    "clean_title": "Hyundai Inverter 12000 BTU (HY2-12-INV)",
+    "brand": "Hyundai",
+    "normalized_reference": "HY212INV",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/25507-home_default/climatiseur-hyundai-inverter-12000-btu-chaud-froid-hy2-12inv.jpg",
+    "description": "Climatiseur HYUNDAI\nINVERTER\n- Capacité :\n12000 BTU/H\n- Mode :\nChaud et Froid\n- Classe Climatique :\nT3\n- Température opérationnelle maximale :\n16-52C°\n(En mode froid) - Température d'ambiance maximale :\n-15-24C°\n(En mode chaud) - Affichage électronique - Contrôle : Commande - Type de gaz :\nR410A\n- Niveau de bruit (unité intérieure) :\n50/44/38/29\ndB\n- Niveau de bruit (unité extérieure) :\n58 dB\n- Dimension Unité intérieure (LxHxP) : 811 x 203 x 292 mm, Unité Extérieure : 777 x 498 x 290 mm - Couleur : Blanc -\nGarantie 3ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1539.0,
+            "raw_title": "CLIMATISEUR HYUNDAI INVERTER 12000 BTU CHAUD / FROID / HY2-12.INV",
+            "url": "https://jumbo.tn/climatiseur/9334-climatiseur-hyundai-inverter-12000-btu-chaud-froid-hy2-12inv.html",
+            "image_url": "https://jumbo.tn/25507-home_default/climatiseur-hyundai-inverter-12000-btu-chaud-froid-hy2-12inv.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "C",
+        "Gas_Type": "R410A",
+        "Dimensions": "811 x 203 x 292 mm | 777 x 498 x 290 mm",
+        "Weight": "Not found",
+        "Noise_Level": "29 db | 58 db",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Hyundai/images/Hyundai_HY212INV.jpg"
+}

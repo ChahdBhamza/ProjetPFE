@@ -1,0 +1,37 @@
+{
+    "clean_title": "Biolux Inverter 12000 BTU (BIOLUX 12000BTU)",
+    "brand": "Biolux",
+    "normalized_reference": "BIOLUX12000BTU",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/70515-large_default/climatiseur-biolux-12000-btu-chaudfroid-tropical-inverter-smart.jpg",
+    "description": "Le climatiseur Biolux 12000 / Classe énergétique: 3 / Classe  Tropical /Fluide frigorigène: R410a / Classe énergétique: 3 / Afficheur LED / Purification Automatique / Asservissement Automatique / Minuterie programmable 24 heures / Mode Nuit / Mode de Fonctionnement Prédéfinie / Niveau Sonore 40 dBA (Unité intérieure), 50 dBA (Unité extérieure) /Connectivité: WiFi / Garantie 5 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1499.0,
+            "raw_title": "CLIMATISEUR BIOLUX 12000 BTU CHAUD/FROID - TROPICAL INVERTER SMART",
+            "url": "https://zoom.com.tn/climatiseur/17743-climatiseur-biolux-12000-btu-chaudfroid-tropical-inverter-smart.html",
+            "image_url": "https://zoom.com.tn/70515-large_default/climatiseur-biolux-12000-btu-chaudfroid-tropical-inverter-smart.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 499,000 DT",
+            "raw_title": "Climatiseur Biolux M-125CFVSB 12000 BTU Smart Inverter Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410a",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Int: 40 dB",
+        "Warranty": "5 ans",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Biolux/images/Biolux_BIOLUX12000BTU.jpg"
+}

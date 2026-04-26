@@ -1,0 +1,44 @@
+{
+    "clean_title": "LG Inverter 12000 BTU (D12TIH)",
+    "brand": "LG",
+    "normalized_reference": "D12TIH",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/64348-large_default/climatiseur-lg-dualcool-inverter-12-000-btu-chaud-froid-d12tih.jpg",
+    "description": "Un ventilateur propre pour une brise pure\nÉlimine 99,99%* des bactéries grâce à la lumière LED UV pour garder le ventilateur propre et frais.\nRefroidissement et chauffage\nrapides et puissants\nBénéficiez du confort toute l’année, même lorsque les conditions climatiques sont extrêmes, grâce à notre\ncompresseur DUAL Inverter.\nAllergy Filter\nRéduit les\nallergènes pour un\nair plus sain\nÉlimine les substances allergènes, telles que les acariens, qui\nflottent dans l’air.\nUn contrôle intelligent, une vie plus intelligente\nEN SAVOIR PLUS SUR THINQ\nConnectez-vous et contrôlez l’appare\nL’application LG ThinQ™ vous permet de vous connecter facilement à votre climatiseur comme jamais auparavant. Démarrez votre climatiseur en appuyant simplement sur Le bouton LG ThinQ.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 2599.0,
+            "raw_title": "CLIMATISEUR LG DUALCOOL INVERTER 12 000 BTU CHAUD & FROID - D12TIH",
+            "url": "https://zoom.com.tn/climatiseur/16783-climatiseur-lg-dualcool-inverter-12-000-btu-chaud-froid-d12tih.html",
+            "image_url": "https://zoom.com.tn/64348-large_default/climatiseur-lg-dualcool-inverter-12-000-btu-chaud-froid-d12tih.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2599.0,
+            "raw_title": "LG CLIMATISEUR 12000 BTU INVERTER DUALCOOL CHAUD-FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-12000-btu-inverter-dualcool-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304272_800.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "3 199,000 DT",
+            "raw_title": "Climatiseur LG 12000 BTU Dual Inverter Artcool  Chaud Froid (D12TAH)",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "837 x 189 x 302 mm | 717 x 483 x 230 mm",
+        "Weight": "Not found",
+        "Noise_Level": "41 dba | 50 dba",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc lg climatiseur"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_D12TIH.jpg"
+}

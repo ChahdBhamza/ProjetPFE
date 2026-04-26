@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Inverter 24000 BTU (SP024CF-INV)",
+    "brand": "Coala",
+    "normalized_reference": "SP024CFINV",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720781682_510.jpg",
+    "description": "Climatiseur Coala Inverter - Capacité de Refroidissement: 24000 BTU - Inverter - Classe Energétique : 1 - Filtre Plazma - Auto Nettoyage : Nettoyage automatique du climatiseur - Economie d'énergie - Couleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2499.0,
+            "raw_title": "COALA CLIMATISEUR 24000 BTU INVERTER CHAUD FROID BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-24000-btu-inverter-chaud-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720781682_510.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc coala climatis"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_SP024CFINV.jpg"
+}

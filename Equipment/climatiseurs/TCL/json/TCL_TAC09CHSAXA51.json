@@ -1,0 +1,37 @@
+{
+    "clean_title": "TCL Inverter 9000 BTU (TAC-09CHSA/XA51)",
+    "brand": "TCL",
+    "normalized_reference": "TAC09CHSAXA51",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/23988-home_default/climatiseur-tcl-9000-btu-chaud-froid-inverter-tac-09-chsaxa51.jpg",
+    "description": "Climatiseur TCL - Capacité de Refroidissement :\n9000 BTU/h\n- Débit D’air Intérieur :\n450 m³/h\n- Élimination de l’humidité :\n1 Litres/h\n- Réfrigérant :\nR410A\n- Niveau de Bruit Intérieur :\n41 dB\n- Niveau de Bruit Extérieur :\n52 dB\n- Zone Appropriée :\n09~16 m2\n- Température Ambiante :\n-15~50°C\n- Eco Mode\n(programme fixe à 26 °C optimisé pour l'efficacité)\n- Flux d'air intelligent - Rafraîchissement à\n5 vitesses\n- Redémarrage automatique de coupure de courant - Mode muet - Mode veille -\nAutodiagnostic - Dimensions Nette Unité Intérieure (L x Px H) : 698 × 190 × 255 mm, Extérieure : 660 × 230 × 456 mm -\nGarantie 3ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1449.0,
+            "raw_title": "CLIMATISEUR TCL 9000 BTU CHAUD FROID INVERTER / TAC-09 CHSA/XA51",
+            "url": "https://jumbo.tn/climatiseur/8813-climatiseur-tcl-9000-btu-chaud-froid-inverter-tac-09-chsaxa51.html",
+            "image_url": "https://jumbo.tn/23988-home_default/climatiseur-tcl-9000-btu-chaud-froid-inverter-tac-09-chsaxa51.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 399,000 DT",
+            "raw_title": "Climatiseur TCL 9000 BTU Chaud Froid",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "698 × 190 × 255 mm | 660 × 230 × 456 mm",
+        "Weight": "Not found",
+        "Noise_Level": "41 db | 52 db",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC09CHSAXA51.jpg"
+}

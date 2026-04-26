@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Inverter 60000 BTU (CL60DT-PHS1/A-S)",
+    "brand": "Gree",
+    "normalized_reference": "CL60DTPHS1AS",
+    "capacity_btu": 60000,
+    "primary_image": "https://jumbo.tn/31199-home_default/climatiseur-gainable-gree-60-000-btu-inverter.jpg",
+    "description": "Climatiqeur Armoire GREE\n-\nCapacité :\n60000 BTU/h\n- Débit d’air :\n2500 m3/h\n- Classe Climatique :\nT3\n(jusqu'à 52°C)\n- Capacité Froid :\n17.6 kW\n- Capacité Chaud :\n19.0 kW\n- Consommation électrique :\n6.2 kW (Froid)\n,\n6.4 kW (Chaud)\n- Type de gaz réfrigérant :\nR410A\n- Niveau sonore :\n54 dB (Unité Intérieure)\n,\n60 dB (Unité Extérieure)\n- Poids : 95 kg (Unité intérieur), 125 Kg (Unité extérieur) - Dimensions (HxLxP) : 1150×790×460 mm (Unité Intérieur), 940×1360×320 mm (Unité extérieur) -\nGarantie 3 ans + 6ans sur Compresseur INVERTER",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 8299.0,
+            "raw_title": "CLIMATISEUR GAINABLE GREE 60 000 BTU INVERTER",
+            "url": "https://jumbo.tn/climatiseur/11071-climatiseur-gainable-gree-60-000-btu-inverter.html",
+            "image_url": "https://jumbo.tn/31199-home_default/climatiseur-gainable-gree-60-000-btu-inverter.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "C",
+        "Gas_Type": "R410A",
+        "Dimensions": "1150×790×460 mm | 940×1360×320 mm",
+        "Weight": "95 kg",
+        "Noise_Level": "54 db | 60 db",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL60DTPHS1AS.jpg"
+}

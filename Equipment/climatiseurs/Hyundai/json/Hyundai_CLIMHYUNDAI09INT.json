@@ -1,0 +1,30 @@
+{
+    "clean_title": "Hyundai On/Off 9000 BTU (CLIM-HYUNDAI-09INT)",
+    "brand": "Hyundai",
+    "normalized_reference": "CLIMHYUNDAI09INT",
+    "capacity_btu": 9000,
+    "primary_image": "https://zoom.com.tn/65263-large_default/climatiseur-hyundai-9000-btu-chaud-froid-onoff.jpg",
+    "description": "Climatiseur Hyundai 9000 BTU Chaud Froid ON/OFF\nPlongez dans un confort inégalé toute l'année avec le\nClimatiseur Hyundai 9000 BTU Chaud Froid ON/OFF\n. Sa capacité de refroidissement de 9000 BTU en fait l'allié parfait pour les\nespaces jusqu'à 18 m²\n. Son design contemporain et élégant, associé à sa finition blanc pur, s'intègre harmonieusement à tous les décors intérieurs.\nLa télécommande intuitive vous offre un contrôle total sur les modes de fonctionnement et les températures, vous permettant de personnaliser votre environnement selon vos préférences. De plus, son système de filtration d'air avancé élimine efficacement les impuretés, assurant une qualité d'air optimale dans votre espace de vie.\nZoom.com.tn vous propose\nle meilleur prix en Tunisie\npour cet article, alliant\nperformance et économie\n. Profitez également de notre service de\nlivraison rapide\net de\nnos options de paiement flexibles\npour une expérience d'achat sans tracas. Faites de votre maison un\nrefuge de fraîcheur\net de bien-être avec le\nClimatiseur Hyundai 9000 BTU Chaud Froid ON/OFF\n.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1409.0,
+            "raw_title": "CLIMATISEUR HYUNDAI 9000 BTU CHAUD FROID ON/OFF",
+            "url": "https://zoom.com.tn/climatiseur/15149-climatiseur-hyundai-9000-btu-chaud-froid-onoff.html",
+            "image_url": "https://zoom.com.tn/65263-large_default/climatiseur-hyundai-9000-btu-chaud-froid-onoff.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "On/Off",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "50 Hz. Il utilise le gaz 410 A et offre un niveau de bruit de 40",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Hyundai/images/Hyundai_CLIMHYUNDAI09INT.jpg"
+}

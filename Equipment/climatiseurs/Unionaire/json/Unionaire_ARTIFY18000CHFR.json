@@ -1,0 +1,30 @@
+{
+    "clean_title": "Unionaire Non Inverter 18000 BTU (ARTIFY_18000_CH_FR)",
+    "brand": "Unionaire",
+    "normalized_reference": "ARTIFY18000CHFR",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1532971837_943.jpg",
+    "description": "Climatiseur ARTIFY 18000 BTU, chaud/Froid, compresseur LG, Noir",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1149.0,
+            "raw_title": "UNIONAIRE CLIMATISEUR ARTIFY 18000 BTU CHAUD FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/unionaire/unionaire-clim-artify-18000-ch-fr",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1532971837_943.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Noir"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Unionaire/images/Unionaire_ARTIFY18000CHFR.jpg"
+}

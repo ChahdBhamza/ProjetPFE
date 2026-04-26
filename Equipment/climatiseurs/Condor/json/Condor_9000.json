@@ -1,0 +1,30 @@
+{
+    "clean_title": "Condor Inverter 9000 BTU (9000)",
+    "brand": "Condor",
+    "normalized_reference": "9000",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721047334_917.jpg",
+    "description": "Climatiseur CONDOR Inverter Série ALPHA\r\nPuissance: 9000 BTU\r\nMode: Chaud/Froid\r\nRéfrigérant R410a\r\nType climatique: Tropical T3\r\nÉconomie jusqu'à 75 % d'énergie grâce à l'option Eco-Gear\r\nDépoussiérage Intelligent 360°\r\nGaz Écologique\r\nFonction Turbo\r\nAuto diagnostic\r\nRedémarrage automatique\r\nMode Sommeil confortable\r\nAlimentation électrique : 220V-240V/50Hz\r\nCouleur: Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1399.0,
+            "raw_title": "CONDOR CLIMATISEUR INVERTER 9000 BTU CHAUD/FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/climatiseur-inverter-9000-btu-chaudfroid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721047334_917.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc condor climati"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Condor/images/Condor_9000.jpg"
+}

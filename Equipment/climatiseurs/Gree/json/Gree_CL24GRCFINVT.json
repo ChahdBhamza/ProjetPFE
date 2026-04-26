@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Inverter 24000 BTU (CL24GR-CF-INVT)",
+    "brand": "Gree",
+    "normalized_reference": "CL24GRCFINVT",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524577662_729.jpg",
+    "description": "Climatiser GREE CL24GR Inverter :  Capacité :24000 BTU -Mode: Chaud & Froid -Modele :CL24GR Inverter - Classe énergetique: 1- Type de gaz :R410 - Dimensions Unité Intérieure: 270 x 785 x 198mm - Dimensions Unité Exterieure: 540 x 710 x 255 mm -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2849.0,
+            "raw_title": "GREE CLIMATISEUR 24000 BTU INVERTER CHAUD & FROID (CL24GR)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-24000-btu-inverter-chaud-froid-cl24gr",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524577662_729.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "270 x 785 x 198mm | 540 x 710 x 255 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL24GRCFINVT.jpg"
+}

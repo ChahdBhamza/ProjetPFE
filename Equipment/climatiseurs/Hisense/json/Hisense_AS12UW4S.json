@@ -1,0 +1,30 @@
+{
+    "clean_title": "Hisense Inverter 12000 BTU (AS-12UW4S)",
+    "brand": "Hisense",
+    "normalized_reference": "AS12UW4S",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/25928-home_default/climatiseur-hisense-12000-btu-inverter-tropicalise-chaud-froid.jpg",
+    "description": "Climatiseur HISENSE\nTROPICALISÉ INVERTER\n- Puissance :\n12000 BTU/H\n- Mode de refroidissement :\nChaud / Froid\n- Classe énergétique :\n1\n- Classe Climatique :\nT3\n- Type de Gaz :\nR410A\n-  Smart : Non -\nGarantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1599.0,
+            "raw_title": "CLIMATISEUR HISENSE 12000 BTU INVERTER TROPICALISÉ / CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/9490-climatiseur-hisense-12000-btu-inverter-tropicalise-chaud-froid.html",
+            "image_url": "https://jumbo.tn/25928-home_default/climatiseur-hisense-12000-btu-inverter-tropicalise-chaud-froid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Hisense/images/Hisense_AS12UW4S.jpg"
+}

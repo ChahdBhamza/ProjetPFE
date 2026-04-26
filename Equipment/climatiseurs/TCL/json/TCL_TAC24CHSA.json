@@ -1,0 +1,44 @@
+{
+    "clean_title": "TCL Non Inverter 24000 BTU (TAC-24CHSA)",
+    "brand": "TCL",
+    "normalized_reference": "TAC24CHSA",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1594651014_269.jpg",
+    "description": "Climatiseur TCL 24000 BTU - Chaud & Froid - Intensité de démarrage: 10.1A - Calibre disjoncteur (IEC60335): 13.2A - Puissance absorbée: 2120W - Puissance absorbée Max (IEC60335): 2760W - Débit d'air: 1200 m3/h - Tension minimale: 4.5MPa - Niveau de bruit: 53 dB(A) - Tension: 220-240V - Fréquence: 50Hz - Surface appropriée: 60-80 m2 - Classe Énergétique: 3",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2689.0,
+            "raw_title": "TCL CLIMATISEUR 24000 BTU CHAUD & FROID TAC-24CHSA/XA91",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-24000-btu-chaud-froid-tac-24chsa-xa91",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1594651014_269.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2699.0,
+            "raw_title": "TCL CLIMATISEUR 24000 BTU INVERTER TAC-24CHSA/STD",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-24000-btu-inverter",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1542123141_401.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2899.0,
+            "raw_title": "TCL CLIMATISEUR 24000 BTU CHAUD & FROID / TAC-24CHSA/XA61",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-24000-btu-chaud-froid-garantie-3-ans",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356590_996.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "3",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "53 db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC24CHSA.jpg"
+}

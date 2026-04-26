@@ -1,0 +1,37 @@
+{
+    "clean_title": "Brandt Inverter 12000 BTU (BTS12TIQC)",
+    "brand": "Brandt",
+    "normalized_reference": "BTS12TIQC",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/20383-home_default/climatiseur-brandt-inverter-tropicalise-12000-btu-chaud-froid-blanc.jpg",
+    "description": "Climatiseur Inverter Brandt - Capacité : 12000 BTU - Mode : Chaud & Froid - Classe énergétique : A - Gaz R410a - Vitesse(Élevée/Moyenne/Basse)en mode Refroidissement r/min 1180/1050/920/800/750 - Vitesse(Élevée/Moyenne/Basse) en mode Chauffage r/min 1180/1050/850/750/650 - Avec Télécommande - Débit d'air intérieur (Moyen) : 650 m3/h - Dimension : 811×292×203 mm - T3 Tropicalisé - Couleur : Blanc",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1649.0,
+            "raw_title": "CLIMATISEUR BRANDT INVERTER TROPICALISÉ 12000 BTU CHAUD & FROID / BLANC",
+            "url": "https://jumbo.tn/climatiseur/7454-climatiseur-brandt-inverter-tropicalise-12000-btu-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/20383-home_default/climatiseur-brandt-inverter-tropicalise-12000-btu-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1619.0,
+            "raw_title": "BRANDT CLIMATISEUR INVERTER 12000 BTU CHAUD FROID BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/brandt/climatiseur-inverter-12000-btu-chaud-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721046610_581.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A",
+        "Gas_Type": "R410A",
+        "Dimensions": "811×292×203 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "2 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Brandt/images/Brandt_BTS12TIQC.jpg"
+}

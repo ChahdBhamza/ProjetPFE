@@ -1,0 +1,37 @@
+{
+    "clean_title": "TCL Non Inverter 24000 BTU (TAC-24CHSA/XAA1)",
+    "brand": "TCL",
+    "normalized_reference": "TAC24CHSAXAA1",
+    "capacity_btu": 24000,
+    "primary_image": "https://jumbo.tn/24029-home_default/climatiseur-tcl-24000-btu-onoff-chaud-froid-blanc.jpg",
+    "description": "Climatiseur TCL - Capacité de Refroidissement :\n12000 BTU/h\n- Mode : Chaud /Froid - Réfrigérant :\nR410A\n- Niveau de Bruit Intérieur :\n47 dB\n- Niveau de Bruit Extérieur :\n56 dB\n- Zone Appropriée :\n15-23m²\n- Eco Mode\n(programme fixe à 26 °C optimisé pour l'efficacité)\n- Flux d'air intelligent - Rafraîchissement à\n5 vitesses\n- Redémarrage automatique de coupure de courant - Mode muet - Mode veille -\nAutodiagnostic - Dimensions Nette Unité Intérieure (L x Px H) :\n1010×315×220 mm\n, Extérieure :\n853×349×602 mm\n-\nGarantie 3ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2499.0,
+            "raw_title": "CLIMATISEUR TCL 24000 BTU ON/OFF CHAUD FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/8830-climatiseur-tcl-24000-btu-onoff-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/24029-home_default/climatiseur-tcl-24000-btu-onoff-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 799,000 DT",
+            "raw_title": "Climatiseur Inverter TCL 24000 BTU Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud /froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "1010×315×220 mm | 853×349×602 mm",
+        "Weight": "Not found",
+        "Noise_Level": "47 db | 56 db",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC24CHSAXAA1.jpg"
+}

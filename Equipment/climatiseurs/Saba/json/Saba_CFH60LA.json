@@ -1,0 +1,37 @@
+{
+    "clean_title": "Saba Non Inverter 60000 BTU (CFH-60LA)",
+    "brand": "Saba",
+    "normalized_reference": "CFH60LA",
+    "capacity_btu": 60000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121521_379.webp",
+    "description": "Capacité: 60000 BTU \r\nMode: Chaud et Froid \r\nDébit d?Air: 1800/2100 m3/h \r\nElimination de l?humidité: 4.2 Litres/h\r\nNiveau de bruit interne: 51 dB(A)\r\nNiveau de bruit externe: 63 dB(A) \r\nMinuterie programmable | Ultra Silencieux | Design moderne\r\nDimension unité intérieure: 1906 × 581 × 385 mm \r\nDimension unité extérieure: 1030 × 1331 × 380 mm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 6689.0,
+            "raw_title": "SABA CLIMATISEUR ARMOIRE 60000BTU CHAUD & FROID - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/saba/climatiseur-armoire-60000btu-chaud-and-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723121521_379.webp"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR ARMOIRE SABA CFH-60LA 60000 BTU / CHAUD & FROID",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/65120-climatiseur-armoire-saba-cfh-60la-60000-btu-chaud-froid.html",
+            "image_url": "https://www.tunisianet.com.tn/307034-large/climatiseur-armoire-saba-cfh-60la-60000-btu-chaud-froid.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "1906 × 581 × 385 mm | 1030 × 1331 × 380 mm",
+        "Weight": "Not found",
+        "Noise_Level": "51 db | 63 db",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Saba/images/Saba_CFH60LA.webp"
+}

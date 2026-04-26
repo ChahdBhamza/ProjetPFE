@@ -1,0 +1,51 @@
+{
+    "clean_title": "Gree Non 9000 BTU (CHAUD-FROID)",
+    "brand": "Gree",
+    "normalized_reference": "CHAUDFROID",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.tunisianet.com.tn/431024-large/climatiseur-gree-tropicalise-9000-btu-chaud-froid-onoff.jpg",
+    "description": "Not found",
+    "availability": [
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR GREE TROPICALISÉ 9000 BTU / CHAUD-FROID / ON/OFF",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/66727-climatiseur-gree-tropicalise-9000-btu-chaud-froid-onoff.html",
+            "image_url": "https://www.tunisianet.com.tn/431024-large/climatiseur-gree-tropicalise-9000-btu-chaud-froid-onoff.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR CASSETTE GREE INVERTER 24000 BTU CHAUD-FROID / GARANTIE 3 ANS",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/64566-climatiseur-cassette-gree-inverter-24000-btu-chaud-froid-garantie-3-ans.html",
+            "image_url": "https://www.tunisianet.com.tn/303492-large/climatiseur-cassette-gree-inverter-24000-btu-chaud-froid-garantie-3-ans.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR CASSETTE GREE INVERTER 36000 BTU CHAUD-FROID / GARANTIE 3 ANS",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/64564-climatiseur-cassette-gree-inverter-36000-btu-chaud-froid-garantie-3-ans.html",
+            "image_url": "https://www.tunisianet.com.tn/303487-large/climatiseur-cassette-gree-inverter-36000-btu-chaud-froid-garantie-3-ans.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR CASSETTE GREE INVERTER 48000 BTU CHAUD-FROID / GARANTIE 3 ANS",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/64563-climatiseur-cassette-gree-inverter-48000-btu-chaud-froid-garantie-3-ans.html",
+            "image_url": "https://www.tunisianet.com.tn/303476-large/climatiseur-cassette-gree-inverter-48000-btu-chaud-froid-garantie-3-ans.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CHAUDFROID.jpg"
+}

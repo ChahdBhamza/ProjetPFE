@@ -1,0 +1,37 @@
+{
+    "clean_title": "LG Inverter 12000 BTU (D12UAH)",
+    "brand": "LG",
+    "normalized_reference": "D12UAH",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/64636-large_default/climatiseur-lg-artcool-mirror-inverter-12000-btu-chaud-froid-d12uah.jpg",
+    "description": "UVnano\nUn ventilateur propre pour une brise pure\nÉlimine 99,99%* des bactéries grâce à la lumière LED UV pour garder le ventilateur propre et frais.\nRefroidissement et chauffage\nrapides et puissants\nBénéficiez du confort toute l’année, même lorsque les conditions climatiques sont extrêmes, grâce à notre\ncompresseur DUAL Inverter.\nAllergy Filter\nRéduit les\nallergènes pour un\nair plus sain\nÉlimine les substances allergènes, telles que les acariens, qui\nflottent dans l’air.\nUn contrôle intelligent, une vie plus intelligente\nEN SAVOIR PLUS SUR THINQ\nConnectez-vous et contrôlez l’appare\nL’application LG ThinQ™ vous permet de vous connecter facilement à votre climatiseur comme jamais\nauparavant. Démarrez votre climatiseur en appuyant simplement sur Le bouton LG ThinQ™.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 3299.0,
+            "raw_title": "CLIMATISEUR LG ARTCOOL MIRROR INVERTER 12000 BTU CHAUD & FROID L WIFI L D12UAH",
+            "url": "https://zoom.com.tn/climatiseur/16804-climatiseur-lg-artcool-mirror-inverter-12000-btu-chaud-froid-d12uah.html",
+            "image_url": "https://zoom.com.tn/64636-large_default/climatiseur-lg-artcool-mirror-inverter-12000-btu-chaud-froid-d12uah.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 3299.0,
+            "raw_title": "LG CLIMATISEUR 12000 BTU DUAL INVERTER ARTCOOL CHAUD/FROID - NOIR",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-12000-btu-dual-inverter-artcool-chaudfroid-noir",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304093_676.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "A++++",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "21 db",
+        "Warranty": "Not found",
+        "Smart": "Yes",
+        "Color": "Noir"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_D12UAH.jpg"
+}

@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Focus FC-12CH Inverter Tropicalisé 12000 BTU Chaud & Froid Blanc",
+    "brand": "Other",
+    "normalized_reference": "FC12CH",
+    "capacity_btu": 12000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Other/images/Other_FC12CH.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 549,000 DT",
+            "raw_title": "Climatiseur Focus FC-12CH Inverter Tropicalisé 12000 BTU Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

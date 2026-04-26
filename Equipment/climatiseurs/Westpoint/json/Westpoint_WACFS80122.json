@@ -1,0 +1,30 @@
+{
+    "clean_title": "Westpoint Non Inverter (WACFS-80122)",
+    "brand": "Westpoint",
+    "normalized_reference": "WACFS80122",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657793723_493.jpg",
+    "description": "Climeur WESTPOINT - Capacité: 80 L - Puissance: 210W - Technologie i-PURE - Cooling media: Honycomb -Alimentation: 220-240V~50-60Hz - Très pratique - Ecologie - Une très faible consommation d?énergie électrique car cette climatisation fonctionne sans compresseur - Dimensions: 70 x 43.5 x 122.5",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 449.0,
+            "raw_title": "WESTPOINT CLIMEUR WACFS-80122 80 LITRES",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climeur-westpoint-wacfs-80122-80-litres",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657793723_493.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_WACFS80122.jpg"
+}

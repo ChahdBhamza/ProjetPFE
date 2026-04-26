@@ -1,0 +1,30 @@
+{
+    "clean_title": "TCL Inverter 9000 BTU (TAC-09CHSA/TPG11I)",
+    "brand": "TCL",
+    "normalized_reference": "TAC09CHSATPG11I",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/25882-home_default/climatiseur-tcl-inverter-9000btu-chaud-froid-.jpg",
+    "description": "Climatiseur TCL\nINVERTER\n- Puissance :\n9000 BTU/H\n- Mode de refroidissement :\nChaud & Froid\n- Classe énergétique :\n1\n-\nFlux d'air intelligent\n- Type de Gaz :\nR410A\n- Dimensions :\n808×292×208\nmm\n(Intérieur)\n/\n777×290×498\nmm\n(Extérieur)\n-  Smart : Non  -\nGarantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1459.0,
+            "raw_title": "CLIMATISEUR TCL INVERTER 9000BTU CHAUD FROID",
+            "url": "https://jumbo.tn/climatiseur/8802-climatiseur-tcl-inverter-9000btu-chaud-froid-.html",
+            "image_url": "https://jumbo.tn/25882-home_default/climatiseur-tcl-inverter-9000btu-chaud-froid-.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R410A",
+        "Dimensions": "808×292×208 mm | 777×290×498 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC09CHSATPG11I.jpg"
+}

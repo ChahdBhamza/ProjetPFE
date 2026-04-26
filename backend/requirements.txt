@@ -5,3 +5,11 @@ python-multipart
 sqlalchemy
 alembic
 python-dotenv
+requests
+beautifulsoup4
+google-genai
+qdrant-client
+torch
+transformers
+Pillow
+easyocr

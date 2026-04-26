@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Non Inverter (RA100)",
+    "brand": "Coala",
+    "normalized_reference": "RA100",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1626349944_130.jpg",
+    "description": "Rideau d'air COALA 100cm - BlanC-Réf : R A100 - Rideau d'air COALA 100cm - Blanc Installation au dessus des portes, Confort intérieur en été et en hiver même avec porte d'entrée ouverte - Economie d'énergie en limitant la perdition thermique - Grille de soufflage orientable - Panneau de commande intégré - Corps en tôle anticorrosive - Hauteur d'installation jusqu'à 3 000 mm - Alimentation électrique 220 v 240 v 50 hz - Lieux d'utilisation : cafés, restaurants, boutique, grandes surfaces, Espaces Commerciaux, Magasins, les Hôtels, Salon de thé",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 429.0,
+            "raw_title": "COALA RIDEAU D'AIR 100CM  (R A100)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/rideau-dair-coala-100cm-blanc-r-a100",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1626349944_130.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_RA100.jpg"
+}

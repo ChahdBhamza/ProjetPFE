@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Non Inverter 12000 BTU (MB12CF)",
+    "brand": "Coala",
+    "normalized_reference": "MB12CF",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1579647859_230.jpg",
+    "description": "Climatiseur Mobile COALA - Capacité:  12000 BTU   - Mode: Chaud/Froid - Compact, Légère - Roulettes Robustes - drainage facile - condensateur double - Équipé par des accessoires de connexion aux fenêtres ( sans besoin d'installation au Mur) - Minuterie Programmable - Compresseur de haute Qualité - contrôle par télécommande ou directement sur l'appareil  - Couleur: Blanc & Noir",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1299.0,
+            "raw_title": "COALA CLIMATISEUR MOBILE 12000 BTU CHAUD/FROID (MB12CF)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-mobile-coala-12000-btu-chaud-froid-mb12cf",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1579647859_230.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc & noir coala c"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_MB12CF.jpg"
+}

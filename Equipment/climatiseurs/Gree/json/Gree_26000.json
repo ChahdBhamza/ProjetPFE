@@ -1,0 +1,29 @@
+{
+    "clean_title": "Climatiseur Gree G-Boost Tropicalisé Smart Inverter 26000 BTU  Chaud & Froid Blanc",
+    "brand": "Gree",
+    "normalized_reference": "26000",
+    "capacity_btu": 26000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_26000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "3 549,000 DT",
+            "raw_title": "Climatiseur Gree G-Boost Tropicalisé Smart Inverter 26000 BTU  Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "Yes",
+        "Color": "Blanc"
+    }
+}

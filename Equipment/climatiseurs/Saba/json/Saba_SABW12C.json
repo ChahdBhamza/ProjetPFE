@@ -1,0 +1,30 @@
+{
+    "clean_title": "Saba  12000 BTU (SABW12C)",
+    "brand": "Saba",
+    "normalized_reference": "SABW12C",
+    "capacity_btu": 12000,
+    "primary_image": "https://zoom.com.tn/70275-large_default/climatiseur-saba-12000-btu-froid-blanc.jpg",
+    "description": "Offrez fraîcheur et confort à votre espace avec le Climatiseur Saba 12000 BTU Froid Blanc. Parfait pour affronter les journées chaudes. Capacité: 12000 BTU / Mode: Froid / Intensité de démarrage: 4.9A / Puissance absorbée: 1055W / Puissance absorbée Max (IEC60335): 1375W / Débit d'air: 550 m3/h / Tension minimale: 4.5MPa / Niveau de bruit: 50 dB(A) / Tension: 220-240V / Fréquence: 50Hz / Surface appropriée: 30-40 m2 / Classe Énergétique: 2 / Garantie 3 ans .",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1199.0,
+            "raw_title": "CLIMATISEUR SABA 12000 BTU FROID BLANC",
+            "url": "https://zoom.com.tn/climatiseur/17724-climatiseur-saba-12000-btu-froid-blanc.html",
+            "image_url": "https://zoom.com.tn/70275-large_default/climatiseur-saba-12000-btu-froid-blanc.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "50",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Saba/images/Saba_SABW12C.jpg"
+}

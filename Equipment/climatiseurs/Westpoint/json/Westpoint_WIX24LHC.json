@@ -1,0 +1,51 @@
+{
+    "clean_title": "Westpoint Inverter 24000 BTU (WIX-24.LHC)",
+    "brand": "Westpoint",
+    "normalized_reference": "WIX24LHC",
+    "capacity_btu": 24000,
+    "primary_image": "https://jumbo.tn/24303-home_default/climatiseur-westpoint-inverter-24000-btu-chaud-froid.jpg",
+    "description": "Le climatiseur Westpoint WIX-24.LHC (24 000 BTU) est la solution la plus puissante de la gamme Inverter, idéale pour les grands espaces (salons, bureaux, open-spaces) allant généralement de 32 à 47 m². Technologie Inverter : Son compresseur module sa puissance en continu pour maintenir une température constante. Cette technologie permet des économies d'énergie significatives (pouvant atteindre 50% selon les conditions d'utilisation) par rapport aux modèles classiques. Performance Tropicalisée : Conçu pour les climats exigeants, il reste opérationnel et efficace même lorsque la température extérieure atteint des niveaux élevés (jusqu'à 50°C ). Système Réversible (Chaud/Froid) : Il assure un confort thermique toute l'année : rafraîchissement performant en été et chauffage efficace en hiver. Type : Climatiseur split mural / Technologie : Inverter / Mode : Chaud, Froid / Capacité : 24 000 BTU / Surface recommandée : 32 à 47 m² / Tropicalisé / Gaz réfrigérant : R410A / Pression sonore : 46dBA (Haut), 37dBA (Bas) / Fonctions : Auto-nettoyage, mode silence, économie d’énergie / Affichage : LED / Dimensions intérieure ( Hx Lx P ) : 223 x 1030 x 319 mm / Dimensions extérieure ( Hx Lx P ) : 635 x 820 x 310 mm / Couleur : Blanc / Garantie : 7 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 3085.0,
+            "raw_title": "CLIMATISEUR WESTPOINT INVERTER 24000 BTU / CHAUD & FROID",
+            "url": "https://jumbo.tn/climatiseur/8923-climatiseur-westpoint-inverter-24000-btu-chaud-froid.html",
+            "image_url": "https://jumbo.tn/24303-home_default/climatiseur-westpoint-inverter-24000-btu-chaud-froid.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 3059.0,
+            "raw_title": "CLIMATISEUR WESTPOINT WIX-24.LHC 24000 BTU INVERTER TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18452-climatiseur-westpoint-wix-24lhc-24000-btu-inverter-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73924-large_default/climatiseur-westpoint-wix-24lhc-24000-btu-inverter-tropicalise-chaudfroid.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2989.0,
+            "raw_title": "WESTPOINT CLIMATISEUR INVERTER 24000 BTU CHAUD & FROID BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-inverter-24000-btu-chaud-and-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1723102244_582.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "2 999,000 DT",
+            "raw_title": "Climatiseur Westpoint Inverter 24000 BTU Chaud & Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "1025x 320x 235mm | 860x 720x 320mm",
+        "Weight": "14kg",
+        "Noise_Level": "46",
+        "Warranty": "5 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_WIX24LHC.jpg"
+}

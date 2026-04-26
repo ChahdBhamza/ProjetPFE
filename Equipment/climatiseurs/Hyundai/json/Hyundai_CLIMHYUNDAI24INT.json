@@ -1,0 +1,30 @@
+{
+    "clean_title": "Hyundai On/Off 24000 BTU (CLIM-HYUNDAI-24INT)",
+    "brand": "Hyundai",
+    "normalized_reference": "CLIMHYUNDAI24INT",
+    "capacity_btu": 24000,
+    "primary_image": "https://zoom.com.tn/64069-large_default/climatiseur-hyundai-24-000-btu-chaud-froid-onoff.jpg",
+    "description": "Climatiseur Hyundai 12000 BTU Chaud Froid ON/OFF\nDécouvrez l'ultime confort avec le\nClimatiseur Hyundai 24000 BTU Chaud Froid ON/OFF\n. Sa\npuissance de refroidissement de 24000 BTU\nle rend idéal pour les\ngrands espaces jusqu'à 45 m²\n. Son design raffiné et sa finition blanc éclatant en font un ajout élégant à tout intérieur.\nProfitez d'un contrôle total grâce à la télécommande intuitive, vous permettant de personnaliser les modes de fonctionnement et les températures selon vos préférences.\nSon système de filtration d'air avancé assure une purification optimale\n, créant ainsi un environnement frais et sain.\nTrouvez\nle meilleur prix en Tunisie\npour cet article sur\nZoom.com.tn\n,\nalliant performances exceptionnelles et économies\n. Bénéficiez également de\nnotre livraison rapide\net de\nnos options de paiement flexibles pour une expérience d'achat sans stress\n. Transformez votre maison en\nun oasis de fraîcheur\net de bien-être avec le\nClimatiseur Hyundai 24000 BTU Chaud Froid ON/OFF\n.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 2829.0,
+            "raw_title": "CLIMATISEUR HYUNDAI 24000 BTU CHAUD FROID ON/OFF",
+            "url": "https://zoom.com.tn/climatiseur/15152-climatiseur-hyundai-24-000-btu-chaud-froid-onoff.html",
+            "image_url": "https://zoom.com.tn/64069-large_default/climatiseur-hyundai-24-000-btu-chaud-froid-onoff.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "On/Off",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "50 Hz et utilise le gaz 410 A . Il présente un niveau de bruit de 40",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "2 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Hyundai/images/Hyundai_CLIMHYUNDAI24INT.jpg"
+}

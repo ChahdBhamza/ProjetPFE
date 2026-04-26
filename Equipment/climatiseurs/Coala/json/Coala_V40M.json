@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Non Inverter (V40M)",
+    "brand": "Coala",
+    "normalized_reference": "V40M",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721309101_769.jpg",
+    "description": "Ventilateur Murale COALA prix Tunisie Puissance :45W   Intensité: 0.35A Vitesse(r.p.m) : 800-1200  Nombre de pales : 3  Hauteur du sol : 600 mm  Poids : 2.5kg  Couleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 79.0,
+            "raw_title": "COALA VENTILATEUR V40M FIXATION MURALE BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/ventilateur-coala-v40m-fixation-murale-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721309101_769.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "2.5kg",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc coala ventilat"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_V40M.jpg"
+}

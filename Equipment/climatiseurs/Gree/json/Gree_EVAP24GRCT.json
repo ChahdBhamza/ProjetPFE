@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Inverter 24000 BTU (EVAP24GR-CT)",
+    "brand": "Gree",
+    "normalized_reference": "EVAP24GRCT",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657633157_171.jpg",
+    "description": "Unite Intereure Cassette Gree Inverter Multi-SPL - Capacité : 24000 BTU - Mode : Froid et Chaud / Turbo - Ultra silencieux - Fonction « I Feel » - Respecte l?environnement - Consommation minimale d?énergie - Résiste aux températures extrêmes - Nettoyage automatique",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 5769.0,
+            "raw_title": "GREE CASSETTE 24000 BTU INVERTER FROID & CHAUD",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/cassette-gree-24000-btu-inverter-froid-chaud",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657633157_171.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_EVAP24GRCT.jpg"
+}

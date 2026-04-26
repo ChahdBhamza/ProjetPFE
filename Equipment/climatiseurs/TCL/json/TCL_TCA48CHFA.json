@@ -1,0 +1,30 @@
+{
+    "clean_title": "TCL Non Inverter 48000 BTU (TCA-48CHFA)",
+    "brand": "TCL",
+    "normalized_reference": "TCA48CHFA",
+    "capacity_btu": 48000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721206281_136.webp",
+    "description": "Capacité: 48000 BTU \r\nMode: Chaud et Froid \r\nDébit d?Air: 1700 m3/h \r\nElimination de l?humidité: 4 Litres/h\r\nNiveau de bruit : 50db(A)\r\nSurface appropriée : 53/75 m2\r\nDimensions : 1776 x 415 x 540 mm \r\nDimension unité extérieure: 1030 × 1331 × 380 mm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 5989.0,
+            "raw_title": "TCL CLIMATISEUR ARMOIRE 48000BTU CHAUD & FROID - BLANC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-armoire-48000btu-chaud-and-froid-blanc",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721206281_136.webp"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "1776 x 415 x 540 mm | 1030 × 1331 × 380 mm",
+        "Weight": "Not found",
+        "Noise_Level": "50db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TCA48CHFA.webp"
+}

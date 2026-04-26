@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge-AI Comparison | Qwen vs Gemma 4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F172A;
+            --card: #1E293B;
+            --primary: #00C7BE;
+            --gemma: #A855F7;
+            --text: #F8FAFC;
+            --accent: #60A5FA;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #00C7BE 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upload-card {
+            background: var(--card);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            padding: 2rem;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #preview {
+            margin-top: 1rem;
+            max-width: 300px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .comparison-grid {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .model-card {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .model-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .qwen-badge { background: rgba(0, 199, 190, 0.1); color: var(--primary); }
+        .gemma-badge { background: rgba(168, 85, 247, 0.1); color: var(--gemma); }
+
+        .analysis-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-top: 1.5rem;
+            padding-left: 1rem;
+            border-left: 3px solid;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #0F172A;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .loader {
+            display: none;
+            margin: 2rem auto;
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--border);
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
+
+        nav { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+        .nav-link { color: var(--primary); text-decoration: none; font-size: 0.9rem; border: 1px solid var(--primary); padding: 8px 16px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:1rem;">
+            <a href="/" class="nav-link">🏠 DASHBOARD</a>
+            <a href="/ocr" class="nav-link">🏷️ OCR RAW</a>
+            <a href="/classic-ocr" class="nav-link" style="border-color: #F472B6; color: #F472B6;">📠 CLASSIC OCR</a>
+        </nav>
+        
+        <header class="header">
+            <h1>Expert Model Comparison</h1>
+            <p style="opacity: 0.7;">Qwen2.5-VL (3B) 🆚 Gemma 4 (E2B) | Edge-AI Vision</p>
+        </header>
+
+        <div class="upload-card">
+            <label class="upload-area" for="fileInput">
+                <span style="font-size: 3rem;">🦾</span>
+                <p>Upload Unit for Multi-Model Competitive Analysis</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <img id="preview">
+            </label>
+            <div id="loader" class="loader"></div>
+            <button id="searchBtn" class="btn">Start Competitive Analysis</button>
+        </div>
+
+        <div id="results" class="comparison-grid">
+            <!-- Qwen Column -->
+            <div class="model-card" style="border-top: 4px solid var(--primary);">
+                <span class="model-badge qwen-badge">QWEN2.5-VL</span>
+                <h3 style="margin-top: 0;">Vision Reasoning</h3>
+                <div id="qwenStatus"></div>
+                <div id="qwenAnalysis" class="analysis-text" style="border-color: var(--primary);"></div>
+            </div>
+
+            <!-- Gemma Column -->
+            <div class="model-card" style="border-top: 4px solid var(--gemma);">
+                <span class="model-badge gemma-badge">GEMMA 4</span>
+                <h3 style="margin-top: 0;">Vision Reasoning</h3>
+                <div id="gemmaStatus"></div>
+                <div id="gemmaAnalysis" class="analysis-text" style="border-color: var(--gemma);"></div>
+            </div>
+
+            <!-- Global Result -->
+            <div class="model-card" style="grid-column: span 2; margin-top: 2rem;">
+                <h3 style="margin-top: 0;">Technical Match (System-of-Record)</h3>
+                <div id="systemMatch"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const searchBtn = document.getElementById('searchBtn');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+
+        fileInput.onchange = e => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = f => {
+                    preview.src = f.target.result;
+                    preview.style.display = 'block';
+                    searchBtn.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        searchBtn.onclick = async () => {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('use_vlm', 'true');
+
+            loader.style.display = 'block';
+            searchBtn.style.display = 'none';
+            results.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/search', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || "Unknown analysis error");
+                }
+
+                loader.style.display = 'none';
+                results.style.display = 'grid';
+
+                const comp = data.verified_details;
+                
+                // Qwen Output
+                document.getElementById('qwenStatus').innerHTML = `
+                    <span style="color: ${comp.qwen.is_match_verified ? '#10B981' : '#EF4444'}; font-weight: 600;">
+                        ${comp.qwen.is_match_verified ? 'MATCH VERIFIED' : 'DISCREPANCY ALERT'}
+                    </span>
+                `;
+                document.getElementById('qwenAnalysis').textContent = comp.qwen.analysis;
+
+                // Gemma Output
+                document.getElementById('gemmaStatus').innerHTML = `
+                    <span style="color: ${comp.gemma.is_match_verified ? '#10B981' : '#EF4444'}; font-weight: 600;">
+                        ${comp.gemma.is_match_verified ? 'MATCH VERIFIED' : 'DISCREPANCY ALERT'}
+                    </span>
+                `;
+                document.getElementById('gemmaAnalysis').textContent = comp.gemma.analysis;
+
+                // Match
+                const item = data.vector_match.item;
+                document.getElementById('systemMatch').innerHTML = `
+                    <div style="font-weight: 600; font-size: 1.2rem; color: var(--primary);">${item.filename}</div>
+                    <p style="opacity: 0.7;">Database Brand: ${item.brand} | BTU: ${item.btu} | Confidence: ${(data.vector_match.confidence * 100).toFixed(1)}%</p>
+                `;
+
+            } catch (err) {
+                alert("Analysis Error: " + err.message);
+                loader.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

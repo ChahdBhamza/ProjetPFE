@@ -1,0 +1,30 @@
+{
+    "clean_title": "TCL  9000 BTU (CLIM-TCL-10)",
+    "brand": "TCL",
+    "normalized_reference": "CLIMTCL10",
+    "capacity_btu": 9000,
+    "primary_image": "https://zoom.com.tn/64060-large_default/climatiseur-tcl-9000-btu-chaudfroid-tac-09chsaxa91.jpg",
+    "description": "I Feel\nLe mode iFeel vous offre la possibilité d'ajuster la température ambiante grâce à un capteur intégré à la télécommande. Profitez d'un confort optimal grâce à une mesure précise et une répartition efficace de l'air dans la pièce.\nFlux d'air intelligent\nNotre système de climatisation révolutionnaire dirige l'air frais vers le haut, créant ainsi une sensation de rafraîchissement étendue, semblable à une douche. En revanche, l'air chaud est dirigé vers le bas pour offrir une chaleur enveloppante, comparable à celle d'une couverture. Cette distribution d'air uniforme garantit d'éviter les zones de chaleur étouffante ou de froid extrême.\nÉconomie d'énergie\nEnclenchez le mode Éco pour un réglage fixe et optimisé à 26℃, garantissant un rendement maximal. Conçu dans une optique de respect de l'environnement, ce mode vous permet de réaliser des économies sur vos factures d'électricité tout en maintenant une plage de température stable. Parfait pour une efficacité durable et sans tracas.\nMode veille\nLorsqu'il est activé, le mode veille fonctionne à une capacité réduite, maintenant ainsi une plage de température restreinte. Cette fonctionnalité assure une variation lente de la température sur de longues périodes, offrant un environnement de sommeil confortable tout en optimisant l'efficacité énergétique tout au long de la nuit.\nSécurité intégrée\nNotre conception centrée sur la sécurité est complétée par un boîtier de commande ignifuge, assurant des performances durables en toute tranquillité d'esprit.\nAuto-diagnostic\nEn cas de dysfonctionnement, le climatiseur affiche instantanément des informations sur l'écran, permettant ainsi un diagnostic rapide et une maintenance facile.\nRedémarrage automatique en cas de coupure de courant\nLe logiciel TCL permet de mémoriser les réglages actuels du climatiseur. En cas de coupure de courant soudaine, la routine de climatisation reprendra comme prévu dès que le courant sera rétabli.\nRafraîchissement à 5 vitesses\nSélectionnez un niveau d'intensité du vent de 1 à 5. Des réglages plus larges que ceux des concurrents standard vous permettent de régler une vitesse d'air parfaite et bien ajustée.",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1449.0,
+            "raw_title": "CLIMATISEUR TCL 9000 BTU  CHAUD/FROID (TAC-09CHSA/XA91)",
+            "url": "https://zoom.com.tn/climatiseur/8300-climatiseur-tcl-9000-btu-chaudfroid-tac-09chsaxa91.html",
+            "image_url": "https://zoom.com.tn/64060-large_default/climatiseur-tcl-9000-btu-chaudfroid-tac-09chsaxa91.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_CLIMTCL10.jpg"
+}

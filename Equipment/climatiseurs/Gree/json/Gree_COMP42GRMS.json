@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Inverter 42000 BTU (COMP42GR-MS)",
+    "brand": "Gree",
+    "normalized_reference": "COMP42GRMS",
+    "capacity_btu": 42000,
+    "primary_image": "https://jumbo.tn/22331-home_default/-unite-exterieur-clim-42000-btu-121-kw-gree-inverter-multi-split.jpg",
+    "description": "UNITE EXTERIEUR CLIM 42000  BTU  - Capacité : 24000 BTU - Mode : Froid et Chaud / Turbo - Puissance : 12.1 KW - Ultra silencieux - Fonction « I Feele » - Respecte l’environnement - Consommation minimale d’énergie - Résiste aux températures extrêmes - Nettoyage automatique - Couleur : Blanc - Garantie : 3ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 7959.0,
+            "raw_title": "UNITE EXTERIEUR CLIM 42000  BTU (12.1 KW) GREE INVERTER  MULTI-SPLIT",
+            "url": "https://jumbo.tn/climatiseur/8164--unite-exterieur-clim-42000-btu-121-kw-gree-inverter-multi-split.html",
+            "image_url": "https://jumbo.tn/22331-home_default/-unite-exterieur-clim-42000-btu-121-kw-gree-inverter-multi-split.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_COMP42GRMS.jpg"
+}

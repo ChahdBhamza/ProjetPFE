@@ -1,0 +1,30 @@
+{
+    "clean_title": "NewStar Inverter 12000 BTU (NS-12000CF-INV)",
+    "brand": "NewStar",
+    "normalized_reference": "NS12000CFINV",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720257986_386.webp",
+    "description": "Capacité: 12000 BTU \r\nMode: Chaud/Froid \r\nGaz réfrigérant: R410A \r\nPonts Forts : Afficheur LED | Mode veille | Forte déshumidification | Ailette en aluminium hydrophile | Turbo opération | Redémarrage automatique | Nettoyage automatique | Minuterie programmable 24 heures \r\nAlimentation: 220 -240 / 50Hz\r\nCouleur : Blanc",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1248.0,
+            "raw_title": "NEWSTAR CLIMATISEUR INVERTER 12000 BTU C/F",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/newstar/climatiseur-inverter-12000-btu-cf",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720257986_386.webp"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc newstar climat"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/NewStar/images/NewStar_NS12000CFINV.webp"
+}

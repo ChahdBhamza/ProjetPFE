@@ -1,0 +1,44 @@
+{
+    "clean_title": "Westpoint Inverter 9000 BTU (WIX-09.LHC)",
+    "brand": "Westpoint",
+    "normalized_reference": "WIX09LHC",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/24308-home_default/climatiseur-westpoint-inverter-9000-btu-chaud-froid-blanc.jpg",
+    "description": "Le Westpoint WIX-09.LHC est un modèle Inverter réversible de 9 000 BTU, idéal pour les surfaces de 12 à 18 m² . Ses trois atouts majeurs sont : Économie d'énergie : Grâce à sa technologie Inverter, il réduit la consommation électrique jusqu'à 40% en stabilisant la température sans redémarrages brusques. Haute résistance (Tropicalisé T3) : Conçu pour les chaleurs extrêmes, il garantit un refroidissement efficace même par 52°C extérieur. Polyvalence : Utilisable toute l'année, il offre un mode froid puissant et un mode chauffage efficace. Type : Climatiseur split mural / Technologie : Inverter / Mode : Chaud, Froid / Capacité : 9000 BTU / Surface recommandée : 12 à 18 m² / Tropicalisé / Gaz réfrigérant : R410A / Pression sonore : 37dBA (Haut), 25dBA (Bas) / Fonctions : Auto-nettoyage, mode silence, économie d’énergie / Affichage : LED / Dimensions intérieure ( Hx Lx P ) : 283 x 821 x 200 mm / Dimensions extérieure ( Hx Lx P ) : 540 x 830 x 325 mm / Couleur : Blanc / Garantie : 7 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1569.0,
+            "raw_title": "CLIMATISEUR WESTPOINT INVERTER 9000 BTU CHAUD & FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/8934-climatiseur-westpoint-inverter-9000-btu-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/24308-home_default/climatiseur-westpoint-inverter-9000-btu-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 1559.0,
+            "raw_title": "CLIMATISEUR WESTPOINT WIX-09.LHC 9000 BTU INVERTER TROPICALISÉ - CHAUD/FROID",
+            "url": "https://zoom.com.tn/climatiseur/18454-climatiseur-westpoint-wix-09lhc-9000-btu-inverter-tropicalise-chaudfroid.html",
+            "image_url": "https://zoom.com.tn/73928-large_default/climatiseur-westpoint-wix-09lhc-9000-btu-inverter-tropicalise-chaudfroid.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 599,000 DT",
+            "raw_title": "Climatiseur Westpoint Inverter 9000 BTU Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "Int: 283 cm | Ext: 540 cm",
+        "Weight": "Not found",
+        "Noise_Level": "37",
+        "Warranty": "5 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_WIX09LHC.jpg"
+}

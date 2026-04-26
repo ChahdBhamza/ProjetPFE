@@ -1,0 +1,30 @@
+{
+    "clean_title": "TCL Non Inverter 24000 BTU (TAC-24CSA)",
+    "brand": "TCL",
+    "normalized_reference": "TAC24CSA",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356628_509.jpg",
+    "description": "Climatiseur TCL ON / OFF- Type: Froid- Puissance: 24000 BTU- Gamme de tension: 198~242- Classe Energetique: 3 -Niveau sonore: 52 dB(A)- Dimensions nettes ( L x H x P): 1010 x 315 x 220 mm- Poids Net: 13 kg - Couleur: Blanc-",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2599.0,
+            "raw_title": "TCL CLIMATISEUR 24000 BTU FROID ON/OFF TAC-24CSA/XA41",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tcl/climatiseur-tcl-24000-btu-froid-on-off",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1559356628_509.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "3",
+        "Gas_Type": "Not found",
+        "Dimensions": "1010 x 315 x 220 mm",
+        "Weight": "13 kg",
+        "Noise_Level": "52 db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC24CSA.jpg"
+}

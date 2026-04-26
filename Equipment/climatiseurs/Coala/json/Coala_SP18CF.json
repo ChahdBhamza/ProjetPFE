@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Non Inverter 18000 BTU (SP18CF)",
+    "brand": "Coala",
+    "normalized_reference": "SP18CF",
+    "capacity_btu": 18000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524649989_215.jpg",
+    "description": "Climatiseur Coala R410 Chaud & Froid 18000 BTU Filtre Plazma Auto Nettoyage : Nettoyage automatique du climatiseur  Economie d'' énergie Niveau sonore réduit",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1469.0,
+            "raw_title": "COALA CLIMATISEUR R410 CHAUD & FROID 18000 BTU - SP18CF",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-coala-r410-chaud-froid-18000-btu",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524649989_215.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_SP18CF.jpg"
+}

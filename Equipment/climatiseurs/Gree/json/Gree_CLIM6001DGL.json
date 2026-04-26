@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Non Inverter 60000 BTU (CLIM-6001DGL)",
+    "brand": "Gree",
+    "normalized_reference": "CLIM6001DGL",
+    "capacity_btu": 60000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657625610_718.jpg",
+    "description": "Soufflante d?air turbo Dispositif de protection de la pompe contre les mouvements brusques Facilité de nettoyage du réservoir d'eau Deux méthodes de remplissage Réservoir d'eau de 60 litres Compartiment à glace Commande tactile Affichage LED 4 vitesses de ventilation Minuterie jusqu?à 15h Fonction de mémoire de mise hors tension Fonction d'oscillation",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 659.0,
+            "raw_title": "GREE CLIMEUR 60L",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climeur-gree-60l",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657625610_718.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CLIM6001DGL.jpg"
+}

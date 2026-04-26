@@ -1,0 +1,30 @@
+{
+    "clean_title": "Servicom Inverter 9000 BTU (9000BTU)",
+    "brand": "Servicom",
+    "normalized_reference": "9000BTU",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1539166273_654.jpg",
+    "description": "Climatiseur SPLIT MURAL INVERTER 9000 BTU",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1399.0,
+            "raw_title": "SERVICOM CLIMATISEUR SPLIT MURAL INVERTER 9000 BTU",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/servicom/servicom-split-mural-inverter-9000-btu",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1539166273_654.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Servicom/images/Servicom_9000BTU.jpg"
+}

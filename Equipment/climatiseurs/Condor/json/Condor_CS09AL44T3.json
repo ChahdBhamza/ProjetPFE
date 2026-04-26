@@ -1,0 +1,44 @@
+{
+    "clean_title": "Condor Inverter 9000 BTU (CS09-AL44T3)",
+    "brand": "Condor",
+    "normalized_reference": "CS09AL44T3",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/2891-home_default/climatiseur-condor-inverter-9000-btu-chaud-froid-blanc.jpg",
+    "description": "Climatiseur CONDOR Inverter Série ALPHA - Puissance: 9000 BTU  - Mode: Chaud/Froid  - Réfrigérant R410a - Type climatique: Tropical T3 - Économiser jusqu'au 75 % d'énergie grâce à l'option Eco- Gear - Superficie: 15-25m² - Dépoussiérage Intéligent 360° - Gaz Écologique - Fonction Turbo - Auto diagnostic - Redémarrage auto - Mode Sommeil confortable - Alimentation électrique : 220V-240V/50Hz - Couleur: Blanc -",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1379.0,
+            "raw_title": "CLIMATISEUR CONDOR INVERTER 9000 BTU CHAUD FROID / BLANC",
+            "url": "https://jumbo.tn/climatiseur/1037-climatiseur-condor-inverter-9000-btu-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/2891-home_default/climatiseur-condor-inverter-9000-btu-chaud-froid-blanc.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1349.0,
+            "raw_title": "CONDOR CLIMATISEUR ALPHA INVERTER 9000 BTU CHAUD/FROID - GARANTIE 3ANS",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/climatiseur-alpha-inverter-condor-9000-btu-chaud-froid-garantie-3ans",
+            "image_url": "Not found"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 399,000 DT",
+            "raw_title": "Climatiseur Condor CS09-AL44T3 Inverter 9000 BTU Chaud Froid - Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3ans",
+        "Smart": "No",
+        "Color": "Blanc climatiseur co"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Condor/images/Condor_CS09AL44T3.jpg"
+}

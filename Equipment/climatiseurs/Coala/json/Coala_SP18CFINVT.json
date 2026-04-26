@@ -1,0 +1,44 @@
+{
+    "clean_title": "Coala Inverter 18000 BTU (SP18CF-INVT)",
+    "brand": "Coala",
+    "normalized_reference": "SP18CFINVT",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/8744-home_default/climatiseur-coala-inverter-r410-chaud-froid-18000-btu.jpg",
+    "description": "Apportez confort et performance à votre espace avec le climatiseur Coala Inverter R410 18000 BTU . Conçu pour offrir une climatisation efficace et économe en énergie. Inverter / Chaud & Froid / Puissance : 18000 BTU / Filtre Plazma / Auto Nettoyage : Nettoyage automatique du climatiseur / Economie d' énergie jusqu'a 40 % / Niveau sonore réduit / Couleur : Gris / Garantie 3 ans . Technologie Inverter : Assure une température stable et réduit la consommation énergétique. Double fonction Chaud & Froid : Utilisable toute l'année, pour un confort optimal en été comme en hiver. Gaz R410 écologique : Respectueux de l'environnement tout en garantissant une performance élevée. Silencieux : Profitez d'une atmosphère paisible grâce à un fonctionnement discret.",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1799.0,
+            "raw_title": "CLIMATISEUR COALA INVERTER R410 CHAUD & FROID 18000 BTU",
+            "url": "https://jumbo.tn/climatiseur/3415-climatiseur-coala-inverter-r410-chaud-froid-18000-btu.html",
+            "image_url": "https://jumbo.tn/8744-home_default/climatiseur-coala-inverter-r410-chaud-froid-18000-btu.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": 1849.0,
+            "raw_title": "CLIMATISEUR COALA INVERTER R410 CHAUD & FROID 18000 BTU",
+            "url": "https://zoom.com.tn/climatiseur/17723-climatiseur-coala-inverter-r410-chaud-froid-18000-btu.html",
+            "image_url": "https://zoom.com.tn/70274-large_default/climatiseur-coala-inverter-r410-chaud-froid-18000-btu.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1849.0,
+            "raw_title": "COALA CLIMATISEUR 18000 BTU INVERTER R410 CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-18000-btu-inverter-r410-chaud-and-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721293955_252.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Gris"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_SP18CFINVT.jpg"
+}

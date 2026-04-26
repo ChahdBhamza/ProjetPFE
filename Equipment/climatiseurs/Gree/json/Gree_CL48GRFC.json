@@ -1,0 +1,44 @@
+{
+    "clean_title": "Gree Non Inverter 48000 BTU (CL48GR-FC)",
+    "brand": "Gree",
+    "normalized_reference": "CL48GRFC",
+    "capacity_btu": 48000,
+    "primary_image": "https://jumbo.tn/9816-home_default/climatiseur-gree-floor-ceilling-48000-btu-chaud-froid.jpg",
+    "description": "Climatiseur Gree Inverter Floor Ceilling Chaud & Froid / Puissance: 48000 BTU / Classe énergétique : A / Réfrigérant: R 410A / Type de gaz: 410 A  / Débit d'air puissant / Ventilateur multi-vitesse / Balayage automatique / Moteur et ventilateur facile d'entretien / Couleur: Blanc / Garantie: 3 ans, 6ans Moteur)",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 9799.0,
+            "raw_title": "CLIMATISEUR GREE FLOOR CEILLING 48000 BTU CHAUD-FROID",
+            "url": "https://jumbo.tn/climatiseur/3819-climatiseur-gree-floor-ceilling-48000-btu-chaud-froid.html",
+            "image_url": "https://jumbo.tn/9816-home_default/climatiseur-gree-floor-ceilling-48000-btu-chaud-froid.jpg"
+        },
+        {
+            "store": "zoom",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR GREE 48000 BTU INVERTER FLOOR CEILLING| CHAUD & FROID | CL48GR-FC",
+            "url": "https://zoom.com.tn/climatiseur/15659-climatiseur-gree-48000-btu-inverter-floor-ceilling-chaud-froid-cl48gr-fc.html",
+            "image_url": "https://zoom.com.tn/57494-large_default/climatiseur-gree-48000-btu-inverter-floor-ceilling-chaud-froid-cl48gr-fc.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "10 199,000 DT",
+            "raw_title": "Climatiseur Cassette GREE Inverter 48000 BTU ChaudFroid",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL48GRFC.jpg"
+}

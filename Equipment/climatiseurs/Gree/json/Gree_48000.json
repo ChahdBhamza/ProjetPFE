@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Gree 48000 BTU Inverter Gainable Blanc",
+    "brand": "Gree",
+    "normalized_reference": "48000",
+    "capacity_btu": 48000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_48000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "7 559,000 DT",
+            "raw_title": "Climatiseur Gree 48000 BTU Inverter Gainable Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "clean_title": "Condor Inverter 18000 BTU (CS18-AL44T3-I)",
+    "brand": "Condor",
+    "normalized_reference": "CS18AL44T3I",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/24545-home_default/climatiseur-condor-18000btu-cf-inverter-blanc-cs18-al44t3-i.jpg",
+    "description": "Le\nclimatiseur Condor Inverter 18 000 BTU\nassure un confort optimal en toute saison grâce à sa fonction\nchaud et froid\n, idéale pour rafraîchir en été et chauffer en hiver. Doté de la\ntechnologie Inverter\n, il offre des performances élevées tout en réduisant la consommation d’énergie, avec une\nclasse énergétique 2\n. Son\nmode Turbo\npermet d’atteindre rapidement la température souhaitée, tandis que le\nflux d’air 3D\ngarantit une diffusion homogène dans toute la pièce. Équipé d’un\nmode économique\net d’un\nmode sommeil confortable\n, il combine efficacité et bien-être au quotidien. Utilisant le\nréfrigérant écologique R410a\n, ce climatiseur intègre également une fonction\nauto-diagnostique\npour faciliter l’entretien. Il est couvert par une\ngarantie de 3 ans\n, avec\n6 ans sur le compresseur",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2099.0,
+            "raw_title": "CLIMATISEUR CONDOR 18000BTU C/F INVERTER / BLANC / CS18-AL44T3-I",
+            "url": "https://jumbo.tn/climatiseur/9002-climatiseur-condor-18000btu-cf-inverter-blanc-cs18-al44t3-i.html",
+            "image_url": "https://jumbo.tn/24545-home_default/climatiseur-condor-18000btu-cf-inverter-blanc-cs18-al44t3-i.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "2",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Condor/images/Condor_CS18AL44T3I.jpg"
+}

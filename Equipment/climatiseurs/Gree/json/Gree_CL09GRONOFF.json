@@ -1,0 +1,37 @@
+{
+    "clean_title": "Gree Non Inverter 9000 BTU (CL09GR-ONOFF)",
+    "brand": "Gree",
+    "normalized_reference": "CL09GRONOFF",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/30961-home_default/climatiseur-gree-9000btu-onoff-chaudfroid.jpg",
+    "description": "Climatiseur Mode\nChaud & Froid\n–\nClasse énergétique 1\n–\nUltra silencieux\n– Type de gaz :\nR410\n– Mode Turbo – Fonction « I Feel » – Respectueux de l’environnement – Consommation minimale d’énergie – Résistant aux températures extrêmes – Nettoyage automatique – Dimensions Unité Intérieure : 270 x 785 x 198 mm – Dimensions Unité Extérieure : 540 x 710 x 255 mm\nGarantie 3 ans + 6 ans moteur",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1459.0,
+            "raw_title": "CLIMATISEUR GREE 9000BTU ON/OFF CHAUD/FROID",
+            "url": "https://jumbo.tn/climatiseur/10997-climatiseur-gree-9000btu-onoff-chaudfroid.html",
+            "image_url": "https://jumbo.tn/30961-home_default/climatiseur-gree-9000btu-onoff-chaudfroid.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1419.0,
+            "raw_title": "GREE CLIMATISEUR 9000BTU CHAUD-FROID CL09GR-CF",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-gree-9000btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524577777_920.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "1",
+        "Gas_Type": "Not found",
+        "Dimensions": "270 x 785 x 198 mm | 540 x 710 x 255 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL09GRONOFF.jpg"
+}

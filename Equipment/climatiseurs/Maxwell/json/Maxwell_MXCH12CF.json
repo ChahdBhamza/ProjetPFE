@@ -1,0 +1,37 @@
+{
+    "clean_title": "Maxwell Non Inverter 12000 BTU (MX-CH12CF)",
+    "brand": "Maxwell",
+    "normalized_reference": "MXCH12CF",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524633803_461.jpg",
+    "description": "Climatiseur Maxwell 12 000 BTU - Chaud / Froid",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1529.0,
+            "raw_title": "MAXWELL CLIMATISEUR 12 000 BTU CHAUD/FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/maxwell/climatiseur-maxwell-12-000-btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1524633803_461.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 549,000 DT",
+            "raw_title": "Climatiseur Maxwell 12000 BTU Inverter Ultra Tropical Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "7 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Maxwell/images/Maxwell_MXCH12CF.jpg"
+}

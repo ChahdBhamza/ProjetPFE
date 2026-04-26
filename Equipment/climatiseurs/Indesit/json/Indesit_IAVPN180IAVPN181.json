@@ -1,0 +1,30 @@
+{
+    "clean_title": "Indesit Inverter 18000 BTU (IAVPN180-IAVPN181)",
+    "brand": "Indesit",
+    "normalized_reference": "IAVPN180IAVPN181",
+    "capacity_btu": 18000,
+    "primary_image": "https://jumbo.tn/31774-home_default/climatiseur-indesit-18000-btu-inverter-chaud-froid-blanc.jpg",
+    "description": "Profitez d’une puissance de climatisation optimale avec le climatiseur\nIndesit\nde\n18000 BTU\n, parfaitement adapté pour rafraîchir efficacement des espaces de 40 à 50 m². Grâce à son mode chaud et froid, il assure un confort idéal tout au long de l’année. Doté de la technologie Inverter et d’une classe énergétique 1, il garantit une performance élevée avec une consommation maîtrisée. Son système Split associé au réfrigérant R32 offre une solution plus écologique et performante. Pratique, il intègre une fonction d’auto-nettoyage pour maintenir un air sain au quotidien. Avec ses dimensions (unité intérieure : 800x560x280 mm / unité extérieure : 910x295x225 mm) et son design élégant en blanc, il s’intègre facilement à tous les espaces. Fiable et durable, ce climatiseur est couvert par une\ngarantie de 3 ans\npour une tranquillité totale",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 2049.0,
+            "raw_title": "CLIMATISEUR INDESIT 18000 BTU INVERTER CHAUD FROID BLANC",
+            "url": "https://jumbo.tn/climatiseur/11214-climatiseur-indesit-18000-btu-inverter-chaud-froid-blanc.html",
+            "image_url": "https://jumbo.tn/31774-home_default/climatiseur-indesit-18000-btu-inverter-chaud-froid-blanc.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud et froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R32",
+        "Dimensions": "800x560x280 mm | 910x295x225 mm",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Indesit/images/Indesit_IAVPN180IAVPN181.jpg"
+}

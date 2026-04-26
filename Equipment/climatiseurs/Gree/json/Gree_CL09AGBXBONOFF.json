@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Non Inverter 9000 BTU (CL09AGBXB-ONOFF)",
+    "brand": "Gree",
+    "normalized_reference": "CL09AGBXBONOFF",
+    "capacity_btu": 9000,
+    "primary_image": "https://jumbo.tn/31255-home_default/climatiseur-gree-9000-btu-chaud-froid-tropicalise.jpg",
+    "description": "Climatiseur Gree Tropicalisé -\nPuissance 9000 Btu\n-\nChaud & Froid - Fonction ” I Feel ”\n-\nDégivrage intelligent\n- 18ºC Rafraîchissement à température extérieure - Affichage de l’horloge - Mode sommeil confortable - 4 Vitesses du ventilateur - Diagnostique automatique - Nettoyage automatique - Fonctionnement automatique - Minuteur - Affichage LED - Prévention de l’air froid - Classe Climatique : T3 - Classe énergétique : 2 - Silencieux -\nGarantie 3 ans ( 6 Ans Moteur )",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1499.0,
+            "raw_title": "CLIMATISEUR GREE 9000 BTU CHAUD-FROID TROPICALISÉ",
+            "url": "https://jumbo.tn/climatiseur/7838-climatiseur-gree-9000-btu-chaud-froid-tropicalise.html",
+            "image_url": "https://jumbo.tn/31255-home_default/climatiseur-gree-9000-btu-chaud-froid-tropicalise.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "2",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL09AGBXBONOFF.jpg"
+}

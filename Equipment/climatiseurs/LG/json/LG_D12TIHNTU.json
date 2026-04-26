@@ -1,0 +1,30 @@
+{
+    "clean_title": "LG Inverter 12000 BTU (D12TIH-NTU)",
+    "brand": "LG",
+    "normalized_reference": "D12TIHNTU",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304433_666.jpg",
+    "description": "Compresseur Inverter Purification d'air Auto diagnostic Nettoyage automatique Démarrage à chaud Niveau acoustique: 50 dB Max  (Extérieur)   41 dB Max  (Intérieur)",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2599.0,
+            "raw_title": "LG CLIMATISEUR 12000BTU CH&FR INVERTER",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-lg-12000btu-chfr-inverter",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304433_666.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "50 db | 41 db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_D12TIHNTU.jpg"
+}

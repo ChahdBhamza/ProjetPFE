@@ -1,0 +1,30 @@
+{
+    "clean_title": "Biolux Inverter 12000 BTU (M.125CFVS)",
+    "brand": "Biolux",
+    "normalized_reference": "M125CFVS",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721293700_169.jpg",
+    "description": "Facilité de Paiement",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1499.0,
+            "raw_title": "BIOLUX CLIMATISEUR 12000 BTU INVERTER CHAUD/FROID SMART",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/biolux/climatiseur-12000-btu-inverter-chaudfroid-smart",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721293700_169.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "Yes",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Biolux/images/Biolux_M125CFVS.jpg"
+}

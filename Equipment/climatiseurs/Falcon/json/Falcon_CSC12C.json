@@ -1,0 +1,30 @@
+{
+    "clean_title": "Falcon Non Inverter 12000 BTU (CSC-12C)",
+    "brand": "Falcon",
+    "normalized_reference": "CSC12C",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495215_326.jpg",
+    "description": "Climatiseur Falcon Froid R410A - 12000 BTU - Classe énergétique 2 - EER/COP : 3.23 - Débit d’air: 550 m3/h - Niveaux sonores: 30-40 dB (A) - Dimensions (HxLxP): 795 x 255 x 540 mm - Poids: 520 g",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1049.0,
+            "raw_title": "FALCON CLIMATISEUR FROID 12000 BTU / R410A",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-falcon-12000-btu-chaud-froid-csc-12ch",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1495495215_326.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "2",
+        "Gas_Type": "R410A",
+        "Dimensions": "795 x 255 x 540 mm",
+        "Weight": "Not found",
+        "Noise_Level": "40 db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Falcon/images/Falcon_CSC12C.jpg"
+}

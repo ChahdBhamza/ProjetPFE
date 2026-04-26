@@ -1,0 +1,37 @@
+{
+    "clean_title": "BOSCH Inverter 12000 BTU (BOSCH12000BTUCF)",
+    "brand": "BOSCH",
+    "normalized_reference": "BOSCH12000BTUCF",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1625141586_559.jpg",
+    "description": "Marque : BOSCH Puissance frigorifique : 12000 Btu/h Puissances : 3.5 KW Fonctionnement : Réversible (chaud/froid)",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2119.0,
+            "raw_title": "BOSCH CLIMATISEUR MURAL INVERTER 12000 BTU CHAUD / FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/bosch/climatiseur-mural-bosch-inverter-12000-btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1625141586_559.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 999,000 DT",
+            "raw_title": "Climatiseur Bosch S5000I 12000 BTU Inverter Chaud & Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "2 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/BOSCH/images/BOSCH_BOSCH12000BTUCF.jpg"
+}

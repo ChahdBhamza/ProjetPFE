@@ -1,0 +1,30 @@
+{
+    "clean_title": "Gree Non Inverter 9000 BTU (CL09AGBXB)",
+    "brand": "Gree",
+    "normalized_reference": "CL09AGBXB",
+    "capacity_btu": 9000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721222901_237.jpg",
+    "description": "Le climatiseur gree 9000 BTU Tropicalisé on off assure un environnement confortable tout en conservant une consommation minimale d?énergie. Afin de satisfaire vous besoins. Fonction \" I Feel \" / Mode ?Turbo? / Dégivrage intelligent / -18ºC Rafraîchissement à température extérieure/ Affichage de l?horloge / Mode sommeil confortable / 4 Vitesses du ventilateur / Diagnostique automatique / Nettoyage automatique / Fonctionnement automatique / Minuteur / Affichage LED / Prévention de l?air froid / Silencieux / Garantie 6 ans pour le compresseur",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1379.0,
+            "raw_title": "GREE CLIMATISEUR 9000 BTU TROPICALISÉ ON OFF CHAUD/FROID (CL09AGBXB-ONOF)",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-9000-btu-tropicalise-on-off-chaudfroid-cl09agbxb-onof",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721222901_237.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "6 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL09AGBXB.jpg"
+}

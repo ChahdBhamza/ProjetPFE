@@ -1,0 +1,30 @@
+{
+    "clean_title": "LG Inverter 24000 BTU (D24TIH.UTU)",
+    "brand": "LG",
+    "normalized_reference": "D24TIHUTU",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304462_862.jpg",
+    "description": "Dual Inverter Compressor Purification de l'air  Nettoyage automatique  Autodiagnostic  Démarrage à chaud Dimensions: Unité interne: 83,7* 18,9* 30,2 cm Unité externe: 71,7* 48,3* 23 cm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 3899.0,
+            "raw_title": "LG CLIMATISEUR SLPIT INVERTER 24000BTU CH&FR",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/lg/climatiseur-slpit-lg-inverter-24000btu-chfr",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721304462_862.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/LG/images/LG_D24TIHUTU.jpg"
+}

@@ -1,0 +1,30 @@
+{
+    "clean_title": "HGE Non Inverter (HGE-OXYGENE)",
+    "brand": "HGE",
+    "normalized_reference": "HGEOXYGENE",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657788305_396.jpg",
+    "description": "Ventilateur HGE Pliable - Type de Pose: Sur Table - Puissance: 60 Watts - Vitesse de Rotation: 820-1500 Tr/min - Ampérage : 0.2A-0.26A - Alimentation: 220V - 50Hz - Ventilateur avec grille tournante - Allure élégante - Vitesse réglable - Ventilation silencieuse - Moteur protégé par soi même contre le sur échauffement - Economie d?energie - Avec dispositif de sécurité - Sleeping mode pour la sécurité au sommeil - Position variable",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 95.0,
+            "raw_title": "HGE VENTILATEUR DE TABLE -OXYGENE PLIANTE 60W",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-de-table-hge-hge-oxygene-pliante-60w",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657788305_396.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/HGE/images/HGE_HGEOXYGENE.jpg"
+}

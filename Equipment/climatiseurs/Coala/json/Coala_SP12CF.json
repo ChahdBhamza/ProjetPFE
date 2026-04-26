@@ -1,0 +1,30 @@
+{
+    "clean_title": "Coala Non Inverter 12000 BTU (SP12CF)",
+    "brand": "Coala",
+    "normalized_reference": "SP12CF",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1531761086_863.jpg",
+    "description": "Climatiseur COALA R410  Chaud & Froid - Modèle: SP12F - Capacité de Refroidissement: 12000 BTU  - Filtre Plazma - Auto Nettoyage : Nettoyage automatique du climatiseur - Economie d' énergie jusqu'a 40 %  - Niveau sonore réduit -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1249.0,
+            "raw_title": "COALA CLIMATISEUR R410 12000 BTU CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/coala/climatiseur-coala-r410-12000-btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1531761086_863.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Coala/images/Coala_SP12CF.jpg"
+}

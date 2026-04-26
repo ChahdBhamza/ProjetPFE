@@ -1,0 +1,37 @@
+{
+    "clean_title": "Biolux  60000 BTU (ECO60CF)",
+    "brand": "Biolux",
+    "normalized_reference": "ECO60CF",
+    "capacity_btu": 60000,
+    "primary_image": "https://www.tunisianet.com.tn/425810-large/climatiseur-armoire-biolux-60-000btu-chaudfroid-blanc-eco60cf.jpg",
+    "description": "Not found",
+    "availability": [
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR ARMOIRE BIOLUX 60000 BTU CHAUD/FROID / BLANC / ECO60CF",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/85403-climatiseur-armoire-biolux-60-000btu-chaudfroid-blanc-eco60cf.html",
+            "image_url": "https://www.tunisianet.com.tn/425810-large/climatiseur-armoire-biolux-60-000btu-chaudfroid-blanc-eco60cf.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "7 999,000 DT",
+            "raw_title": "Climatiseur Armoire Biolux ECO60CF 60000BTU Chaud Froid Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Not found",
+        "Mode": "Not found",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Biolux/images/Biolux_ECO60CF.jpg"
+}

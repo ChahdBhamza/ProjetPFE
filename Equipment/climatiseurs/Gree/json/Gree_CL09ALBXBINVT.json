@@ -1,0 +1,37 @@
+{
+    "clean_title": "Gree Inverter 9000 BTU (CL09ALBXB-INVT)",
+    "brand": "Gree",
+    "normalized_reference": "CL09ALBXBINVT",
+    "capacity_btu": 9000,
+    "primary_image": "https://zoom.com.tn/69848-large_default/climatiseur-gree-inverter-9000-btu-tropicalise-cl09gr-chaud-froid.jpg",
+    "description": "Le Climatiseur Gree Inverter 9000 BTU CL09GR offre un confort optimal toute l’année grâce à sa fonction chaud et froid . Équipé de la technologie Inverter , il régule automatiquement la puissance pour un refroidissement ou chauffage rapide et efficace, tout en réduisant la consommation d’énergie. Silencieux et performant , il assure une température agréable et stable dans vos pièces, et son design moderne s’intègre facilement à tout intérieur. Climatiseur Gree Inverter CL09ALBXB-INVT Tropicalisé / Capacité: 9000 BTU / Mode Turbo / Ultra Silencieux / Fonction: I feel / Respecte l’environnement / Consommation minimale d’énergie / Résiste aux températures Extrêmes / Nettoyage automatique / Garantie 6 ans pour le compresseur et 3 ans pour les autres pièces",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 1589.0,
+            "raw_title": "CLIMATISEUR GREE INVERTER 9000 BTU TROPICALISÉ CL09GR CHAUD & FROID",
+            "url": "https://zoom.com.tn/climatiseur/13048-climatiseur-gree-inverter-9000-btu-tropicalise-cl09gr-chaud-froid.html",
+            "image_url": "https://zoom.com.tn/69848-large_default/climatiseur-gree-inverter-9000-btu-tropicalise-cl09gr-chaud-froid.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 1499.0,
+            "raw_title": "GREE CLIMATISEUR INVERTER 9000 BTU TROPICALISÉ CL09GR CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/gree/climatiseur-inverter-9000-btu-tropicalise-cl09gr-chaud-and-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721223004_308.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "6 ans pour le compresseur et 3 ans pour les autres pièces",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Gree/images/Gree_CL09ALBXBINVT.jpg"
+}

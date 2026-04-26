@@ -1,0 +1,44 @@
+{
+    "clean_title": "Samsung Inverter 12000 BTU (WI-FI)",
+    "brand": "Samsung",
+    "normalized_reference": "WIFI",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.tunisianet.com.tn/466332-large/climatiseur-samsung-12-000-btu-inverter-chaud-froid-technologie-windfree.jpg",
+    "description": "Not found",
+    "availability": [
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR SAMSUNG 12 000 BTU / INVERTER / CHAUD FROID / WI-FI / TECHNOLOGIE WINDFREE",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/93305-climatiseur-samsung-12-000-btu-inverter-chaud-froid-technologie-windfree.html",
+            "image_url": "https://www.tunisianet.com.tn/466332-large/climatiseur-samsung-12-000-btu-inverter-chaud-froid-technologie-windfree.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR SAMSUNG 18 000 BTU / INVERTER / CHAUD FROID / WI-FI / TECHNOLOGIE WINDFREE",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/93309-climatiseur-samsung-18-000-btu-inverter-chaud-froid-wi-fi-technologie-windfree.html",
+            "image_url": "https://www.tunisianet.com.tn/466363-large/climatiseur-samsung-18-000-btu-inverter-chaud-froid-wi-fi-technologie-windfree.jpg"
+        },
+        {
+            "store": "tunisianet",
+            "price_tnd": null,
+            "raw_title": "CLIMATISEUR SAMSUNG 24 000 BTU / INVERTER / CHAUD FROID / WI-FI / TECHNOLOGIE WINDFREE",
+            "url": "https://www.tunisianet.com.tn/climatiseur-tunisie-chaud-froid/93310-climatiseur-samsung-24-000-btu-inverter-chaud-froid-wi-fi-technologie-windfree.html",
+            "image_url": "https://www.tunisianet.com.tn/466365-large/climatiseur-samsung-24-000-btu-inverter-chaud-froid-wi-fi-technologie-windfree.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans",
+        "Smart": "Yes",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Samsung/images/Samsung_WIFI.jpg"
+}

@@ -1,0 +1,27 @@
+{
+    "clean_title": "Climatiseur Inverter TCL 12000 BTU Chaud & Froid T3 Blanc",
+    "brand": "TCL",
+    "normalized_reference": "12000",
+    "capacity_btu": 12000,
+    "primary_image": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_12000.jpg",
+    "description": "Local product: Split",
+    "availability": [
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 529,000 DT",
+            "raw_title": "Climatiseur Inverter TCL 12000 BTU Chaud & Froid T3 Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud-Froid",
+        "Energy_Class": "Unknown",
+        "Gas_Type": "Unknown",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "3 ans"
+    }
+}

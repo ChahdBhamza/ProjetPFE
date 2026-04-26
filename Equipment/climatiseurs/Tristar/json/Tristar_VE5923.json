@@ -1,0 +1,30 @@
+{
+    "clean_title": "Tristar Non Inverter (VE-5923)",
+    "brand": "Tristar",
+    "normalized_reference": "VE5923",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657796350_717.jpg",
+    "description": "Type de ventilateur : Domestique    Nombre de vitesse :  2 vitesses de ventilation   Points forts :  Facile à déplacer en raison du poids modeste| Il oscille à 75 degrés pour rafraichir une plus grande zone | Sûr à utiliser avec des pieds antidérapants",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 85.0,
+            "raw_title": "TRISTAR VENTILATEUR BLANC - VE-5923",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tristar/tristar-ventilateur-blanc-ve-5923",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1657796350_717.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blanc"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Tristar/images/Tristar_VE5923.jpg"
+}

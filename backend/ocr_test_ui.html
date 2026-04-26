@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw OCR Terminal | DetectionAppPFE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020617;
+            --card: #0F172A;
+            --terminal: #1E293B;
+            --primary: #38BDF8;
+            --text: #F8FAFC;
+            --accent: #F472B6;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        nav {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #38BDF8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upload-zone {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: border-color 0.3s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+        }
+
+        #preview {
+            max-width: 400px;
+            max-height: 300px;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .terminals-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .terminal {
+            background: var(--terminal);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            min-height: 400px;
+        }
+
+        /* ... existing dots styles ... */
+
+        #vlmOutput, #classicOutput {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #CBD5E1;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin: 0;
+            overflow-y: auto;
+            max-height: 350px;
+        }
+
+        .vlm-label { color: var(--primary); }
+        .classic-label { color: var(--accent); }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #0EA5E9 100%);
+            color: #020617;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 2rem;
+            display: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.6);
+        }
+
+        .btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/" class="nav-link">🏠 DASHBOARD</a>
+            <a href="/edge" class="nav-link">⚡ EDGE-AI</a>
+            <a href="/classic-ocr" class="nav-link" style="border-color: #F472B6; color: #F472B6;">📠 CLASSIC OCR</a>
+        </nav>
+
+        <header class="header">
+            <h1>OCR Comparison Lab</h1>
+            <p style="opacity: 0.6;">VLM Intelligence vs. Legacy Text Recognition</p>
+        </header>
+
+        <div class="upload-zone">
+            <label for="fileInput" style="cursor:pointer;">
+                <div style="font-size: 3.5rem; margin-bottom: 1rem;">🖼️</div>
+                <p style="font-size: 1.2rem; margin-bottom: 5px;">Drop AC Image Here</p>
+                <p class="instruction">Upload a technical label or far-shot image to compare engines.</p>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;">
+            </label>
+            <img id="preview">
+            <br>
+            <button id="extractBtn" class="btn">🚀 RUN DUAL EXTRACTION</button>
+        </div>
+
+        <div class="terminals-container">
+            <!-- VLM TERMINAL -->
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="terminal-label vlm-label">Smart VLM Processor</span>
+                </div>
+                <pre id="vlmOutput">Ready for AI analysis...</pre>
+            </div>
+
+            <!-- CLASSIC TERMINAL -->
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="terminal-label classic-label">Classic Legacy Scan</span>
+                </div>
+                <pre id="classicOutput">Ready for raw text scan...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const extractBtn = document.getElementById('extractBtn');
+        const vlmOutput = document.getElementById('vlmOutput');
+        const classicOutput = document.getElementById('classicOutput');
+
+        fileInput.onchange = e => {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = f => {
+                    preview.src = f.target.result;
+                    preview.style.display = 'block';
+                    extractBtn.style.display = 'inline-block';
+                    vlmOutput.textContent = "Image ready.";
+                    classicOutput.textContent = "Image ready.";
+                }
+                reader.readAsDataURL(file);
+            }
+        };
+
+        extractBtn.onclick = async () => {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            extractBtn.disabled = true;
+            extractBtn.style.opacity = '0.5';
+            vlmOutput.innerHTML = '<span class="loading-text">>> ANALYZING SCENE...\n>> EXTRACTING METADATA...</span>';
+            classicOutput.innerHTML = '<span class="loading-text">>> STARTING TESSERACT...\n>> SCANNING PIXELS...</span>';
+
+            // Run both in parallel
+            const runVLM = async () => {
+                try {
+                    const response = await fetch('/api/ocr', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    vlmOutput.textContent = JSON.stringify(data, null, 2);
+                } catch (err) { vlmOutput.textContent = "VLM Service Offline."; }
+            };
+
+            const runClassic = async () => {
+                try {
+                    const response = await fetch('/api/ocr/classic', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    if (data.status === 'error') {
+                        classicOutput.textContent = "Error: " + (data.error || "Unknown Error");
+                    } else {
+                        classicOutput.textContent = data.raw_text || "No text found.";
+                    }
+                } catch (err) { classicOutput.textContent = "Classic Service Offline: " + err; }
+            };
+
+            await Promise.all([runVLM(), runClassic()]);
+            
+            extractBtn.disabled = false;
+            extractBtn.style.opacity = '1';
+        };
+    </script>
+</body>
+</html>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+    "clean_title": "Beko Non Inverter 12000 BTU (BITH120)",
+    "brand": "Beko",
+    "normalized_reference": "BITH120",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1008_1.jpg",
+    "description": "Climatiseur BEKO 12000 BTU Chaud / Froid, Modéle: BITH120 ,Filtre à charbon actif - Affichage numérique, Redémarrage automatique , Contrôle de température automatique ,  Mode nuit - Direction d?air automatique ( haut et bas) , Tropicalisé: 21°C ~48°C -",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1499.0,
+            "raw_title": "BEKO CLIMATISEUR 12000 BTU CHAUD - FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/beko/climatiseur-12000btu-chaud-froid-1008",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1008_1.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud / froid",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Beko/images/Beko_BITH120.jpg"
+}

@@ -1,0 +1,37 @@
+{
+    "clean_title": "TCL Inverter 12000 BTU (TAC-12CHSA/TPG11I)",
+    "brand": "TCL",
+    "normalized_reference": "TAC12CHSATPG11I",
+    "capacity_btu": 12000,
+    "primary_image": "https://jumbo.tn/19237-home_default/climatiseur-inverter-tcl-12000-btu-chaud-froid-garantie-3-ans.jpg",
+    "description": "Climatiseur TCL 12000 BTU - Inverter - Chaud & Froid - Surface appropriée: 30 m² - Classe Énergétique A+ - Débit d'air: 500 m3/h - Consommation d'énergie chaud/froid 1180 W / 1132 W - Minuterie 24 heures - Niveau sonore 39 dB - Dimensions: 777 x 250 x 205 mm -\nGarantie 3 ans",
+    "availability": [
+        {
+            "store": "jumbo",
+            "price_tnd": 1559.0,
+            "raw_title": "CLIMATISEUR INVERTER TCL 12000 BTU CHAUD & FROID / GARANTIE 3 ANS",
+            "url": "https://jumbo.tn/climatiseur/7008-climatiseur-inverter-tcl-12000-btu-chaud-froid-garantie-3-ans.html",
+            "image_url": "https://jumbo.tn/19237-home_default/climatiseur-inverter-tcl-12000-btu-chaud-froid-garantie-3-ans.jpg"
+        },
+        {
+            "store": "local_dataset",
+            "price_tnd": "1 529,000 DT",
+            "raw_title": "Climatiseur Inverter TCL 12000 BTU Chaud & Froid T3 Blanc",
+            "url": "local",
+            "image_url": "local"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "A+",
+        "Gas_Type": "Not found",
+        "Dimensions": "777 x 250 x 205 mm",
+        "Weight": "Not found",
+        "Noise_Level": "39 db",
+        "Warranty": "3 Ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/TCL/images/TCL_TAC12CHSATPG11I.jpg"
+}

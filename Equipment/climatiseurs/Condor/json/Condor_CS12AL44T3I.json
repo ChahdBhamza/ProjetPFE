@@ -1,0 +1,30 @@
+{
+    "clean_title": "Condor Inverter 12000 BTU (CS12-AL44T3-I)",
+    "brand": "Condor",
+    "normalized_reference": "CS12AL44T3I",
+    "capacity_btu": 12000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721046822_221.jpg",
+    "description": "Puissance en BTU :12000Mode : Chaud-Froid- Inverter : OuiWifi : NonAfficheur : OuiClasse énergétique : 2Niveau Sonore en dB : N/ACouleur : BlancPoints Forts : Turbo | Auto diagnostic `| Auto nettoyage | Redémarrage auto | Mode Sommeil confortable | Flux d?air 3D | Réfrigérant R410a (Gaz écologique)",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 1699.0,
+            "raw_title": "CONDOR CLIMATISEUR ALPHA INVERTER 12000 BTU/R410/T2",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/condor/climatiseur-alpha-inverter-12000-btur410t2",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1721046822_221.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Inverter",
+        "Mode": "Chaud",
+        "Energy_Class": "2NIVEAU",
+        "Gas_Type": "R410A",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Blancpoints forts :"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Condor/images/Condor_CS12AL44T3I.jpg"
+}

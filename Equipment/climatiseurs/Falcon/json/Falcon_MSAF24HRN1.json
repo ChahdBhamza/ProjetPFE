@@ -1,0 +1,30 @@
+{
+    "clean_title": "Falcon Non Inverter 24000 BTU (MSAF-24HRN1)",
+    "brand": "Falcon",
+    "normalized_reference": "MSAF24HRN1",
+    "capacity_btu": 24000,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720258430_925.jpg",
+    "description": "Débit d?air: 900 m3/h  Classe Énergétique: 3 EER/COP: 3,10/3,08  Niveau sonore unité intérieure : 42-46 dB Niveau sonore unité extérieure : 54dB  Dimensions:  Unité intérieure : 102,5* 32* 21 cm  Unité extérieure : 84* 34* 70,5 cm",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 2430.0,
+            "raw_title": "FALCON CLIMATISEUR 24000BTU CHAUD & FROID",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/flacon/climatiseur-falcon-24000btu-chaud-froid",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1720258430_925.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud & froid",
+        "Energy_Class": "3",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "46 db | 54db",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Falcon/images/Falcon_MSAF24HRN1.jpg"
+}

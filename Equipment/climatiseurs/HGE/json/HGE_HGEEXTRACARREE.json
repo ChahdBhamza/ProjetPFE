@@ -1,0 +1,29 @@
+{
+    "clean_title": "HGE Non Inverter (HGE-EXTRA-CARREE)",
+    "brand": "HGE",
+    "normalized_reference": "HGEEXTRACARREE",
+    "capacity_btu": null,
+    "primary_image": "Not found",
+    "description": "Ventilateur HGE Extra Carré - Type de Pose: Sur Table  - Puissance: 50 Watts - Vitesse de ventilateur:  3 vitesses Réglable - Vitesse de Rotation: 820-1100 Tr/min - Température: <= 85°C - Alimentation: 230V - 50Hz - Ampérage: 0.15A-0.19A - Avec dispositif de sécurité - Ventilateur avec grille tournante - Economie d'énergie - Moteur protégé par soi même contre le sur échauffement - Couleur: Noir",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 45.0,
+            "raw_title": "HGE VENTILATEUR DE TABLE EXTRA CARRÉ 50W - NOIR",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/hge/ventilateur-de-table-hge-extra-carre-50w-noir",
+            "image_url": "Not found"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Noir hge ventilateur"
+    }
+}

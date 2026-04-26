@@ -1,0 +1,30 @@
+{
+    "clean_title": "Tornado Non Inverter (TCF56WW)",
+    "brand": "Tornado",
+    "normalized_reference": "TCF56WW",
+    "capacity_btu": null,
+    "primary_image": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1630945323_876.png",
+    "description": "Vous êtes à la recherche d?un ventilateur de plafond moins cher ? Le Tornado TCF56WW devrait alors vous convenir. Cet appareil est capable de fonctionner selon 5 vitesses différentes que vous pouvez choisir à travers un sélecteur afin de régler le débit d?air. Commandez ce produit directement en ligne, sur Numedia, votre boutique la plus recommandée en Tunisie.",
+    "availability": [
+        {
+            "store": "mega",
+            "price_tnd": 99.0,
+            "raw_title": "TORNADO TCF56WW, VENTILATEUR DE PLAFOND 56\" À 5 VITESSES",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/tornado/tornado-tcf56ww-ventilateur-de-plafond-56-a-5-vitesses",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1630945323_876.png"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Not found",
+        "Energy_Class": "Not found",
+        "Gas_Type": "Not found",
+        "Dimensions": "Not found",
+        "Weight": "Not found",
+        "Noise_Level": "Not found",
+        "Warranty": "Not found",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Tornado/images/Tornado_TCF56WW.png"
+}

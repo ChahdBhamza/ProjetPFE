@@ -1,19 +1,7 @@
-# Backend
-backend/venv/
-backend/__pycache__/
-backend/*.pyc
-backend/.env
-backend/app/db.sqlite3
-
-# Frontend
-frontend/node_modules/
-frontend/.expo/
-frontend/dist/
-frontend/web-build/
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-
-# OS
+venv/
+.env
+__pycache__/
+*.pyc
 .DS_Store
-Thumbs.db
+# Optional: If you don't want to save the massive database folder to git, uncomment the line below:
+# qdrant_db/

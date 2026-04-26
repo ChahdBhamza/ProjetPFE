@@ -1,0 +1,44 @@
+{
+    "clean_title": "Westpoint  18000 BTU (WSM-18-LHEC)",
+    "brand": "Westpoint",
+    "normalized_reference": "WSM18LHEC",
+    "capacity_btu": 18000,
+    "primary_image": "https://zoom.com.tn/42723-large_default/climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec.jpg",
+    "description": "Climatiseur WESTPOINT R410A / Capacité: 18 000 BTU / Mode: Chaud & Froid / Classe énergétique: 1 / Intensité du courant froid/chaud: 7.1/6.7 A / Déshumidification: 1.4 litre/h / Débit d’air (L/M/H): 442/664/799 m3/h / Niveaux sonores (L/M/H): 30/37/44.5 Décibels / Dimensions: 715 x 194 x 285 mm / Garantie: 7 ans",
+    "availability": [
+        {
+            "store": "zoom",
+            "price_tnd": 3055.0,
+            "raw_title": "CLIMATISEUR WESTPOINT 18 000 BTU CHAUD & FROID WSM-18-LHEC",
+            "url": "https://zoom.com.tn/climatiseur/9321-climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec.html",
+            "image_url": "https://zoom.com.tn/42723-large_default/climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2250.0,
+            "raw_title": "WESTPOINT CLIMATISEUR 18 000 BTU CHAUD & FROID WSM-18-LHEC",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-18-000-btu-chaud-froid-wsm-18-lhec",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1623311969_610.jpg"
+        },
+        {
+            "store": "mega",
+            "price_tnd": 2249.0,
+            "raw_title": "WESTPOINT CLIMATISEUR CHAUD & FROID R410A 18000 BTU",
+            "url": "https://www.mega.tn/electromenager/climatisations/climatiseurs/westpoint/climatiseur-westpoint-chaud-froid-r410a-18000-btu",
+            "image_url": "https://www.mega.tn/assets/uploads/img/pr_climatisations/1523978234_302.jpg"
+        }
+    ],
+    "specs": {
+        "Technology": "Non Inverter",
+        "Mode": "Chaud/Froid",
+        "Energy_Class": "1",
+        "Gas_Type": "R410A",
+        "Dimensions": "715 x 194 x 285 mm",
+        "Weight": "36.5 kg",
+        "Noise_Level": "Not found",
+        "Warranty": "7 ans",
+        "Smart": "No",
+        "Color": "Not found"
+    },
+    "local_image_path": "C:/Users/chahd/Desktop/DetectionAppPFE/Equipment/climatiseurs/Westpoint/images/Westpoint_WSM18LHEC.jpg"
+}
