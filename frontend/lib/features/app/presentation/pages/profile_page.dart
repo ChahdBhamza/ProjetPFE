@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 
@@ -8,6 +9,10 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final String name = authProvider.fullName ?? "Cyber Operator";
+    final String email = authProvider.userEmail ?? "Access Denied";
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
@@ -66,10 +71,10 @@ class ProfilePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Chahd Operator', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+                            Text(name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
                             const SizedBox(height: 4),
                             Text(
-                              'ID: OP-7742 • Role: Supervisor',
+                              email,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
@@ -84,11 +89,11 @@ class ProfilePage extends StatelessWidget {
                   Container(height: 1, color: Colors.white.withOpacity(0.05)),
                   const SizedBox(height: 16),
                   Row(
-                    children: const [
+                    children: [
                       Expanded(child: _Stat(label: 'Uploads', value: '28')),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(child: _Stat(label: 'Detected', value: '84')),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       Expanded(child: _Stat(label: 'Saved', value: '41')),
                     ],
                   ),
@@ -119,7 +124,10 @@ class ProfilePage extends StatelessWidget {
               title: 'Sign out',
               subtitle: 'Return to login',
               trailing: const Icon(Icons.arrow_forward_rounded, color: Colors.white24),
-              onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/signin', (_) => false),
+              onTap: () {
+                authProvider.logout();
+                Navigator.pushNamedAndRemoveUntil(context, '/signin', (_) => false);
+              },
             ),
           ],
         ),

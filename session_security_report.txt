@@ -1,0 +1,47 @@
+# 🛡️ SECURITY & SESSION MANAGEMENT REPORT - DetectionAppPFE
+# Documenting technical implementations for Master's Thesis PFE
+
+================================================================================
+ARCHITECTURAL OVERVIEW: SESSION PERSISTENCE
+================================================================================
+The application utilizes the SharedPreferences API (Native Storage) to manage 
+user authentication state. This approach was chosen over web-based cookies 
+to ensure native platform security and performance.
+
+1. STORAGE MECHANISM:
+   - Data is stored in the application's private filesystem sandbox.
+   - On Android: /data/data/com.example.app/shared_prefs (XML format)
+   - On iOS: UserDefaults (Plist format)
+
+2. DATA SYNC:
+   - user_email: Cached locally to identify the session.
+   - full_name: Cached to provide immediate UI feedback without network latency.
+
+================================================================================
+SECURITY SENTINEL: AUTO-LOGOUT (AFK)
+================================================================================
+To protect sensitive inventory data, an "Inactivity Watchdog" was implemented 
+to monitor user engagement in real-time.
+
+1. DETECTION LOGIC:
+   - A global PointerListener wraps the entire AppShell.
+   - Every tap, scroll, or swipe triggers a "Timer Reset" signal.
+
+2. TIMEOUT ACTION:
+   - Default Timeout: 5 Minutes.
+   - Action: Wipe local cache + Force navigation to login screen.
+
+================================================================================
+GOOGLE OAUTH OPTIMIZATION
+================================================================================
+The Google Authentication flow was customized for the PFE defense:
+1. MANDATORY SIGN-OUT: Every login attempt forces a sign-out of the previous 
+   Google session. This enables the "Account Picker" HUD, allowing judges to 
+   see the multi-account capability of the system.
+
+2. BACKEND SYNC: Every Google Login triggers a "Neural Handshake" with the 
+   FastAPI backend to verify the user against the MongoDB Atlas cluster.
+
+================================================================================
+PREPARED FOR PFE DEFENSE • APRIL 2026
+================================================================================

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import 'dart:math' as math;
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
@@ -20,6 +22,19 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     super.initState();
     _scanningController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
     _auroraController = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
+    
+    // Auto-navigate after splash delay
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        if (authProvider.isAuthenticated) {
+          print("[Splash] Session detected. Bypassing login...");
+          Navigator.pushReplacementNamed(context, '/app');
+        } else {
+          print("[Splash] No session. Waiting for user input.");
+        }
+      }
+    });
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -18,6 +19,28 @@ class AuthProvider extends ChangeNotifier {
 
   bool get isAuthenticated => _userEmail != null;
 
+  AuthProvider() {
+    _loadSession();
+  }
+
+  /// Load session from SharedPreferences
+  Future<void> _loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    _userEmail = prefs.getString('user_email');
+    _fullName = prefs.getString('full_name');
+    if (_userEmail != null) {
+      print("[Auth] Session restored for: $_userEmail");
+      notifyListeners();
+    }
+  }
+
+  /// Save session to SharedPreferences
+  Future<void> _saveSession(String email, String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_email', email);
+    await prefs.setString('full_name', name);
+  }
+
   /// Register a new user in MongoDB
   Future<bool> signUp(String email, String password, String name) async {
     _isLoading = true;
@@ -30,6 +53,7 @@ class AuthProvider extends ChangeNotifier {
     if (result["success"] == true) {
       _userEmail = email;
       _fullName = name;
+      await _saveSession(email, name);
       notifyListeners();
       return true;
     } else {
@@ -51,6 +75,7 @@ class AuthProvider extends ChangeNotifier {
     if (result["success"] == true) {
       _userEmail = result["user"]["email"];
       _fullName = result["user"]["full_name"];
+      await _saveSession(_userEmail!, _fullName!);
       notifyListeners();
       return true;
     } else {
@@ -67,12 +92,18 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Force account picker by signing out first
+      await _googleSignIn.signOut();
+      
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
+        print("[Auth] Google Sign-In cancelled by user.");
         _isLoading = false;
         notifyListeners();
         return false; 
       }
+
+      print("[Auth] Google User detected: ${googleUser.email}");
 
       // Send Google details to backend for synchronization
       final result = await _apiService.googleSignIn(
@@ -83,6 +114,7 @@ class AuthProvider extends ChangeNotifier {
       if (result["success"] == true) {
         _userEmail = googleUser.email;
         _fullName = googleUser.displayName;
+        await _saveSession(_userEmail!, _fullName!);
         _isLoading = false;
         notifyListeners();
         return true;
@@ -101,7 +133,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    await _googleSignIn.signOut();
     _userEmail = null;
     _fullName = null;
     _errorMessage = null;

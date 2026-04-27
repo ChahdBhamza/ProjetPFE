@@ -4,7 +4,7 @@ import 'package:equipment_detection_app/features/app/data/models/detection_resul
 
 class ApiService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: "http://192.168.11.19:5000",
+    baseUrl: "http://192.168.85.148:8000",
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 15),
   ));
@@ -86,6 +86,7 @@ class ApiService {
   /// Authentication: Log in using Google OAuth
   Future<Map<String, dynamic>> googleSignIn(String email, String fullName) async {
     try {
+      print("DEBUG: Calling Backend at ${_dio.options.baseUrl}/api/auth/google");
       Response response = await _dio.post(
         "/api/auth/google",
         data: {

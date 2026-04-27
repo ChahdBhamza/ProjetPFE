@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:provider/provider.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import 'dart:math' as math;
 
 import '../../../../core/widgets/hud_widgets.dart';
@@ -17,6 +20,10 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin {
   int _index = 0;
   late AnimationController _bgController;
+  Timer? _inactivityTimer;
+
+  // Time in minutes before auto-logout
+  static const int _inactivityTimeoutMinutes = 5;
 
   static const _pages = <Widget>[
     EquipmentPage(),
@@ -31,67 +38,86 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
       vsync: this,
       duration: const Duration(seconds: 12),
     )..repeat();
+    _resetInactivityTimer();
+  }
+
+  void _resetInactivityTimer() {
+    _inactivityTimer?.cancel();
+    _inactivityTimer = Timer(const Duration(minutes: _inactivityTimeoutMinutes), _handleInactivity);
+  }
+
+  void _handleInactivity() {
+    print("[Sentinel] Inactivity detected. Signing out...");
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.logout();
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
+    }
   }
 
   @override
   void dispose() {
     _bgController.dispose();
+    _inactivityTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return CybersightAtmosphere(
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Stack(
-            children: [
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _bgController,
-                  builder: (context, child) => CustomPaint(
-                    painter: _DashboardWavePainter(t: _bgController.value),
+    return Listener(
+      onPointerDown: (_) => _resetInactivityTimer(),
+      child: CybersightAtmosphere(
+        child: SafeArea(
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: AnimatedBuilder(
+                    animation: _bgController,
+                    builder: (context, child) => CustomPaint(
+                      painter: _DashboardWavePainter(t: _bgController.value),
+                    ),
                   ),
                 ),
-              ),
-              Positioned.fill(
-                child: IndexedStack(index: _index, children: _pages),
-              ),
-            ],
-          ),
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: GlassContainer(
-              opacity: 0.07,
-              blur: 18,
-              borderRadius: 18,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: BottomNavigationBar(
-                currentIndex: _index,
-                onTap: (v) => setState(() => _index = v),
-                type: BottomNavigationBarType.fixed,
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                selectedItemColor: CybersightTheme.accent,
-                unselectedItemColor: Colors.white54,
-                showUnselectedLabels: true,
-                selectedFontSize: 11,
-                unselectedFontSize: 11,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.upload_rounded),
-                    label: 'Detect',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.inventory_2_outlined),
-                    label: 'Inventory',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.person_outline_rounded),
-                    label: 'Profile',
-                  ),
-                ],
+                Positioned.fill(
+                  child: IndexedStack(index: _index, children: _pages),
+                ),
+              ],
+            ),
+            bottomNavigationBar: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: GlassContainer(
+                opacity: 0.07,
+                blur: 18,
+                borderRadius: 18,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: BottomNavigationBar(
+                  currentIndex: _index,
+                  onTap: (v) => setState(() => _index = v),
+                  type: BottomNavigationBarType.fixed,
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  selectedItemColor: CybersightTheme.accent,
+                  unselectedItemColor: Colors.white54,
+                  showUnselectedLabels: true,
+                  selectedFontSize: 11,
+                  unselectedFontSize: 11,
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.upload_rounded),
+                      label: 'Detect',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.inventory_2_outlined),
+                      label: 'Inventory',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.person_outline_rounded),
+                      label: 'Profile',
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

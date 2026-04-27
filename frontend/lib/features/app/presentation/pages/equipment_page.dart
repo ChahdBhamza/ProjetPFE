@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import 'package:equipment_detection_app/core/design_system/cybersight_theme.dart';
 import 'package:equipment_detection_app/core/widgets/hud_widgets.dart';
 import 'package:equipment_detection_app/features/app/presentation/providers/detection_provider.dart';
+import 'package:equipment_detection_app/features/auth/presentation/providers/auth_provider.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
@@ -15,31 +15,8 @@ class EquipmentPage extends StatefulWidget {
   State<EquipmentPage> createState() => _EquipmentPageState();
 }
 
-class _EquipmentPageState extends State<EquipmentPage> with TickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late AnimationController _rotationController;
+class _EquipmentPageState extends State<EquipmentPage> {
   final ImagePicker _picker = ImagePicker();
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-    
-    _rotationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 15),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    _rotationController.dispose();
-    super.dispose();
-  }
 
   Future<void> _showPickOptions() async {
     final provider = context.read<DetectionProvider>();
@@ -52,29 +29,30 @@ class _EquipmentPageState extends State<EquipmentPage> with TickerProviderStateM
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('NEURAL INPUT SOURCE', style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2)),
+            const _SectionTitle('Neural Input Source'),
             const SizedBox(height: 24),
-            _PickOption(icon: Icons.camera_alt_outlined, label: 'SCAN VIA CAMERA', onTap: () => _handlePick(ImageSource.camera, provider)),
+            _ActionTile(
+              icon: Icons.camera_alt_outlined, 
+              title: 'Camera Scan', 
+              subtitle: 'Capture live equipment', 
+              onTap: () => _handlePick(ImageSource.camera, provider)
+            ),
             const SizedBox(height: 12),
-            _PickOption(icon: Icons.photo_library_outlined, label: 'SCAN VIA GALLERY', onTap: () => _handlePick(ImageSource.gallery, provider)),
-            const SizedBox(height: 12),
-            _PickOption(icon: Icons.videocam_outlined, label: 'RECORD VIDEO SCAN', onTap: () => _handlePick(ImageSource.camera, provider, isVideo: true)),
+            _ActionTile(
+              icon: Icons.photo_library_outlined, 
+              title: 'Gallery Scan', 
+              subtitle: 'Select from media library', 
+              onTap: () => _handlePick(ImageSource.gallery, provider)
+            ),
           ],
         ),
       ),
     );
   }
 
-  Future<void> _handlePick(ImageSource source, DetectionProvider provider, {bool isVideo = false}) async {
-    Navigator.pop(context); 
-    
-    XFile? file;
-    if (isVideo) {
-      file = await _picker.pickVideo(source: source);
-    } else {
-      file = await _picker.pickImage(source: source);
-    }
-
+  Future<void> _handlePick(ImageSource source, DetectionProvider provider) async {
+    Navigator.pop(context);
+    final XFile? file = await _picker.pickImage(source: source);
     if (file == null) return;
     provider.detectEquipment(File(file.path));
   }
@@ -82,459 +60,293 @@ class _EquipmentPageState extends State<EquipmentPage> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final detectionProvider = context.watch<DetectionProvider>();
+    final authProvider = context.watch<AuthProvider>();
     final isProcessing = detectionProvider.isLoading;
     final hasUpload = detectionProvider.capturedFile != null;
+    final String operatorName = authProvider.fullName ?? "Operator";
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. HEADER
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShaderMask(
-                      shaderCallback: (rect) => const LinearGradient(
-                        colors: [CybersightTheme.accent, Colors.white, CybersightTheme.accent2],
-                      ).createShader(rect),
-                      child: Text(
-                        'EQUIPMENT',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.w900,
-                          height: 1.0,
-                          fontSize: 42,
-                          letterSpacing: -1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'NEURAL RECOGNITION SYSTEM • V3.1',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white24,
-                        letterSpacing: 2.2,
-                      ),
-                    ),
-                  ],
-                ),
-                GlassContainer(
-                  width: 48,
-                  height: 48,
-                  opacity: 0.05,
-                  blur: 15,
-                  borderRadius: 14,
-                  child: const Icon(Icons.hub_outlined, color: CybersightTheme.accent, size: 20),
-                ),
-              ],
+            _TopBar(
+              title: 'Identify',
+              subtitle: 'WELCOME, ${operatorName.toUpperCase()}',
+              trailing: _StatusPill(
+                label: isProcessing ? 'SCANNING' : 'SYSTEM READY',
+                color: isProcessing ? CybersightTheme.warning : CybersightTheme.ok,
+              ),
             ),
-
-            const SizedBox(height: 40),
-
-            // 2. CIRCULAR SCANNER HUB
-            Center(
-              child: GestureDetector(
-                onTap: isProcessing ? null : _showPickOptions,
-                child: SizedBox(
-                  width: 280,
-                  height: 280,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Rotating Outer Ring
-                      RotationTransition(
-                        turns: _rotationController,
-                        child: CustomPaint(
-                          size: const Size(280, 280),
-                          painter: _HUDRingPainter(color: CybersightTheme.accent.withOpacity(0.2)),
-                        ),
-                      ),
-                      // Static Inner HUD
-                      CustomPaint(
-                        size: const Size(220, 220),
-                        painter: _HUDRingPainter(color: Colors.white10, dashCount: 40, strokeWidth: 1),
-                      ),
-                      // Viewfinder Corners
-                      const _HUDViewfinder(size: 200),
-                      
-                      // Central Sphere
-                      ScaleTransition(
-                        scale: Tween<double>(begin: 1.0, end: 1.05).animate(_pulseController),
-                        child: Container(
-                          width: 180,
-                          height: 180,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: CybersightTheme.accent.withOpacity(0.3), width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: CybersightTheme.accent.withOpacity(isProcessing ? 0.3 : 0.1),
-                                blurRadius: isProcessing ? 30 : 15,
-                                spreadRadius: isProcessing ? 5 : 0,
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Center(
-                              child: hasUpload
-                                  ? ClipOval(
-                                      child: Image.file(
-                                        detectionProvider.capturedFile!,
-                                        fit: BoxFit.cover,
-                                        width: 170,
-                                        height: 170,
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 170,
-                                      height: 170,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: RadialGradient(
-                                          colors: [
-                                            CybersightTheme.accent.withOpacity(0.1),
-                                            Colors.transparent,
-                                          ],
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.add_a_photo_outlined,
-                                            color: CybersightTheme.accent.withOpacity(0.5),
-                                            size: 40,
-                                          ),
-                                          const SizedBox(height: 12),
-                                          Text(
-                                            'INITIATE SCAN',
-                                            style: GoogleFonts.plusJakartaSans(
-                                              color: CybersightTheme.accent.withOpacity(0.7),
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 2,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            const SizedBox(height: 26),
+            
+            // MAIN SCANNER AREA
+            GestureDetector(
+              onTap: isProcessing ? null : _showPickOptions,
+              child: _ScannerHub(
+                isProcessing: isProcessing,
+                hasUpload: hasUpload,
+                capturedFile: detectionProvider.capturedFile,
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 26),
+            const _SectionTitle('Analysis Output'),
+            const SizedBox(height: 10),
 
-            // 3. NEURAL DATA OUTPUT
             if (isProcessing) ...[
-              _MetricRow(label: 'ENCRYPTION', value: 'ECC-256V3', progress: 0.9),
-              const SizedBox(height: 12),
-              _MetricRow(label: 'NEURAL SYNC', value: 'SYNCING...', progress: _pulseController.value),
-              const SizedBox(height: 32),
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'DECODING UNIT SIGNATURE...',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: CybersightTheme.accent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'RAG PIPELINE ACTIVE',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white24,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const _AnalysisProgress(label: 'Neural Handshake', progress: 0.4),
+              const SizedBox(height: 10),
+              const _AnalysisProgress(label: 'VLM Extraction', progress: 0.7),
             ] else if (detectionProvider.status == DetectionStatus.success && detectionProvider.result != null) ...[
-              // REAL AI RESULTS PANEL
-              CybersightCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('IDENTIFIED UNIT', style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 8, letterSpacing: 2)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: CybersightTheme.ok.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: CybersightTheme.ok.withOpacity(0.3)),
-                          ),
-                          child: Text(
-                            '${((detectionProvider.result!.vectorMatch?.confidence ?? 0) * 100).toInt()}% CONFIDENCE',
-                            style: GoogleFonts.plusJakartaSans(color: CybersightTheme.ok, fontSize: 8, fontWeight: FontWeight.w900),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      detectionProvider.result!.vectorMatch?.item.brand.toUpperCase() ?? 'UNKNOWN BRAND',
-                      style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
-                    ),
-                    Text(
-                      detectionProvider.result!.vectorMatch?.item.modelName ?? 'Model: Not Identified',
-                      style: GoogleFonts.plusJakartaSans(color: Colors.white60, fontSize: 13, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        _ResultMeta(label: 'CAPACITY', value: '${detectionProvider.result!.vectorMatch?.item.btu ?? "???"} BTU'),
-                        const SizedBox(width: 24),
-                        _ResultMeta(label: 'SERIAL', value: detectionProvider.result!.vectorMatch?.item.normalizedReference ?? 'GENERIC'),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              _IdentityCard(result: detectionProvider.result!),
+              const SizedBox(height: 16),
               GlowingButton(
                 label: 'SAVE TO INVENTORY',
                 onTap: () async {
                   final success = await detectionProvider.saveCurrentToInventory();
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: success ? CybersightTheme.ok : CybersightTheme.warning,
-                        content: Text(
-                          success ? 'DATABASE SYNC SUCCESSFUL' : 'SYNC FAILED - CHECK LINK',
-                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2),
-                        ),
-                      ),
+                      SnackBar(content: Text(success ? 'SYNC SUCCESSFUL' : 'SYNC FAILED')),
                     );
                   }
                 },
               ),
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => detectionProvider.reset(),
-                child: Center(
-                  child: Text(
-                    'RESET SCANNER',
-                    style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2),
-                  ),
+              Center(
+                child: TextButton(
+                  onPressed: () => detectionProvider.reset(),
+                  child: const Text('RESET SCANNER', style: TextStyle(color: Colors.white24, fontSize: 10, letterSpacing: 2)),
                 ),
               ),
             ] else if (detectionProvider.status == DetectionStatus.error) ...[
-              // ERROR PANEL
-              CybersightCard(
-                child: Column(
-                  children: [
-                    const Icon(Icons.error_outline_rounded, color: CybersightTheme.warning, size: 32),
-                    const SizedBox(height: 16),
-                    Text(
-                      'NEURAL LINK INTERRUPTED',
-                      style: GoogleFonts.plusJakartaSans(color: CybersightTheme.warning, fontWeight: FontWeight.w900, fontSize: 12),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      detectionProvider.errorMessage ?? 'Unexpected server error.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 10),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () => detectionProvider.reset(),
-                      child: Text('TRY AGAIN', style: GoogleFonts.plusJakartaSans(color: CybersightTheme.accent, fontSize: 11, fontWeight: FontWeight.w900)),
-                    ),
-                  ],
-                ),
-              ),
+              _ErrorCard(message: detectionProvider.errorMessage ?? "Link Error", onRetry: () => detectionProvider.reset()),
             ] else ...[
-              // IDLE PANEL
-              const _MetricRow(label: 'ENCRYPTION', value: 'WAITING...', progress: 0),
-              const SizedBox(height: 12),
-              const _MetricRow(label: 'NEURAL SYNC', value: 'DISCONNECTED', progress: 0),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// UI HELPERS (KEEPING EXISTING STYLES)
-
-class _PickOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _PickOption({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: GlassContainer(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-          opacity: 0.05,
-          child: Row(
-            children: [
-              Icon(icon, color: CybersightTheme.accent, size: 24),
-              const SizedBox(width: 20),
-              Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 1.5)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ResultMeta extends StatelessWidget {
-  final String label;
-  final String value;
-  const _ResultMeta({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 7, letterSpacing: 1.5)),
-        const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w800)),
-      ],
-    );
-  }
-}
-
-class _MetricRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final double progress;
-  const _MetricRow({required this.label, required this.value, required this.progress});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 8, letterSpacing: 2)),
-            Text(value, style: GoogleFonts.plusJakartaSans(color: CybersightTheme.accent.withOpacity(0.8), fontWeight: FontWeight.w900, fontSize: 9)),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Stack(
-          children: [
-            Container(height: 2, width: double.infinity, color: Colors.white.withOpacity(0.05)),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: 2,
-              width: MediaQuery.of(context).size.width * 0.9 * progress,
-              decoration: BoxDecoration(
-                color: CybersightTheme.accent,
-                boxShadow: [BoxShadow(color: CybersightTheme.accent.withOpacity(0.5), blurRadius: 4)],
+              const _ActionTile(
+                icon: Icons.auto_awesome_outlined,
+                title: 'Start Analysis',
+                subtitle: 'Tap the hub to begin equipment scan',
+                onTap: null,
               ),
-            ),
+            ],
           ],
         ),
-      ],
+      ),
     );
   }
 }
 
-class _HUDRingPainter extends CustomPainter {
-  final Color color;
-  final int dashCount;
-  final double strokeWidth;
-  _HUDRingPainter({required this.color, this.dashCount = 60, this.strokeWidth = 2});
+// --- INTERNAL COMPONENTS ---
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
+class _ScannerHub extends StatelessWidget {
+  final bool isProcessing;
+  final bool hasUpload;
+  final File? capturedFile;
 
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-
-    const dashWidth = 2 * 3.14159 / 100;
-    for (int i = 0; i < dashCount; i++) {
-      if (i % 5 == 0) continue;
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * (2 * 3.14159 / dashCount),
-        dashWidth,
-        false,
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _HUDViewfinder extends StatelessWidget {
-  final double size;
-  const _HUDViewfinder({required this.size});
+  const _ScannerHub({required this.isProcessing, required this.hasUpload, this.capturedFile});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
+    return GlassContainer(
+      height: 200,
+      opacity: 0.05,
+      blur: 22,
+      borderRadius: 24,
       child: Stack(
         children: [
-          Positioned(top: 0, left: 0, child: _HUDCorner(angle: 0)),
-          Positioned(top: 0, right: 0, child: _HUDCorner(angle: 1.5708)),
-          Positioned(bottom: 0, left: 0, child: _HUDCorner(angle: 4.7124)),
-          Positioned(bottom: 0, right: 0, child: _HUDCorner(angle: 3.14159)),
+          if (hasUpload)
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.4,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.file(capturedFile!, fit: BoxFit.cover),
+                ),
+              ),
+            ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GlassContainer(
+                  width: 56,
+                  height: 56,
+                  opacity: 0.05,
+                  blur: 22,
+                  borderRadius: 999,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
+                    ),
+                    child: Icon(
+                      isProcessing ? Icons.autorenew_rounded : (hasUpload ? Icons.check_rounded : Icons.cloud_upload_outlined),
+                      color: Colors.black,
+                      size: 26,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  isProcessing ? 'PROCESSING...' : (hasUpload ? 'SCAN COMPLETE' : 'INITIATE NEURAL SCAN'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _HUDCorner extends StatelessWidget {
-  final double angle;
-  const _HUDCorner({required this.angle});
+class _IdentityCard extends StatelessWidget {
+  final dynamic result;
+  const _IdentityCard({required this.result});
 
   @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: angle,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(color: CybersightTheme.accent.withOpacity(0.5), width: 3),
-            left: BorderSide(color: CybersightTheme.accent.withOpacity(0.5), width: 3),
+    return CybersightCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('IDENTIFIED UNIT', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 8, letterSpacing: 2)),
+          const SizedBox(height: 12),
+          Text(result.vectorMatch?.item.brand.toUpperCase() ?? 'UNKNOWN', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          Text(result.vectorMatch?.item.modelName ?? 'No model data', style: const TextStyle(color: Colors.white60)),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBar extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Widget trailing;
+  const _TopBar({required this.title, required this.subtitle, required this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.w900, fontSize: 42, height: 1.0)),
+              const SizedBox(height: 6),
+              Text(subtitle, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, letterSpacing: 3.0, fontSize: 9)),
+            ],
           ),
         ),
+        trailing,
+      ],
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _StatusPill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: Colors.white.withOpacity(0.03),
+        border: Border.all(color: color.withOpacity(0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 8, height: 8, decoration: BoxDecoration(shape: BoxShape.circle, color: color)),
+          const SizedBox(width: 10),
+          Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10, letterSpacing: 1.8)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback? onTap;
+  const _ActionTile({required this.icon, required this.title, required this.subtitle, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassContainer(
+        opacity: 0.04,
+        borderRadius: 18,
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Icon(icon, color: CybersightTheme.accent, size: 24),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Text(text.toUpperCase(), style: const TextStyle(color: Colors.white24, letterSpacing: 3, fontSize: 9));
+  }
+}
+
+class _AnalysisProgress extends StatelessWidget {
+  final String label;
+  final double progress;
+  const _AnalysisProgress({required this.label, required this.progress});
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: const TextStyle(color: Colors.white24, fontSize: 8, letterSpacing: 2)),
+        const SizedBox(height: 6),
+        LinearProgressIndicator(value: progress, backgroundColor: Colors.white10, color: CybersightTheme.accent, minHeight: 2),
+      ],
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorCard({required this.message, required this.onRetry});
+  @override
+  Widget build(BuildContext context) {
+    return CybersightCard(
+      child: Column(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: CybersightTheme.warning),
+          const SizedBox(height: 10),
+          Text(message, style: const TextStyle(color: Colors.white70)),
+          TextButton(onPressed: onRetry, child: const Text('RETRY')),
+        ],
       ),
     );
   }
