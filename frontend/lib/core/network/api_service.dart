@@ -1,28 +1,25 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import '../data/models/detection_result_model.dart';
 
 class ApiService {
-  // Use your local IP so the mobile device/emulator can reach the backend
-  static const String baseUrl = "http://192.168.100.5:8000";
-  
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
-  ));
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: 'http://192.168.100.5:8000',
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+    ),
+  );
 
-  /// Uploads an image to the /search endpoint and returns the detection results.
-  Future<Map<String, dynamic>> searchEquipment(File imageFile) async {
+  /// Uploads an image to the backend and returns the parsed detection result
+  Future<DetectionResponse> searchEquipment(File imageFile) async {
     try {
       String fileName = imageFile.path.split('/').last;
       
       FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(
-          imageFile.path, 
-          filename: fileName,
-        ),
-        "use_vlm": "true", // Enable high-accuracy mode
-        "use_openai": "false", // Use Gemini by default
+        "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
+        "use_vlm": false,
+        "use_openai": false,
       });
 
       Response response = await _dio.post(
@@ -30,10 +27,13 @@ class ApiService {
         data: formData,
       );
 
-      return response.data as Map<String, dynamic>;
-    } on DioException catch (e) {
-      print("API Error: ${e.message}");
-      rethrow;
+      if (response.statusCode == 200) {
+        return DetectionResponse.fromJson(response.data);
+      } else {
+        throw Exception('Server Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to connect to backend: $e');
     }
   }
 }

@@ -1,7 +1,25 @@
-venv/
-.env
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.env
+*.log
+
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.lock
+.metadata
+
+# Database
+qdrant_db/
+
+# OS
 .DS_Store
-# Optional: If you don't want to save the massive database folder to git, uncomment the line below:
-# qdrant_db/
+Thumbs.db

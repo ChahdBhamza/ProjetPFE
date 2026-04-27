@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
-import '../../../../core/network/api_service.dart';
+import '../../../auth/presentation/widgets/auth_widgets.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
@@ -13,90 +15,253 @@ class EquipmentPage extends StatefulWidget {
   State<EquipmentPage> createState() => _EquipmentPageState();
 }
 
-class _EquipmentPageState extends State<EquipmentPage> {
+class _EquipmentPageState extends State<EquipmentPage> with TickerProviderStateMixin {
   bool _hasUpload = false;
   bool _isProcessing = false;
+  File? _selectedFile;
+  late AnimationController _pulseController;
+  late AnimationController _rotationController;
+  final ImagePicker _picker = ImagePicker();
 
-  Future<void> _mockUploadAndDetect() async {
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showPickOptions() async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GlassContainer(
+        borderRadius: 24,
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('NEURAL INPUT SOURCE', style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 2)),
+            const SizedBox(height: 24),
+            _PickOption(icon: Icons.camera_alt_outlined, label: 'SCAN VIA CAMERA', onTap: () => _handlePick(ImageSource.camera)),
+            const SizedBox(height: 12),
+            _PickOption(icon: Icons.photo_library_outlined, label: 'SCAN VIA GALLERY', onTap: () => _handlePick(ImageSource.gallery)),
+            const SizedBox(height: 12),
+            _PickOption(icon: Icons.videocam_outlined, label: 'RECORD VIDEO SCAN', onTap: () => _handlePick(ImageSource.camera, isVideo: true)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handlePick(ImageSource source, {bool isVideo = false}) async {
+    Navigator.pop(context); // Close bottom sheet
+    
+    XFile? file;
+    if (isVideo) {
+      file = await _picker.pickVideo(source: source);
+    } else {
+      file = await _picker.pickImage(source: source);
+    }
+
+    if (file == null) return;
+
     setState(() {
+      _selectedFile = File(file!.path);
       _hasUpload = true;
       _isProcessing = true;
     });
-    await Future<void>.delayed(const Duration(seconds: 2));
+
+    // Mock processing for now as requested
+    await Future<void>.delayed(const Duration(seconds: 3));
     if (!mounted) return;
     setState(() => _isProcessing = false);
+  }
+
+  Future<void> _mockUploadAndDetect() async {
+    _showPickOptions();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _TopBar(
-              title: 'Equipment\nDetection',
-              subtitle: 'UPLOAD • ANALYZE • SAVE',
-              trailing: _StatusPill(
-                label: _isProcessing ? 'ANALYZING' : 'READY',
-                color: _isProcessing ? CybersightTheme.warning : CybersightTheme.accent,
-              ),
+            // 1. DYNAMIC CYBER HEADER
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (rect) => const LinearGradient(
+                        colors: [CybersightTheme.accent, Colors.white, CybersightTheme.accent2],
+                      ).createShader(rect),
+                      child: Text(
+                        'EQUIPMENT',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
+                          fontSize: 32,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'NEURAL DETECTION CORE',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white24,
+                        letterSpacing: 2.8,
+                      ),
+                    ),
+                  ],
+                ),
+                _StatusPill(
+                  label: _isProcessing ? 'SCANNING' : 'ONLINE',
+                  color: _isProcessing ? CybersightTheme.warning : CybersightTheme.ok,
+                ),
+              ],
             ),
-            const SizedBox(height: 18),
-            GlassContainer(
-              opacity: 0.05,
-              blur: 18,
-              borderRadius: 24,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            
+            const SizedBox(height: 32),
+
+            // 2. HOLOGRAPHIC SCANNER ZONE
+            Center(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    'Upload a photo (not realtime)',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 20,
+                  // Rotating HUD Rings
+                  AnimatedBuilder(
+                    animation: _rotationController,
+                    builder: (context, child) {
+                      return Transform.rotate(
+                        angle: _rotationController.value * 2 * math.pi,
+                        child: CustomPaint(
+                          size: const Size(260, 260),
+                          painter: _ScannerRingsPainter(
+                            color: _isProcessing ? CybersightTheme.warning : CybersightTheme.accent,
+                          ),
                         ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'We’ll send it to the Python backend for detection and return labels + confidence.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white60),
-                  ),
-                  const SizedBox(height: 18),
-                  _DropZone(
-                    hasUpload: _hasUpload,
-                    isProcessing: _isProcessing,
+                  
+                  // Central Interaction Sphere
+                  GestureDetector(
                     onTap: _mockUploadAndDetect,
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActionTile(
-                          icon: Icons.photo_library_outlined,
-                          title: 'Gallery',
-                          subtitle: 'Pick image',
-                          onTap: _mockUploadAndDetect,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _ActionTile(
-                          icon: Icons.camera_alt_outlined,
-                          title: 'Camera',
-                          subtitle: 'Take photo',
-                          onTap: _mockUploadAndDetect,
-                        ),
-                      ),
-                    ],
+                    child: AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        final glow = _pulseController.value * 15.0;
+                        return Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.03),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_isProcessing ? CybersightTheme.warning : CybersightTheme.accent).withOpacity(0.15),
+                                blurRadius: 20 + glow,
+                                spreadRadius: -2,
+                              ),
+                            ],
+                            border: Border.all(
+                              color: (_isProcessing ? CybersightTheme.warning : CybersightTheme.accent).withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: ClipOval(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                if (_selectedFile != null)
+                                  Positioned.fill(
+                                    child: Image.file(
+                                      _selectedFile!,
+                                      fit: BoxFit.cover,
+                                      color: _isProcessing ? Colors.black.withOpacity(0.5) : null,
+                                      colorBlendMode: BlendMode.darken,
+                                    ),
+                                  ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      _isProcessing ? Icons.radar_rounded : Icons.camera_rounded,
+                                      color: _isProcessing ? CybersightTheme.warning : CybersightTheme.accent,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      _isProcessing ? 'DECODING' : 'INITIATE',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white70,
+                                        letterSpacing: 2.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            _ResultPanel(isProcessing: _isProcessing, hasUpload: _hasUpload),
+
+            const SizedBox(height: 40),
+
+            // 3. ACTION CONTROLS
+            Row(
+              children: [
+                Expanded(
+                  child: _NeuralActionBtn(
+                    icon: Icons.photo_library_outlined,
+                    label: 'SOURCE LIBRARY',
+                    onTap: _mockUploadAndDetect,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _NeuralActionBtn(
+                    icon: Icons.videocam_outlined,
+                    label: 'LIVE UPLINK',
+                    onTap: _mockUploadAndDetect,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // 4. ANALYTICS CARD
+            _AnalyticsPanel(isProcessing: _isProcessing, hasUpload: _hasUpload),
           ],
         ),
       ),
@@ -104,396 +269,159 @@ class _EquipmentPageState extends State<EquipmentPage> {
   }
 }
 
-class _ResultPanel extends StatelessWidget {
-  final bool isProcessing;
-  final bool hasUpload;
-  const _ResultPanel({required this.isProcessing, required this.hasUpload});
+class _ScannerRingsPainter extends CustomPainter {
+  final Color color;
+  _ScannerRingsPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = color.withOpacity(0.2);
+
+    // Outer faint ring
+    canvas.drawCircle(center, size.width / 2, paint);
+    
+    // Segmented ring
+    paint.color = color.withOpacity(0.5);
+    paint.strokeWidth = 2.5;
+    for (int i = 0; i < 4; i++) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: size.width / 2 - 10),
+        (i * math.pi / 2) + 0.2,
+        0.8,
+        false,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _NeuralActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _NeuralActionBtn({required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      opacity: 0.045,
-      blur: 18,
-      borderRadius: 24,
-      padding: const EdgeInsets.all(18),
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassContainer(
+        height: 60,
+        opacity: 0.05,
+        blur: 15,
+        borderRadius: 14,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: CybersightTheme.accent, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 9,
+                fontWeight: FontWeight.w900,
+                color: Colors.white38,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsPanel extends StatelessWidget {
+  final bool isProcessing;
+  final bool hasUpload;
+  const _AnalyticsPanel({required this.isProcessing, required this.hasUpload});
+
+  @override
+  Widget build(BuildContext context) {
+    return CybersightCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome_rounded, color: CybersightTheme.accent, size: 18),
+              const Icon(Icons.analytics_outlined, color: CybersightTheme.accent, size: 14),
               const SizedBox(width: 10),
               Text(
-                'Detection result',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const Spacer(),
-              if (isProcessing)
-                const SizedBox(
-                  height: 14,
-                  width: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                'NEURAL ANALYTICS',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white38,
+                  letterSpacing: 1.5,
                 ),
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          if (!hasUpload) ...[
+          const SizedBox(height: 20),
+          if (!hasUpload)
             Text(
-              'No image yet. Upload to start.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white54),
-            ),
-          ] else if (isProcessing) ...[
-            Text(
-              'Analyzing…',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white60),
-            ),
-            const SizedBox(height: 10),
-            _ConfidenceRow(label: 'Preprocessing', value: 0.85),
-            _ConfidenceRow(label: 'Feature extract', value: 0.60),
-            _ConfidenceRow(label: 'Inference', value: 0.25),
-          ] else ...[
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: const [
-                _Chip(label: 'Helmet', score: 0.93),
-                _Chip(label: 'Safety Vest', score: 0.88),
-                _Chip(label: 'Gloves', score: 0.74),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
+              'WAITING FOR DATA...',
+              style: GoogleFonts.plusJakartaSans(fontSize: 11, color: Colors.white12, fontWeight: FontWeight.bold, letterSpacing: 2),
+            )
+          else if (isProcessing)
+            const Column(
               children: [
-                Expanded(
-                  child: GlowingButton(
-                    label: 'Save to Inventory',
-                    onTap: () {},
-                  ),
+                _MiniMetric(label: 'SCANNING FREQUENCY', value: 0.7),
+                _MiniMetric(label: 'NEURAL MAPPING', value: 0.4),
+              ],
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'BIOLUX 12000 BTU',
+                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 18),
+                ),
+                Text('MODEL: BLX-SHARP-X1', style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                GlowingButton(
+                  label: 'Commit Data',
+                  onTap: () {},
                 ),
               ],
             ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _ConfidenceRow extends StatelessWidget {
+class _MiniMetric extends StatelessWidget {
   final String label;
   final double value;
-  const _ConfidenceRow({required this.label, required this.value});
+  const _MiniMetric({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label.toUpperCase(),
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, fontSize: 9),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: value,
-                minHeight: 6,
-                backgroundColor: Colors.white.withOpacity(0.06),
-                valueColor: const AlwaysStoppedAnimation(CybersightTheme.accent),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text('${(value * 100).round()}%', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38)),
-        ],
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final double score;
-  const _Chip({required this.label, required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            '${(score * 100).round()}%',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 10),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 7, fontWeight: FontWeight.w900, color: Colors.white24, letterSpacing: 1.5)),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: value,
+            minHeight: 2,
+            backgroundColor: Colors.white.withOpacity(0.03),
+            valueColor: const AlwaysStoppedAnimation(CybersightTheme.accent),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DropZone extends StatelessWidget {
-  final bool hasUpload;
-  final bool isProcessing;
-  final VoidCallback onTap;
-  const _DropZone({required this.hasUpload, required this.isProcessing, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final title = !hasUpload
-        ? 'Tap to upload'
-        : (isProcessing ? 'Uploading…' : 'Image staged');
-    final subtitle = !hasUpload
-        ? 'PNG/JPG • up to 10MB'
-        : (isProcessing ? 'Sending to backend' : 'Ready for detection');
-
-    return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        height: 170,
-        opacity: 0.055,
-        blur: 20,
-        borderRadius: 22,
-        border: Border.all(color: Colors.white.withOpacity(0.09)),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: [
-              BoxShadow(
-                color: (hasUpload ? CybersightTheme.accent2 : CybersightTheme.accent).withOpacity(isProcessing ? 0.12 : 0.18),
-                blurRadius: 26,
-                spreadRadius: -16,
-                offset: const Offset(0, 16),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Subtle tint (keeps the glass feeling, without heavy patterns)
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(22),
-                    gradient: LinearGradient(
-                      colors: [
-                        CybersightTheme.navy1.withOpacity(0.20),
-                        Colors.white.withOpacity(0.02),
-                        CybersightTheme.navy2.withOpacity(0.18),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: const [0.0, 0.45, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Accent rim
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: (hasUpload ? CybersightTheme.accent2 : CybersightTheme.accent).withOpacity(0.16),
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GlassContainer(
-                      width: 56,
-                      height: 56,
-                      opacity: 0.05,
-                      blur: 22,
-                      borderRadius: 999,
-                      border: Border.all(color: Colors.white.withOpacity(0.10)),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-                        ),
-                        child: Icon(
-                          isProcessing ? Icons.autorenew_rounded : (hasUpload ? Icons.check_rounded : Icons.cloud_upload_outlined),
-                          color: Colors.black,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      title.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                          ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 9),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  const _ActionTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        opacity: 0.04,
-        blur: 18,
-        borderRadius: 18,
-        padding: const EdgeInsets.all(12),
-        child: SizedBox(
-          height: 56,
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(11),
-                  gradient: LinearGradient(
-                    colors: [
-                      CybersightTheme.accent.withOpacity(0.24),
-                      CybersightTheme.accent2.withOpacity(0.14),
-                    ],
-                  ),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
-                ),
-                child: Icon(icon, color: Colors.white70, size: 18),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Colors.white38,
-                            fontSize: 11,
-                            letterSpacing: 0.1,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white30, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget trailing;
-  const _TopBar({required this.title, required this.subtitle, required this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      height: 1.0,
-                      letterSpacing: 0.5,
-                      fontSize: 42,
-                    ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white24,
-                      letterSpacing: 3.0,
-                      fontSize: 9,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        trailing,
-      ],
     );
   }
 }
@@ -506,36 +434,53 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withOpacity(0.03),
-        border: Border.all(color: color.withOpacity(0.35)),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(color: color.withOpacity(0.2)),
+        color: color.withOpacity(0.05),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-              boxShadow: [BoxShadow(color: color.withOpacity(0.6), blurRadius: 10)],
-            ),
+            width: 5, height: 5,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [BoxShadow(color: color, blurRadius: 4)]),
           ),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.white60,
-                  fontSize: 10,
-                  letterSpacing: 1.8,
-                ),
-          ),
+          const SizedBox(width: 8),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w900, color: color, letterSpacing: 1.0)),
         ],
       ),
     );
   }
 }
 
+class _PickOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _PickOption({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.08)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: CybersightTheme.accent, size: 22),
+            const SizedBox(width: 16),
+            Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1.2)),
+            const Spacer(),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white24, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+}
