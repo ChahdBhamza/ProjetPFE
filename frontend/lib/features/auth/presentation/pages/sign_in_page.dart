@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:provider/provider.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/auth_widgets.dart';
 
 class SignInPage extends StatefulWidget {
@@ -13,6 +15,8 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateMixin {
   late AnimationController _bgController;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -26,11 +30,27 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   @override
   void dispose() {
     _bgController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignIn() async {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signIn(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    if (success && mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
     return CybersightAtmosphere(
       child: SafeArea(
         child: Stack(
@@ -94,13 +114,15 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const CybersightInput(
+                              CybersightInput(
+                                controller: _emailController,
                                 label: 'Email',
                                 hint: 'you@example.com',
                                 icon: Icons.alternate_email_rounded,
                               ),
                               const SizedBox(height: 10),
-                              const CybersightInput(
+                              CybersightInput(
+                                controller: _passwordController,
                                 label: 'Password',
                                 hint: '••••••••••',
                                 icon: Icons.lock_outline_rounded,
@@ -122,12 +144,22 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                   ),
                                 ),
                               ),
+
+                              if (authProvider.errorMessage != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  authProvider.errorMessage!,
+                                  style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+
                               const SizedBox(height: 8),
                               GlowingButton(
-                                label: 'Sign in',
+                                label: authProvider.isLoading ? 'VERIFYING...' : 'Sign in',
                                 textSize: 12,
                                 darkOverlayOpacity: 0.22,
-                                onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false),
+                                onTap: authProvider.isLoading ? () {} : () => _handleSignIn(),
                               ),
                               const SizedBox(height: 10),
                               Text(
@@ -137,7 +169,14 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                               ),
                               const SizedBox(height: 8),
                               _GoogleButton(
-                                onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false),
+                                onTap: authProvider.isLoading 
+                                  ? () {} 
+                                  : () async {
+                                      final success = await authProvider.signInWithGoogle();
+                                      if (success && mounted) {
+                                        Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+                                      }
+                                    },
                               ),
                             ],
                           ),

@@ -314,3 +314,26 @@ class _GlowingButtonState extends State<GlowingButton> with SingleTickerProvider
     );
   }
 }
+
+class CybersightCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  const CybersightCard({
+    super.key,
+    required this.child,
+    this.padding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      padding: padding ?? const EdgeInsets.all(20),
+      borderRadius: 24,
+      opacity: 0.05,
+      blur: 15,
+      border: Border.all(color: Colors.white.withOpacity(0.05)),
+      child: child,
+    );
+  }
+}

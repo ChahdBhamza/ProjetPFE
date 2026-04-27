@@ -7,9 +7,20 @@ import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/check_email_page.dart';
 import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/app/presentation/pages/app_shell.dart';
+import 'package:provider/provider.dart';
+import 'features/app/presentation/providers/detection_provider.dart';
+import 'features/auth/presentation/providers/auth_provider.dart';
 
 void main() {
-  runApp(const CybersightApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => DetectionProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: const CybersightApp(),
+    ),
+  );
 }
 
 class _NoStretchScrollBehavior extends MaterialScrollBehavior {

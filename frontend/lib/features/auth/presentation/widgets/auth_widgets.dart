@@ -3,21 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 
-class CybersightCard extends StatelessWidget {
-  final Widget child;
-  const CybersightCard({super.key, required this.child});
 
-  @override
-  Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(32),
-      opacity: 0.05,
-      blur: 15,
-      borderRadius: 24,
-      child: child,
-    );
-  }
-}
 
 class CybersightInput extends StatelessWidget {
   final String label, hint;

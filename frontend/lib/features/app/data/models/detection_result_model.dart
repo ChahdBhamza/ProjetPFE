@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-class DetectionResponse {
+class DetectionResult {
   final bool success;
   final VectorMatch? vectorMatch;
   final String? ocrText;
   final Map<String, dynamic>? webGrounding;
   final Map<String, dynamic>? verifiedDetails;
 
-  DetectionResponse({
+  DetectionResult({
     required this.success,
     this.vectorMatch,
     this.ocrText,
@@ -15,8 +15,8 @@ class DetectionResponse {
     this.verifiedDetails,
   });
 
-  factory DetectionResponse.fromJson(Map<String, dynamic> json) {
-    return DetectionResponse(
+  factory DetectionResult.fromJson(Map<String, dynamic> json) {
+    return DetectionResult(
       success: json['success'] ?? false,
       vectorMatch: json['vector_match'] != null 
           ? VectorMatch.fromJson(json['vector_match']) 

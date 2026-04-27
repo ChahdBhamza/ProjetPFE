@@ -1,13 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../widgets/auth_widgets.dart';
+import '../providers/auth_provider.dart';
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSignUp() async {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete all identification fields.')),
+      );
+      return;
+    }
+
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signUp(
+      _emailController.text,
+      _passwordController.text,
+      _nameController.text,
+    );
+
+    if (success && mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    
     return CybersightAtmosphere(
       child: SafeArea(
         child: SingleChildScrollView(
@@ -38,21 +79,43 @@ class SignUpPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const CybersightInput(label: 'Full Name', hint: 'OPERATOR NAME', icon: Icons.person_outline),
+                      CybersightInput(
+                        controller: _nameController,
+                        label: 'Full Name', 
+                        hint: 'OPERATOR NAME', 
+                        icon: Icons.person_outline
+                      ),
                       const SizedBox(height: 24),
-                      const CybersightInput(label: 'Operator ID', hint: 'CS-8829-X', icon: Icons.badge_outlined),
+                      CybersightInput(
+                        controller: _emailController,
+                        label: 'Operator ID', 
+                        hint: 'CS-8829-X (Email)', 
+                        icon: Icons.badge_outlined
+                      ),
                       const SizedBox(height: 24),
-                      const CybersightInput(label: 'Security Protocol', hint: '••••••••••••••••', icon: Icons.lock_outline, isPass: true),
-                      const SizedBox(height: 32),
+                      CybersightInput(
+                        controller: _passwordController,
+                        label: 'Security Protocol', 
+                        hint: '••••••••••••••••', 
+                        icon: Icons.lock_outline, 
+                        isPass: true
+                      ),
                       
-                      // Identification Section
-                      const DottedUploadBox(),
-                      const SizedBox(height: 44),
+                      if (authProvider.errorMessage != null) ...[
+                        const SizedBox(height: 20),
+                        Text(
+                          authProvider.errorMessage!,
+                          style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+
+                      const SizedBox(height: 32),
                       
                       // THE ESTABLISH BUTTON
                       GlowingButton(
-                        label: 'Establish Profile',
-                        onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false),
+                        label: authProvider.isLoading ? 'SYNCING...' : 'Establish Profile',
+                        onTap: authProvider.isLoading ? () {} : () => _handleSignUp(),
                       ),
                       const SizedBox(height: 48),
                       
@@ -85,10 +148,10 @@ class SignUpPage extends StatelessWidget {
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: RichText(
-                  text: TextSpan(
+                  text: const TextSpan(
                     text: 'ALREADY REGISTERED? ',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38),
-                    children: const [
+                    style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
+                    children: [
                       TextSpan(text: 'ACCESS GATEWAY', style: TextStyle(color: CybersightTheme.accent)),
                     ],
                   ),
@@ -101,5 +164,3 @@ class SignUpPage extends StatelessWidget {
     );
   }
 }
-
-// Local widgets removed in favor of global hud_widgets and auth_widgets

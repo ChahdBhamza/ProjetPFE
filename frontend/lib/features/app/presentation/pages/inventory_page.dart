@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
+import '../../../auth/presentation/widgets/auth_widgets.dart';
 
 class InventoryPage extends StatelessWidget {
   const InventoryPage({super.key});
@@ -10,105 +13,119 @@ class InventoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 22),
+        padding: const EdgeInsets.fromLTRB(22, 16, 22, 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // 1. NEURAL HEADER
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (rect) => const LinearGradient(
+                        colors: [CybersightTheme.accent, Colors.white, CybersightTheme.accent2],
+                      ).createShader(rect),
+                      child: Text(
+                        'INVENTORY',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w900,
+                          height: 1.0,
+                          fontSize: 26,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'NEURAL DATABASE • CLIMATISEURS',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 7,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white24,
+                        letterSpacing: 2.2,
+                      ),
+                    ),
+                  ],
+                ),
+                GlassContainer(
+                  width: 42,
+                  height: 42,
+                  opacity: 0.05,
+                  blur: 20,
+                  borderRadius: 12,
+                  child: const Icon(Icons.qr_code_scanner_rounded, color: CybersightTheme.accent, size: 20),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 24),
+
+            // 2. SEARCH HUD
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    'Inventory',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 42,
-                          height: 1.0,
-                        ),
-                  ),
-                ),
-                GlassContainer(
-                  width: 44,
-                  height: 44,
-                  opacity: 0.05,
-                  blur: 18,
-                  borderRadius: 14,
-                  child: const Icon(Icons.tune_rounded, color: Colors.white70, size: 20),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'TRACKED EQUIPMENT • TAGS • STATUS',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, letterSpacing: 3, fontSize: 9),
-            ),
-            const SizedBox(height: 16),
-            GlassContainer(
-              opacity: 0.05,
-              blur: 18,
-              borderRadius: 24,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Expanded(
+                  child: GlassContainer(
+                    height: 48,
+                    opacity: 0.05,
+                    blur: 15,
+                    borderRadius: 14,
                     child: TextField(
+                      style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
-                        hintText: 'Search equipment…',
-                        prefixIcon: const Icon(Icons.search_rounded, color: Colors.white24),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.025),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                        hintText: 'FILTER DATABASE...',
+                        hintStyle: GoogleFonts.plusJakartaSans(color: Colors.white10, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                        prefixIcon: const Icon(Icons.search_rounded, color: Colors.white24, size: 18),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-                      boxShadow: [BoxShadow(color: CybersightTheme.accent.withOpacity(0.35), blurRadius: 18, spreadRadius: -10)],
-                    ),
-                    child: const Icon(Icons.add_rounded, color: Colors.black),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
+                    boxShadow: [BoxShadow(color: CybersightTheme.accent.withOpacity(0.15), blurRadius: 12)],
                   ),
-                ],
-              ),
+                  child: const Icon(Icons.add_rounded, color: Colors.black, size: 24),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 28),
+
+            // 3. DATABASE LIST
             _InventoryCard(
-              title: 'Safety Helmet',
-              subtitle: 'PPE • ID: HEL-219',
-              status: 'ACTIVE',
+              title: 'BIOLUX 12K SHARP',
+              category: 'CLIMATISEUR',
+              serial: 'BLX-2024-X99',
+              status: 'VERIFIED',
               statusColor: CybersightTheme.ok,
-              meta: const [
-                _Meta(label: 'Stock', value: '12'),
-                _Meta(label: 'Last scan', value: '2 days'),
-                _Meta(label: 'Confidence', value: '93%'),
-              ],
+              btu: '12000',
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             _InventoryCard(
-              title: 'Reflective Vest',
-              subtitle: 'PPE • ID: VST-884',
-              status: 'LOW',
+              title: 'SAMSUNG WIND-FREE',
+              category: 'CLIMATISEUR',
+              serial: 'SAM-WF-2024',
+              status: 'SYNCING',
               statusColor: CybersightTheme.warning,
-              meta: const [
-                _Meta(label: 'Stock', value: '3'),
-                _Meta(label: 'Last scan', value: 'Today'),
-                _Meta(label: 'Confidence', value: '88%'),
-              ],
+              btu: '18000',
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             _InventoryCard(
-              title: 'Protective Gloves',
-              subtitle: 'PPE • ID: GLV-055',
-              status: 'CHECK',
+              title: 'AUX PREMIUM ECO',
+              category: 'CLIMATISEUR',
+              serial: 'AUX-ECO-12',
+              status: 'LOCAL',
               statusColor: CybersightTheme.accent2,
-              meta: const [
-                _Meta(label: 'Stock', value: '8'),
-                _Meta(label: 'Last scan', value: '5 hrs'),
-                _Meta(label: 'Confidence', value: '74%'),
-              ],
+              btu: '12000',
             ),
           ],
         ),
@@ -119,132 +136,68 @@ class InventoryPage extends StatelessWidget {
 
 class _InventoryCard extends StatelessWidget {
   final String title;
-  final String subtitle;
+  final String category;
+  final String serial;
   final String status;
   final Color statusColor;
-  final List<_Meta> meta;
+  final String btu;
+
   const _InventoryCard({
     required this.title,
-    required this.subtitle,
+    required this.category,
+    required this.serial,
     required this.status,
     required this.statusColor,
-    required this.meta,
+    required this.btu,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      opacity: 0.05,
-      blur: 18,
-      borderRadius: 24,
-      padding: const EdgeInsets.all(14),
+    return CybersightCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  gradient: LinearGradient(
-                    colors: [
-                      statusColor.withOpacity(0.25),
-                      Colors.white.withOpacity(0.02),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white.withOpacity(0.02),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
                 ),
-                child: Icon(Icons.qr_code_2_rounded, color: statusColor.withOpacity(0.9), size: 18),
+                child: Center(
+                  child: Icon(Icons.ac_unit_rounded, color: statusColor.withOpacity(0.4), size: 20),
+                ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 14),
                     ),
-                    const SizedBox(height: 2),
                     Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
+                      '$category • $serial',
+                      style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.3),
                     ),
                   ],
                 ),
               ),
-              _StatusBadge(label: status, color: statusColor),
+              _StatusIndicator(label: status, color: statusColor),
             ],
           ),
-          const SizedBox(height: 14),
-          Container(height: 1, color: Colors.white.withOpacity(0.05)),
-          const SizedBox(height: 14),
-          Row(
-            children: meta
-                .map(
-                  (m) => Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          m.label.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, fontSize: 9, letterSpacing: 2.2),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          m.value,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.white.withOpacity(0.10)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    'View',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white60, letterSpacing: 2),
-                  ),
-                ),
-              ),
+              _MetaTag(label: 'CAPACITY', value: '$btu BTU'),
               const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  height: 46,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-                  ),
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Update',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.black, letterSpacing: 2),
-                    ),
-                  ),
-                ),
-              ),
+              _MetaTag(label: 'LAST SCAN', value: '24H AGO'),
+              const Spacer(),
+              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.07), size: 12),
             ],
           ),
         ],
@@ -253,39 +206,49 @@ class _InventoryCard extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
+class _StatusIndicator extends StatelessWidget {
   final String label;
   final Color color;
-  const _StatusBadge({required this.label, required this.color});
+  const _StatusIndicator({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.35)),
+        color: color.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.15)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [BoxShadow(color: color.withOpacity(0.6), blurRadius: 10)]),
+            width: 4, height: 4,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [BoxShadow(color: color, blurRadius: 4)]),
           ),
-          const SizedBox(width: 8),
-          Text(label, style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white60, fontSize: 10, letterSpacing: 1.8)),
+          const SizedBox(width: 6),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 7, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.8)),
         ],
       ),
     );
   }
 }
 
-class _Meta {
+class _MetaTag extends StatelessWidget {
   final String label;
   final String value;
-  const _Meta({required this.label, required this.value});
-}
+  const _MetaTag({required this.label, required this.value});
 
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 6.5, fontWeight: FontWeight.w900, color: Colors.white24, letterSpacing: 1.2)),
+        const SizedBox(height: 3),
+        Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white60)),
+      ],
+    );
+  }
+}

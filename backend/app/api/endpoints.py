@@ -5,6 +5,7 @@ from io import BytesIO
 import json
 from app.services.classic_ocr_service import ClassicOCRService
 from app.services.hybrid_ocr_service import HybridOCRService
+from app.database import mongo_db
 
 router = APIRouter()
 
@@ -214,3 +215,28 @@ async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
         
     except Exception as e:
         return {"success": False, "error": f"Hybrid Pipeline Failed: {str(e)}"}
+
+@router.post("/inventory/save")
+async def save_to_inventory(data: dict):
+    """Save a detected item to the user's MongoDB inventory"""
+    try:
+        brand = data.get("brand", "Unknown")
+        model = data.get("model", "Unknown")
+        btu = data.get("btu")
+        metadata = data.get("metadata", {})
+        
+        # Call the MongoDB service from app/database.py
+        success = mongo_db.save_detection(
+            brand=brand,
+            raw_text=f"Model: {model}",
+            btu=int(btu) if btu and str(btu).isdigit() else None,
+            details=metadata
+        )
+        
+        if success:
+            return {"success": True, "message": "Item secured in cloud database."}
+        else:
+            return {"success": False, "message": "Database connection error."}
+            
+    except Exception as e:
+        return {"success": False, "error": str(e)}

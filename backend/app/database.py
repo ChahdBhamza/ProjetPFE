@@ -30,14 +30,38 @@ class MongoService:
                     safe_pass = urllib.parse.quote_plus(password)
                     raw_uri = f"{protocol}://{user}:{safe_pass}@{host_info}"
 
-            self.client = MongoClient(raw_uri)
-            # Access the database named in the URI or default to detection_db
-            self.db = self.client.get_database("ac_detection_db")
+            self.client = MongoClient(raw_uri, serverSelectionTimeoutMS=5000)
+            # Force a connection check
+            self.client.admin.command('ping')
+            
+            self.db = self.client.get_database("equipment_detection_db")
             self.detections = self.db.detections
-            print("[MongoDB] Connected successfully to Atlas Cluster.")
+            self.users = self.db.users
+            print("[MongoDB] Neural Link Established: Atlas Cluster Verified.")
         except Exception as e:
-            print(f"[MongoDB] Connection Error: {e}")
+            print(f"[MongoDB] Neural Link Failed (Check Atlas Whitelist): {e}")
             self.client = None
+
+    def create_user(self, email, password_hash, full_name):
+        """Create a new user profile in MongoDB"""
+        if not self.client: return False
+        try:
+            user_data = {
+                "email": email,
+                "password_hash": password_hash,
+                "full_name": full_name,
+                "created_at": datetime.datetime.now(),
+                "inventory": [] # Start with an empty inventory
+            }
+            return self.users.insert_one(user_data).inserted_id
+        except Exception as e:
+            print(f"[MongoDB] User Creation Error: {e}")
+            return None
+
+    def find_user_by_email(self, email):
+        """Find a user by their email address"""
+        if not self.client: return None
+        return self.users.find_one({"email": email})
 
     def save_detection(self, brand: str, raw_text: str = None, btu: int = None, details: dict = None):
         """Save a new detection event to the cloud"""
