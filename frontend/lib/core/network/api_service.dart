@@ -4,7 +4,7 @@ import 'package:equipment_detection_app/features/app/data/models/detection_resul
 
 class ApiService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: "http://192.168.85.148:8000",
+    baseUrl: "http://localhost:8000",
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 15),
   ));
