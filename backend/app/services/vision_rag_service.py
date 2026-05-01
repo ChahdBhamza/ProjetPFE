@@ -16,10 +16,9 @@ class VisionRAGService:
             raise ValueError("GOOGLE_API_KEY not found. Please check your .env file.")
         
         self.client = genai.Client(api_key=self.api_key)
-        # Primary models to try if the main one fails
+        # Use stable models that are widely available
         self.models_to_try = [
             'gemini-2.5-flash',
-            'gemini-1.5-flash',
             'gemini-2.0-flash'
         ]
 
@@ -123,8 +122,8 @@ class VisionRAGService:
         
     def identify_from_raw_image(self, image_data):
         """High-Precision Visual Identification for RAG filtering"""
-        # Using Pro model for better logo/text reading accuracy
-        model_name = 'gemini-1.5-pro' 
+        # Using Gemini 2.5 for futuristic accuracy
+        model_name = 'gemini-2.5-flash' 
         
         prompt = """You are a Forensic HVAC Logo & Brand Analyst.
 Your mission is to identify the BRAND of an air conditioner with 100% precision to guide a database search.

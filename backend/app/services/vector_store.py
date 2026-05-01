@@ -4,12 +4,12 @@ import os
 from pathlib import Path
 
 class VectorStore:
-    def __init__(self, collection_name="climatiseurs_v2", path="qdrant_db"):
+    def __init__(self, collection_name="climatiseurs", path="qdrant_db"):
         """Initialize Qdrant Vector Store"""
         self.collection_name = collection_name
         # Ensure we always use the same database folder in backend/qdrant_db
-        base_dir = Path(__file__).parent.parent.parent
-        db_path = str(base_dir / "backend" / "qdrant_db")
+        db_path = os.path.join(os.getcwd(), "qdrant_db")
+        print(f"[VectorStore] Connecting to DB at: {db_path}")
         self.client = QdrantClient(path=db_path)
         
         # Create collection if it doesn't exist
@@ -20,32 +20,9 @@ class VectorStore:
             )
             print(f"Collection '{collection_name}' created")
             
-            # Configure Full-Text Search Indexes for better RAG accuracy
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="clean_title",
-                field_schema=models.TextIndexParams(
-                    type="text",
-                    tokenizer=models.TokenizerType.WORD,
-                    min_token_len=2,
-                    max_token_len=15,
-                    lowercase=True,
-                )
-            )
-            self.client.create_payload_index(
-                collection_name=self.collection_name,
-                field_name="normalized_reference",
-                field_schema=models.TextIndexParams(
-                    type="text",
-                    tokenizer=models.TokenizerType.WORD,
-                    min_token_len=2,
-                    max_token_len=15,
-                    lowercase=True,
-                )
-            )
-        except Exception:
+        except Exception as e:
             # Collection likely already exists
-            print(f"Using existing collection '{collection_name}'")
+            print(f"Using existing collection '{collection_name}' or Note: {e}")
 
     def add_climatiseur(self, product_id, brand, model_name, embedding, metadata):
         """Add a single product to the vector database"""

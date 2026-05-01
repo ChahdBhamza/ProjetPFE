@@ -51,6 +51,24 @@ async def search_endpoint(
     use_vlm: bool = Form(False),
     use_openai: bool = Form(False) 
 ):
+    global _embedder, _vector_store, _vision_service
+    
+    # --- LAZY INITIALIZATION ---
+    if _embedder is None:
+        print("[LazyLoad] Initializing AI Services on demand...")
+        from app.services.clip_embedder import CLIPEmbedder
+        from app.services.vector_store import VectorStore
+        from app.services.vision_rag_service import VisionRAGService
+        
+        try:
+            _embedder = CLIPEmbedder()
+            _vector_store = VectorStore()
+            _vision_service = VisionRAGService()
+            print("[LazyLoad] Neural Link Established!")
+        except Exception as e:
+            print(f"[LazyLoad] CRITICAL FAILURE: {e}")
+            return {"success": False, "error": "AI Services failed to wake up."}
+
     try:
         contents = await file.read()
         image = Image.open(BytesIO(contents))
@@ -90,7 +108,10 @@ async def search_endpoint(
             local_vlm_analysis = _local_vlm.extract_specs(image)
             v_brand = local_vlm_analysis.get("brand")
             v_btu = normalize_btu(local_vlm_analysis.get("btu"))
-
+        
+        # Normalize filters to match uppercase DB entries
+        if v_brand: v_brand = v_brand.upper()
+        
         # 4. Core Hybrid Search (Semantic + Keywords + AI Filters)
         matches = _vector_store.hybrid_search(
             query_vector=query_vector, 
