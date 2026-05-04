@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Bounding Box Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .upload-area {
+            border: 2px dashed #4CAF50;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .upload-area:hover {
+            background-color: #2a2a2a;
+        }
+        #file-input {
+            display: none;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .image-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+        img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-top: 15px;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>YOLO Bounding Box Visualizer</h1>
+    
+    <div class="container">
+        <p>Upload an image to see how YOLO detects and bounds the objects.</p>
+        
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <p id="upload-text">Click to browse or drag an image here</p>
+            <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+        </div>
+
+        <button class="btn" id="analyze-btn" onclick="analyzeImage()" disabled>Run YOLO Inference</button>
+
+        <div class="loading" id="loading-indicator">
+            Processing image through Neural Network...
+        </div>
+
+        <div class="image-preview" id="result-container" style="display: none;">
+            <h3>YOLO Result:</h3>
+            <img id="result-image" src="" alt="YOLO Result">
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('upload-text').innerText = `Selected: ${file.name}`;
+                document.getElementById('analyze-btn').disabled = false;
+                
+                // Hide previous results
+                document.getElementById('result-container').style.display = 'none';
+            }
+        }
+
+        async function analyzeImage() {
+            if (!selectedFile) return;
+
+            const btn = document.getElementById('analyze-btn');
+            const loading = document.getElementById('loading-indicator');
+            const resultContainer = document.getElementById('result-container');
+            const resultImage = document.getElementById('result-image');
+
+            // Set UI to loading state
+            btn.disabled = true;
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // Call the FastAPI endpoint
+                const response = await fetch('/api/yolo/test', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                // The response is an image blob
+                const imageBlob = await response.blob();
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+                
+                // Display the image
+                resultImage.src = imageObjectURL;
+                resultContainer.style.display = 'flex';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during inference. Check console for details.');
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

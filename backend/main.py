@@ -36,6 +36,14 @@ app.include_router(auth_router, prefix="/api/auth")
 async def read_root():
     return {"message": "Cybersight Neural Link Active"}
 
+@app.get("/yolo")
+async def serve_yolo_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "yolo_test_ui.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "UI file not found"}
+
 if __name__ == "__main__":
+
     # Standard Port 8000 for ADB Reverse USB Link
     uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info")

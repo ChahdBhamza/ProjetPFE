@@ -13,3 +13,4 @@ torch
 transformers
 Pillow
 easyocr
+ultralytics

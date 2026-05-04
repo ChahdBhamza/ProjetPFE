@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Response
 from fastapi.responses import JSONResponse
 from PIL import Image
 from io import BytesIO
@@ -17,9 +17,10 @@ _web_service = None
 _local_vlm = None # Qwen/Moondream
 _ocr_service = None # OCR Engine
 _openai_service = None
+_yolo_service = None
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None, yolo_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service, _yolo_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -27,6 +28,7 @@ def init_services(embedder, vector_store, vision_service, web_service, local_vlm
     _local_vlm = local_vlm
     _ocr_service = ocr_service
     _openai_service = openai_service
+    _yolo_service = yolo_service
 
 def normalize_btu(btu_str):
     """Normalize '12' or '12k' to '12000' for reliable DB filtering"""
@@ -59,11 +61,13 @@ async def search_endpoint(
         from app.services.clip_embedder import CLIPEmbedder
         from app.services.vector_store import VectorStore
         from app.services.vision_rag_service import VisionRAGService
+        from app.services.yolo_service import YoloService
         
         try:
             _embedder = CLIPEmbedder()
             _vector_store = VectorStore()
             _vision_service = VisionRAGService()
+            _yolo_service = YoloService()
             print("[LazyLoad] Neural Link Established!")
         except Exception as e:
             print(f"[LazyLoad] CRITICAL FAILURE: {e}")
@@ -72,6 +76,18 @@ async def search_endpoint(
     try:
         contents = await file.read()
         image = Image.open(BytesIO(contents))
+        
+        # 1.1 Optional YOLO Cropping
+        if _yolo_service:
+            print("[Endpoints] Running YOLO detection for cropping...")
+            cropped_image = _yolo_service.detect_and_crop(image)
+            if cropped_image != image:
+                print("[Endpoints] Image cropped by YOLO.")
+                image = cropped_image
+                # Update contents for the models that read raw bytes
+                img_byte_arr = BytesIO()
+                image.save(img_byte_arr, format='JPEG')
+                contents = img_byte_arr.getvalue()
         
         # 2. Embed the image
         query_vector = _embedder.embed_image(image)
@@ -202,6 +218,14 @@ async def ocr_endpoint(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(BytesIO(contents))
         
+        # 1.1 Optional YOLO Cropping
+        if _yolo_service:
+            print("[OCR] Running YOLO detection for cropping...")
+            cropped_image = _yolo_service.detect_and_crop(image)
+            if cropped_image != image:
+                print("[OCR] Image cropped by YOLO.")
+                image = cropped_image
+        
         # Core OCR logic
         result = _ocr_service.process_image(image)
         return result
@@ -230,6 +254,14 @@ async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         image = Image.open(BytesIO(contents))
+        
+        # 1.1 Optional YOLO Cropping
+        if _yolo_service:
+            print("[HybridOCR] Running YOLO detection for cropping...")
+            cropped_image = _yolo_service.detect_and_crop(image)
+            if cropped_image != image:
+                print("[HybridOCR] Image cropped by YOLO.")
+                image = cropped_image
         
         hybrid_service = HybridOCRService()
         return await hybrid_service.process_image(image)
@@ -261,3 +293,30 @@ async def save_to_inventory(data: dict):
             
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+@router.post("/yolo/test")
+async def yolo_test_endpoint(file: UploadFile = File(...)):
+    """Test endpoint to visualize YOLO bounding boxes on an image"""
+    global _yolo_service
+    
+    # Lazy init YOLO if needed
+    if _yolo_service is None:
+        from app.services.yolo_service import YoloService
+        _yolo_service = YoloService()
+        
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+        
+        # Get image with bounding boxes drawn
+        boxed_image = _yolo_service.detect_and_draw(image)
+        
+        # Save to buffer
+        img_byte_arr = BytesIO()
+        boxed_image.save(img_byte_arr, format='JPEG')
+        
+        # Return as image response
+        return Response(content=img_byte_arr.getvalue(), media_type="image/jpeg")
+        
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})
