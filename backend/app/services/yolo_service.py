@@ -49,8 +49,8 @@ class YoloService:
             
             img_width, img_height = image.size
             
-            # Find the largest VALID bounding box
-            largest_area = 0
+            # Find the VALID bounding box with the HIGHEST CONFIDENCE
+            highest_conf = -1
             best_box = None
             
             for box in boxes:
@@ -58,19 +58,20 @@ class YoloService:
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
                 width = x2 - x1
                 height = y2 - y1
+                conf = box.conf[0].item()
                 
                 if height == 0: continue
                 aspect_ratio = width / height
                 area = width * height
                 
                 # HEURISTICS FILTERING:
-                # 1. AC units are usually much wider than they are tall (aspect_ratio > 2.2)
+                # 1. AC units are usually much wider than they are tall (aspect_ratio > 1.8)
                 # 2. It shouldn't take up the entire screen (like a ceiling or blank wall)
-                if aspect_ratio < 2.2: continue
-                if area > (img_width * img_height * 0.5): continue
+                if aspect_ratio < 1.8: continue
+                if area > (img_width * img_height * 0.8): continue
                 
-                if area > largest_area:
-                    largest_area = area
+                if conf > highest_conf:
+                    highest_conf = conf
                     best_box = (int(x1), int(y1), int(x2), int(y2))
             
             if best_box:
@@ -117,8 +118,8 @@ class YoloService:
                 area = width * height
                 
                 # HEURISTICS FILTERING (Same as crop):
-                if aspect_ratio < 2.2: continue
-                if area > (img_width * img_height * 0.5): continue
+                if aspect_ratio < 1.8: continue
+                if area > (img_width * img_height * 0.8): continue
                 
                 # It passed the filter! Draw it manually.
                 drawn_boxes += 1
