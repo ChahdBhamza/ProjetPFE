@@ -43,6 +43,13 @@ async def serve_yolo_ui():
         return FileResponse(html_path)
     return {"error": "UI file not found"}
 
+@app.get("/video")
+async def serve_video_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "video_test_ui.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "UI file not found"}
+
 if __name__ == "__main__":
 
     # Standard Port 8000 for ADB Reverse USB Link

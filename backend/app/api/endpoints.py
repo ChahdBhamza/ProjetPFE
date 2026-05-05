@@ -18,6 +18,7 @@ _local_vlm = None # Qwen/Moondream
 _ocr_service = None # OCR Engine
 _openai_service = None
 _yolo_service = None
+_video_service = None
 
 def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None, yolo_service=None):
     global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service, _yolo_service
@@ -53,6 +54,11 @@ async def search_endpoint(
     use_vlm: bool = Form(False),
     use_openai: bool = Form(False) 
 ):
+    contents = await file.read()
+    image = Image.open(BytesIO(contents))
+    return await _perform_search(image, contents, use_vlm, use_openai)
+
+async def _perform_search(image, contents, use_vlm=False, use_openai=False):
     global _embedder, _vector_store, _vision_service
     
     # --- LAZY INITIALIZATION ---
@@ -74,9 +80,6 @@ async def search_endpoint(
             return {"success": False, "error": "AI Services failed to wake up."}
 
     try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents))
-        
         # 1.1 Optional YOLO Cropping
         if _yolo_service:
             print("[Endpoints] Running YOLO detection for cropping...")
@@ -347,3 +350,59 @@ async def yolo_test_endpoint(file: UploadFile = File(...)):
         
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})
+
+@router.post("/video/extract-frames")
+async def extract_frames_endpoint(
+    file: UploadFile = File(...),
+    auto_search: bool = Form(False)
+):
+    """Extract key frames and optionally run search on the best one"""
+    global _video_service
+    if _video_service is None:
+        from app.services.video_service import VideoService
+        _video_service = VideoService()
+        
+    try:
+        contents = await file.read()
+        
+        # Ensure YOLO is ready for extraction validation
+        global _yolo_service
+        if _yolo_service is None:
+            from app.services.yolo_service import YoloService
+            _yolo_service = YoloService()
+
+        frames = _video_service.process_video_bytes(contents, yolo_service=_yolo_service)
+        
+        if not frames:
+            return {"success": False, "error": "No clear key frames detected."}
+            
+        processed_frames = []
+        for f in frames:
+            processed_frames.append({
+                "raw": _video_service.pil_to_base64(f["raw"]),
+                "boxed": _video_service.pil_to_base64(f.get("boxed", f["raw"])),
+                "cropped": _video_service.pil_to_base64(f["cropped"]),
+                "frame_idx": f["frame_idx"]
+            })
+
+        search_result = None
+        if auto_search and len(frames) > 0:
+            best_frame_data = frames[0]
+            best_frame = best_frame_data["cropped"]
+            
+            print("[Video] Auto-searching on best frame (cropped)...")
+            img_byte_arr = BytesIO()
+            best_frame.save(img_byte_arr, format='JPEG')
+            best_frame_bytes = img_byte_arr.getvalue()
+            
+            search_result = await _perform_search(best_frame, best_frame_bytes)
+            
+        return {
+            "success": True, 
+            "frame_count": len(frames),
+            "frames": processed_frames,
+            "auto_search_result": search_result,
+            "message": f"Extracted {len(frames)} key frames with full AI pipeline."
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}

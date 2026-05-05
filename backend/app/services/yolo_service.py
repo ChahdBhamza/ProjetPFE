@@ -10,14 +10,9 @@ class YoloService:
             self.model = YOLO(model_name)
             # Define custom classes for zero-shot detection
             custom_classes = [
-                "air conditioner", 
-                "split air conditioner", 
-                "ac unit", 
-                "wall mounted air conditioner",
-                "appliance",
-                "black appliance",
-                "dark air conditioner",
-                "indoor unit"
+                "air conditioner",
+                "split air conditioner",
+                "vertical air conditioner"
             ]
             self.model.set_classes(custom_classes)
             print(f"[YoloService] Loaded YOLO-World model: {model_name} with classes: {custom_classes}")
@@ -34,8 +29,8 @@ class YoloService:
             return image
         
         try:
-            # 1. Run inference with a more inclusive threshold
-            results = self.model(image, conf=0.1)
+            # 1. Run inference with a balanced threshold to avoid trash detections
+            results = self.model(image, conf=0.25)
             
             if not results or len(results) == 0:
                 return image
@@ -49,32 +44,27 @@ class YoloService:
             
             img_width, img_height = image.size
             
-            # Find the VALID bounding box with the HIGHEST CONFIDENCE
+            # Find the bounding box with the HIGHEST EFFECTIVE CONFIDENCE
             highest_conf = -1
             best_box = None
             
             for box in boxes:
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
-                width = x2 - x1
-                height = y2 - y1
                 conf = box.conf[0].item()
+                class_id = int(box.cls[0])
                 
-                if height == 0: continue
-                aspect_ratio = width / height
-                area = width * height
-                
-                # HEURISTICS FILTERING:
-                # 1. AC units are wider than tall
-                if aspect_ratio < 1.2: continue
-                if y1 < (img_height * 0.05): continue # Skip top 5% of image (ceiling)
-                if area > (img_width * img_height * 0.8): continue
+                # Apply AC Bias
+                if class_id in [0, 1, 2]: # AC variants
+                    conf = min(conf * 1.5, 1.0)
+                elif class_id == 3: # Refrigerator
+                    conf = conf * 0.5
                 
                 if conf > highest_conf:
                     highest_conf = conf
                     best_box = (int(x1), int(y1), int(x2), int(y2))
             
             if best_box:
-                print(f"[YoloService] Cropping image to bounding box: {best_box}")
+                print(f"[YoloService] Cropping to best candidate with {highest_conf:.2f} effective confidence")
                 cropped_img = image.crop(best_box)
                 return cropped_img
                 
@@ -92,8 +82,8 @@ class YoloService:
             return image
         
         try:
-            # 1. Run inference with a more inclusive threshold
-            results = self.model(image, conf=0.1)
+            # Use a very low threshold for visualization so we can see even weak detections
+            results = self.model(image, conf=0.1, verbose=False)
             
             if not results or len(results) == 0:
                 return image
@@ -103,44 +93,38 @@ class YoloService:
             
             # Convert PIL image to OpenCV format (RGB to BGR)
             img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-            img_height, img_width = img_cv.shape[:2]
             
             boxes = results[0].boxes
             drawn_boxes = 0
             
-            for box in boxes:
-                x1, y1, x2, y2 = box.xyxy[0].tolist()
-                width = x2 - x1
-                height = y2 - y1
-                
-                if height == 0: continue
-                aspect_ratio = width / height
-                area = width * height
-                
-                # HEURISTICS FILTERING (Same as crop):
-                if aspect_ratio < 1.2: continue
-                if y1 < (img_height * 0.05): continue # Skip top 5% (ceiling)
-                if area > (img_width * img_height * 0.8): continue
-                
-                # It passed the filter! Draw it manually.
-                drawn_boxes += 1
-                conf = box.conf[0].item()
-                
-                # Override the label so it always says Air Conditioner
-                label = f"Air Conditioner {conf:.2f}"
-                
-                # Draw Rectangle
-                cv2.rectangle(img_cv, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 5)
-                
-                # Draw Text Background
-                (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.9, 2)
-                cv2.rectangle(img_cv, (int(x1), int(y1) - th - 10), (int(x1) + tw, int(y1)), (0, 255, 0), -1)
-                
-                # Draw Text
-                cv2.putText(img_cv, label, (int(x1), int(y1) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+            if len(boxes) > 0:
+                for box in boxes:
+                    x1, y1, x2, y2 = box.xyxy[0].tolist()
+                    conf = box.conf[0].item()
+                    class_id = int(box.cls[0])
+                    
+                    # BIAS: If it's an AC, we trust it more. If Fridge, we penalize.
+                    effective_conf = conf
+                    if class_id in [0, 1, 2]:
+                        effective_conf = min(conf * 1.5, 1.0)
+                    elif class_id == 3:
+                        effective_conf = conf * 0.5
+                    
+                    # We only draw it if the effective confidence is reasonable
+                    if effective_conf > 0.1:
+                        drawn_boxes += 1
+                        class_name = results[0].names[class_id]
+                        label = f"{class_name.capitalize()} {effective_conf:.2f}"
+                        
+                        # Draw Rectangle (Bright Green)
+                        cv2.rectangle(img_cv, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                        
+                        # Draw Label
+                        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+                        cv2.rectangle(img_cv, (int(x1), int(y1) - th - 10), (int(x1) + tw, int(y1)), (0, 255, 0), -1)
+                        cv2.putText(img_cv, label, (int(x1), int(y1) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
             
             if drawn_boxes == 0:
-                print("[YoloService] No valid boxes passed the heuristics filter.")
                 return image
             
             # Convert back to PIL
