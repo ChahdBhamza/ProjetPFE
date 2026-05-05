@@ -99,6 +99,9 @@
         <div class="image-preview" id="result-container" style="display: none;">
             <h3>YOLO Result:</h3>
             <img id="result-image" src="" alt="YOLO Result">
+            
+            <h3 style="margin-top: 30px; color: #4CAF50;">Extracted OCR Text:</h3>
+            <div id="ocr-result" style="background: #2a2a2a; padding: 15px; border-radius: 8px; width: 100%; text-align: left; white-space: pre-wrap; font-family: monospace; min-height: 50px;"></div>
         </div>
     </div>
 
@@ -151,6 +154,47 @@
                 // Display the image
                 resultImage.src = imageObjectURL;
                 resultContainer.style.display = 'flex';
+                
+                // --- NOW RUN HYBRID VISION LLM ON THE SAME IMAGE ---
+                document.getElementById('ocr-result').innerHTML = "<i>Waking up Vision LLM (Neural Net)... This may take 15-30 seconds to read the logo perfectly...</i>";
+                
+                try {
+                    const ocrResponse = await fetch('/api/ocr', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (ocrResponse.ok) {
+                        const ocrData = await ocrResponse.json();
+                        let displayHTML = `<div style="color: #4CAF50; font-weight: bold; margin-bottom: 10px;">[Gemini 2.5] Vision Analysis Complete:</div>`;
+                        
+                        // Show Structured Data if it exists
+                        if (ocrData.structured_data) {
+                            const sd = ocrData.structured_data;
+                            displayHTML += `
+                            <div style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-bottom: 15px;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div><strong>Brand:</strong> <span style="color: #00d2ff;">${sd.brand || 'N/A'}</span></div>
+                                    <div><strong>BTU:</strong> <span style="color: #00d2ff;">${sd.btu || 'N/A'}</span></div>
+                                    <div><strong>Model Ref:</strong> <span style="color: #00d2ff;">${sd.model_reference || 'N/A'}</span></div>
+                                    <div><strong>Confidence:</strong> <span style="color: #00d2ff;">${(sd.confidence * 100).toFixed(0)}%</span></div>
+                                </div>
+                                <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; font-style: italic; color: #aaa;">
+                                    "${sd.analysis || ''}"
+                                </div>
+                            </div>`;
+                        } else {
+                            displayHTML += `<div style="background: #1a1a1a; padding: 10px; border-radius: 5px; border: 1px solid #333; white-space: pre-wrap;">${ocrData.raw_text || "No text detected."}</div>`;
+                        }
+                        
+                        document.getElementById('ocr-result').innerHTML = displayHTML;
+                    } else {
+                        document.getElementById('ocr-result').innerText = "OCR Failed or endpoint unavailable.";
+                    }
+                } catch (e) {
+                    document.getElementById('ocr-result').innerText = "OCR Error: " + e.message;
+                }
+                
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred during inference. Check console for details.');

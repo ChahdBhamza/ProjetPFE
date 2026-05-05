@@ -211,8 +211,11 @@ async def search_endpoint(
 @router.post("/ocr")
 async def ocr_endpoint(file: UploadFile = File(...)):
     """Dedicated endpoint for raw OCR text extraction"""
+    global _ocr_service
     if _ocr_service is None:
-        return {"error": "OCR Service not initialized on server."}
+        print("[LazyLoad] Initializing OCR Service...")
+        from app.services.hybrid_ocr_service import HybridOCRService
+        _ocr_service = HybridOCRService()
         
     try:
         contents = await file.read()
@@ -225,10 +228,26 @@ async def ocr_endpoint(file: UploadFile = File(...)):
             if cropped_image != image:
                 print("[OCR] Image cropped by YOLO.")
                 image = cropped_image
+                
+        # 2. Convert cropped image back to bytes for Gemini
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        cropped_bytes = img_byte_arr.getvalue()
         
-        # Core OCR logic
-        result = _ocr_service.process_image(image)
-        return result
+        # 3. Use Gemini Vision LLM for 100% flawless logo extraction!
+        global _vision_service
+        if _vision_service is None:
+            from app.services.vision_rag_service import VisionRAGService
+            _vision_service = VisionRAGService()
+            
+        print("[OCR] Sending cropped image to Gemini for analysis...")
+        gemini_result = _vision_service.identify_from_raw_image(cropped_bytes)
+        
+        return {
+            "success": True,
+            "structured_data": gemini_result,
+            "raw_text": gemini_result.get("analysis", "Powered by Gemini 2.5 Vision")
+        }
         
     except Exception as e:
         return {"error": f"OCR Failed: {str(e)}"}
@@ -242,8 +261,16 @@ async def classic_ocr_endpoint(
         contents = await file.read()
         image = Image.open(BytesIO(contents))
         
+        # Crop the image first so we don't OCR the ceiling!
+        global _yolo_service
+        if _yolo_service is None:
+            from app.services.yolo_service import YoloService
+            _yolo_service = YoloService()
+            
+        cropped_image = _yolo_service.detect_and_crop(image)
+        
         ocr = ClassicOCRService()
-        return ocr.process_image(image, combo=lang_combo)
+        return ocr.process_image(cropped_image, combo=lang_combo)
         
     except Exception as e:
         return {"error": f"Classic OCR Failed: {str(e)}", "status": "error"}

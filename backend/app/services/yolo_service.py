@@ -34,8 +34,8 @@ class YoloService:
             return image
         
         try:
-            # Run inference with extremely low confidence threshold for zero-shot
-            results = self.model(image, conf=0.01)
+            # 1. Run inference with a more inclusive threshold
+            results = self.model(image, conf=0.1)
             
             if not results or len(results) == 0:
                 return image
@@ -54,7 +54,6 @@ class YoloService:
             best_box = None
             
             for box in boxes:
-                # box.xyxy is a tensor of shape (1, 4)
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
                 width = x2 - x1
                 height = y2 - y1
@@ -65,9 +64,9 @@ class YoloService:
                 area = width * height
                 
                 # HEURISTICS FILTERING:
-                # 1. AC units are usually much wider than they are tall (aspect_ratio > 1.8)
-                # 2. It shouldn't take up the entire screen (like a ceiling or blank wall)
-                if aspect_ratio < 1.8: continue
+                # 1. AC units are wider than tall
+                if aspect_ratio < 1.2: continue
+                if y1 < (img_height * 0.05): continue # Skip top 5% of image (ceiling)
                 if area > (img_width * img_height * 0.8): continue
                 
                 if conf > highest_conf:
@@ -93,8 +92,9 @@ class YoloService:
             return image
         
         try:
-            # Run inference with extremely low confidence threshold for zero-shot
-            results = self.model(image, conf=0.01)
+            # 1. Run inference with a more inclusive threshold
+            results = self.model(image, conf=0.1)
+            
             if not results or len(results) == 0:
                 return image
                 
@@ -118,7 +118,8 @@ class YoloService:
                 area = width * height
                 
                 # HEURISTICS FILTERING (Same as crop):
-                if aspect_ratio < 1.8: continue
+                if aspect_ratio < 1.2: continue
+                if y1 < (img_height * 0.05): continue # Skip top 5% (ceiling)
                 if area > (img_width * img_height * 0.8): continue
                 
                 # It passed the filter! Draw it manually.
@@ -149,4 +150,3 @@ class YoloService:
         except Exception as e:
             print(f"[YoloService] Error during drawing: {e}")
             return image
-
