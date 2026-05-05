@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
@@ -12,16 +13,29 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateMixin {
+  late AnimationController _bgController;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _bgController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+  }
 
   @override
   void dispose() {
+    _bgController.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -29,6 +43,13 @@ class _SignUpPageState extends State<SignUpPage> {
     if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please complete all identification fields.')),
+      );
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match.')),
       );
       return;
     }
@@ -48,117 +69,286 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    
+
     return CybersightAtmosphere(
       child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: Column(
-            children: [
-              // 1. REGISTRATION HEADER
-              GlassContainer(
-                width: 70, height: 70,
-                borderRadius: 16,
-                opacity: 0.05,
-                child: const Center(child: Icon(Icons.wifi_tethering, color: CybersightTheme.accent, size: 32)),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _bgController,
+                builder: (context, child) => CustomPaint(
+                  painter: _SignUpWavePainter(t: _bgController.value),
+                ),
               ),
-              const SizedBox(height: 32),
-              
-              // 2. TITLE SECTION
-              Text('NEW OPERATOR\nREGISTRATION', 
-                textAlign: TextAlign.center, 
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 28, height: 1.1)),
-              const SizedBox(height: 12),
-              Text('SECURE NEURAL GATEWAY ACCESS', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24)),
-              const SizedBox(height: 48),
-              
-              // 3. MAIN TERMINAL CARD
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: CybersightCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      CybersightInput(
-                        controller: _nameController,
-                        label: 'Full Name', 
-                        hint: 'OPERATOR NAME', 
-                        icon: Icons.person_outline
-                      ),
-                      const SizedBox(height: 24),
-                      CybersightInput(
-                        controller: _emailController,
-                        label: 'Operator ID', 
-                        hint: 'CS-8829-X (Email)', 
-                        icon: Icons.badge_outlined
-                      ),
-                      const SizedBox(height: 24),
-                      CybersightInput(
-                        controller: _passwordController,
-                        label: 'Security Protocol', 
-                        hint: '••••••••••••••••', 
-                        icon: Icons.lock_outline, 
-                        isPass: true
-                      ),
-                      
-                      if (authProvider.errorMessage != null) ...[
-                        const SizedBox(height: 20),
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight - 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: AnimatedBuilder(
+                            animation: _bgController,
+                            builder: (context, child) {
+                              final lift = math.sin(_bgController.value * math.pi * 2) * 4;
+                              return Transform.translate(
+                                offset: Offset(0, lift),
+                                child: GlassContainer(
+                                  width: 64,
+                                  height: 64,
+                                  borderRadius: 18,
+                                  opacity: 0.05,
+                                  child: const Center(
+                                    child: Icon(Icons.person_add_alt_1_rounded, color: CybersightTheme.accent, size: 28),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         Text(
-                          authProvider.errorMessage!,
-                          style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
+                          'Create account',
                           textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 28, letterSpacing: 0.1, height: 1.05),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Sign up with email or continue with Google.',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white54, height: 1.3),
+                        ),
+                        const SizedBox(height: 14),
+                        GlassContainer(
+                          opacity: 0.05,
+                          blur: 16,
+                          borderRadius: 24,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              CybersightInput(
+                                controller: _nameController,
+                                label: 'Full Name',
+                                hint: 'John Doe',
+                                icon: Icons.person_outline_rounded,
+                              ),
+                              const SizedBox(height: 10),
+                              CybersightInput(
+                                controller: _emailController,
+                                label: 'Email',
+                                hint: 'you@example.com',
+                                icon: Icons.alternate_email_rounded,
+                              ),
+                              const SizedBox(height: 10),
+                              CybersightInput(
+                                controller: _passwordController,
+                                label: 'Password',
+                                hint: '••••••••••',
+                                icon: Icons.lock_outline_rounded,
+                                isPass: true,
+                              ),
+                              const SizedBox(height: 10),
+                              CybersightInput(
+                                controller: _confirmPasswordController,
+                                label: 'Confirm password',
+                                hint: '••••••••••',
+                                icon: Icons.lock_outline_rounded,
+                                isPass: true,
+                              ),
+                              
+                              if (authProvider.errorMessage != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  authProvider.errorMessage!,
+                                  style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+
+                              const SizedBox(height: 10),
+                              GlowingButton(
+                                label: authProvider.isLoading ? 'CREATING...' : 'Create account',
+                                textSize: 12,
+                                darkOverlayOpacity: 0.22,
+                                onTap: authProvider.isLoading ? () {} : () => _handleSignUp(),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'or',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                      color: Colors.white.withOpacity(0.35),
+                                      letterSpacing: 0.2,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              _GoogleSignUpButton(
+                                onTap: authProvider.isLoading 
+                                  ? () {} 
+                                  : () async {
+                                      final success = await authProvider.signInWithGoogle();
+                                      if (success && mounted) {
+                                        Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+                                      }
+                                    },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        const ProgressSegments(activeIndex: 0),
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: 'Already have an account? ',
+                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, letterSpacing: 0.2),
+                              children: const [
+                                TextSpan(
+                                  text: 'Sign in',
+                                  style: TextStyle(color: CybersightTheme.accent),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                      const SizedBox(height: 32),
-                      
-                      // THE ESTABLISH BUTTON
-                      GlowingButton(
-                        label: authProvider.isLoading ? 'SYNCING...' : 'Establish Profile',
-                        onTap: authProvider.isLoading ? () {} : () => _handleSignUp(),
-                      ),
-                      const SizedBox(height: 48),
-                      
-                      // Legal Footnote
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white12, fontSize: 9, height: 1.5),
-                          children: const [
-                            TextSpan(text: 'BY ESTABLISHING THIS PROFILE, YOU AGREE TO THE\n'),
-                            TextSpan(text: 'NEURAL DATA PRIVACY PROTOCOLS', style: TextStyle(color: CybersightTheme.accent)),
-                            TextSpan(text: ' AND '),
-                            TextSpan(text: 'OPERATIONAL COMPLIANCE TERMS', style: TextStyle(color: CybersightTheme.accent)),
-                            TextSpan(text: '.'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      
-                      // Segmented Progress
-                      const ProgressSegments(activeIndex: 0),
-                    ],
-                  ),
-                ),
+class _SignUpWavePainter extends CustomPainter {
+  final double t;
+  _SignUpWavePainter({required this.t});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bgPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          CybersightTheme.obsidian,
+          CybersightTheme.navy2.withOpacity(0.98),
+          CybersightTheme.navy1.withOpacity(0.98),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, bgPaint);
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    final driftX = 0.08 + 0.02 * math.sin(t * math.pi * 2);
+    final driftY = 0.56 + 0.015 * math.cos(t * math.pi * 2);
+    final center = Offset(size.width * driftX, size.height * driftY);
+    final maxR = size.longestSide * 0.80;
+    for (double r = 120; r < maxR; r += 36) {
+      final mix = (r / maxR).clamp(0.0, 1.0);
+      paint.color = Color.lerp(
+            CybersightTheme.accent.withOpacity(0.10),
+            CybersightTheme.accent2.withOpacity(0.045),
+            mix,
+          ) ??
+          CybersightTheme.accent.withOpacity(0.08);
+      final start = -1.10 + 0.08 * math.sin((t * math.pi * 2) + mix * 5);
+      canvas.drawArc(Rect.fromCircle(center: center, radius: r), start, 2.35, false, paint);
+
+      // Premium dotted highlights
+      final dotPaint = Paint()
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 1.9;
+      final head = start + (t * math.pi * 2 * 0.58);
+      const trail = math.pi * 1.0;
+      for (double d = 0; d < trail; d += 0.16) {
+        final a = head - d;
+        final inArc = a >= start && a <= start + 2.35;
+        if (!inArc) continue;
+        final x = center.dx + r * math.cos(a);
+        final y = center.dy + r * math.sin(a);
+        final tangent = a + math.pi / 2;
+        final len = 3.8;
+        final dx = math.cos(tangent) * len * 0.45;
+        final dy = math.sin(tangent) * len * 0.45;
+        final dotMix = (d / trail).clamp(0.0, 1.0);
+        dotPaint.color = Color.lerp(
+              CybersightTheme.accent.withOpacity(0.42),
+              CybersightTheme.accent2.withOpacity(0.42),
+              dotMix,
+            ) ??
+            CybersightTheme.accent.withOpacity(0.42);
+        canvas.drawLine(Offset(x - dx, y - dy), Offset(x + dx, y + dy), dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SignUpWavePainter oldDelegate) => oldDelegate.t != t;
+}
+
+class _GoogleSignUpButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _GoogleSignUpButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withOpacity(0.04),
+          border: Border.all(color: Colors.white.withOpacity(0.12)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.92),
               ),
-              
-              const SizedBox(height: 48),
-              
-              // 4. FOOTER TOGGLE
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: RichText(
-                  text: const TextSpan(
-                    text: 'ALREADY REGISTERED? ',
-                    style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold),
-                    children: [
-                      TextSpan(text: 'ACCESS GATEWAY', style: TextStyle(color: CybersightTheme.accent)),
-                    ],
-                  ),
-                ),
+              child: Text(
+                'G',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.black87,
+                      fontSize: 12,
+                      letterSpacing: 0,
+                    ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Continue with Google',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white.withOpacity(0.80),
+                    fontSize: 12,
+                    letterSpacing: 0.2,
+                  ),
+            ),
+          ],
         ),
       ),
     );

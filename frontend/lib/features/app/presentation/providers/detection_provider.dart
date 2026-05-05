@@ -45,6 +45,30 @@ class DetectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Initiate video-based equipment detection
+  Future<void> detectFromVideo(File file) async {
+    _status = DetectionStatus.loading;
+    _capturedFile = file;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.detectFromVideo(XFile(file.path));
+      
+      if (response != null) {
+        _result = response;
+        _status = DetectionStatus.success;
+      } else {
+        _status = DetectionStatus.error;
+        _errorMessage = "Key frame extraction failed to identify product.";
+      }
+    } catch (e) {
+      _status = DetectionStatus.error;
+      _errorMessage = "Connection to Cloud Cluster lost: $e";
+    }
+    notifyListeners();
+  }
+
   /// Save the currently detected item to the user's MongoDB inventory
   Future<bool> saveCurrentToInventory() async {
     if (_result == null) return false;

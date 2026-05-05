@@ -44,6 +44,13 @@ class _EquipmentPageState extends State<EquipmentPage> {
               subtitle: 'Select from media library', 
               onTap: () => _handlePick(ImageSource.gallery, provider)
             ),
+            const SizedBox(height: 12),
+            _ActionTile(
+              icon: Icons.video_collection_outlined, 
+              title: 'Video Neural Scan', 
+              subtitle: 'Extract frames from video', 
+              onTap: () => _handleVideoPick(provider)
+            ),
           ],
         ),
       ),
@@ -55,6 +62,13 @@ class _EquipmentPageState extends State<EquipmentPage> {
     final XFile? file = await _picker.pickImage(source: source);
     if (file == null) return;
     provider.detectEquipment(File(file.path));
+  }
+
+  Future<void> _handleVideoPick(DetectionProvider provider) async {
+    Navigator.pop(context);
+    final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
+    if (file == null) return;
+    provider.detectFromVideo(File(file.path));
   }
 
   @override

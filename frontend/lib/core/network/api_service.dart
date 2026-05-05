@@ -28,6 +28,28 @@ class ApiService {
     }
   }
 
+  /// Send video for key frame extraction and search
+  Future<DetectionResult?> detectFromVideo(XFile videoFile) async {
+    try {
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(videoFile.path, filename: "upload.mp4"),
+        "auto_search": "true",
+      });
+
+      Response response = await _dio.post("/api/video/extract-frames", data: formData);
+
+      if (response.statusCode == 200 && response.data["success"] == true) {
+        if (response.data["auto_search_result"] != null) {
+          return DetectionResult.fromJson(response.data["auto_search_result"]);
+        }
+      }
+      return null;
+    } catch (e) {
+      print("Video Detection API Error: $e");
+      return null;
+    }
+  }
+
   /// Save detection to user's MongoDB inventory
   Future<bool> saveToInventory(DetectionResult result) async {
     try {
