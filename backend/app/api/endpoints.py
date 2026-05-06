@@ -19,6 +19,7 @@ _ocr_service = None # OCR Engine
 _openai_service = None
 _yolo_service = None
 _video_service = None
+_detectron_service = None
 
 def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None, yolo_service=None):
     global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service, _yolo_service
@@ -350,6 +351,46 @@ async def yolo_test_endpoint(file: UploadFile = File(...)):
         
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})
+
+@router.post("/detectron/test")
+async def detectron_test_endpoint(file: UploadFile = File(...)):
+    """Run Detectron2 Mask R-CNN inference and return annotated image + detections JSON"""
+    global _detectron_service
+
+    if _detectron_service is None:
+        from app.services.detectron_service import DetectronService
+        _detectron_service = DetectronService()
+
+    if not _detectron_service.is_available():
+        return JSONResponse(
+            status_code=503,
+            content={
+                "success": False,
+                "error": "Detectron2 is not installed on this server.",
+                "install_hint": "pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch2.0/index.html",
+            },
+        )
+
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+
+        result = _detectron_service.run_inference(image)
+
+        annotated_b64 = _detectron_service.pil_to_base64(result["annotated_image"])
+
+        return {
+            "success":        True,
+            "annotated_image": annotated_b64,
+            "detections":     result["detections"],
+            "count":          result["count"],
+            "device":         result["device"],
+            "model":          result["model"],
+        }
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
 
 @router.post("/video/extract-frames")
 async def extract_frames_endpoint(

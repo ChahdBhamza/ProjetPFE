@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Mini Bar Acer 89 Litres De Frost / Dark Silver / GT1001",
+    "url": "https://www.tunisianet.com.tn/mini-refrigerateur-mini-bar/83274-frigo-bar-acer-rs-1001-lxd-dark-noir.html",
+    "sku": "GT1001LXD",
+    "brand": "ACER",
+    "category": "Mini-Réfrigérateur / Mini-Bar",
+    "source": "tunisianet",
+    "current_price": 569.0,
+    "original_price": null,
+    "discount_percent": null,
+    "short_description": "Mini Bar Acer DeFrost - Volume total : 89 Litres - Classe Énergétique : 3 - Dimensions: 840 x 480 x 480 mm - Couleur Dark Silver - Garantie 2 ans + Livraison + Installation et Mise en Place Gratuites",
+    "full_description": null,
+    "availability": "569,000 DT",
+    "specifications": {
+      "Type": "Une Porte",
+      "Garantie": "2 ans",
+      "Système de dégivrage": "DeFrost",
+      "Couleur": "Silver",
+      "Volume": "Entre 0 et 200 litres"
+    },
+    "images": [
+      "https://www.tunisianet.com.tn/415164-home/frigo-bar-acer-rs-1001-lxd-dark-noir.jpg",
+      "https://www.tunisianet.com.tn/415164-large/frigo-bar-acer-rs-1001-lxd-dark-noir.jpg",
+      "https://www.tunisianet.com.tn/415165-large/frigo-bar-acer-rs-1001-lxd-dark-noir.jpg"
+    ],
+    "primary_image": "https://www.tunisianet.com.tn/415164-home/frigo-bar-acer-rs-1001-lxd-dark-noir.jpg",
+    "duplicate_of_mytek_sku": "GT1001LXD"
+  },
+  {
+    "name": "Mini Bar Acer De Frost GT1001LX 89 LITRES / Silver",
+    "url": "https://www.tunisianet.com.tn/mini-refrigerateur-mini-bar/63874-mini-bar-acer-de-frost-gt1001lx-89litres-silver-.html",
+    "sku": "RS1001LXS",
+    "brand": "ACER",
+    "category": "Mini-Réfrigérateur / Mini-Bar",
+    "source": "tunisianet",
+    "current_price": 567.0,
+    "original_price": null,
+    "discount_percent": null,
+    "short_description": "Mini Bar Acer DeFrost - Volume total: 89 Litres - Classe Énergétique: 3 - Dimensions: 840 x 480 x 480 mm - Couleur Silver - Garantie 2 ans+ Livraison + Installation et Mise en Place Gratuites",
+    "full_description": null,
+    "availability": "567,000 DT",
+    "specifications": {
+      "Type": "Une Porte",
+      "Garantie": "2 ans",
+      "Système de dégivrage": "DeFrost",
+      "Couleur": "Silver",
+      "Volume": "Entre 0 et 200 litres"
+    },
+    "images": [
+      "https://www.tunisianet.com.tn/382202-home/mini-bar-acer-de-frost-gt1001lx-89litres-silver-.jpg",
+      "https://www.tunisianet.com.tn/382202-large/mini-bar-acer-de-frost-gt1001lx-89litres-silver-.jpg"
+    ],
+    "primary_image": "https://www.tunisianet.com.tn/382202-home/mini-bar-acer-de-frost-gt1001lx-89litres-silver-.jpg",
+    "duplicate_of_mytek_sku": null
+  }
+]
