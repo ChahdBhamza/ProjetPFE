@@ -7,6 +7,7 @@ import '../../../../core/widgets/hud_widgets.dart';
 import '../../../auth/presentation/widgets/auth_widgets.dart';
 
 import '../../../../core/network/api_service.dart';
+import 'equipment_detail_page.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -257,6 +258,17 @@ class _InventoryPageState extends State<InventoryPage> {
                   status: 'VERIFIED',
                   statusColor: CybersightTheme.ok,
                   btu: (item['btu'] ?? 'N/A').toString(),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => FractionallySizedBox(
+                        heightFactor: 0.85,
+                        child: EquipmentDetailPage(item: item),
+                      ),
+                    );
+                  },
                 ),
               )),
           ],
@@ -273,6 +285,7 @@ class _InventoryCard extends StatefulWidget {
   final String status;
   final Color statusColor;
   final String btu;
+  final VoidCallback onTap;
 
   const _InventoryCard({
     required this.title,
@@ -281,6 +294,7 @@ class _InventoryCard extends StatefulWidget {
     required this.status,
     required this.statusColor,
     required this.btu,
+    required this.onTap,
   });
 
   @override
@@ -293,6 +307,7 @@ class _InventoryCardState extends State<_InventoryCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: widget.onTap,
       onTapDown: (_) => setState(() => _isHovered = true),
       onTapUp: (_) => setState(() => _isHovered = false),
       onTapCancel: () => setState(() => _isHovered = false),
