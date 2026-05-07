@@ -1,13 +1,29 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:equipment_detection_app/features/app/data/models/detection_result_model.dart';
 
 class ApiService {
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: "http://localhost:8000",
-    connectTimeout: const Duration(seconds: 15),
-    receiveTimeout: const Duration(seconds: 15),
-  ));
+  final Dio _dio;
+
+  ApiService() : _dio = Dio(BaseOptions(
+    baseUrl: _getBaseUrl(),
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+  )) {
+    // Interceptor to automatically attach the JWT token to every request
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('jwt_token');
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+    ));
+  }
 
   /// Send image for detection and RAG processing
   Future<DetectionResult?> detectEquipment(XFile imageFile) async {
@@ -57,7 +73,7 @@ class ApiService {
       if (item == null) return false;
 
       Response response = await _dio.post(
-        "/api/inventory/save",
+        "/api/auth/inventory/save",
         data: {
           "brand": item.brand,
           "model": item.modelName,
@@ -69,6 +85,20 @@ class ApiService {
     } catch (e) {
       print("Inventory Save Error: $e");
       return false;
+    }
+  }
+
+  /// Fetch user's inventory from MongoDB
+  Future<List<dynamic>> fetchInventory() async {
+    try {
+      Response response = await _dio.get("/api/auth/inventory/list");
+      if (response.data["success"] == true) {
+        return response.data["inventory"] as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      print("Inventory Fetch Error: $e");
+      return [];
     }
   }
 
@@ -84,8 +114,11 @@ class ApiService {
         },
       );
       return response.data;
+    } on DioException catch (e) {
+      final detail = e.response?.data?["detail"] ?? e.message;
+      return {"success": false, "detail": detail};
     } catch (e) {
-      return {"success": false, "detail": e.toString()};
+      return {"success": false, "detail": "Neural Link failed: $e"};
     }
   }
 
@@ -100,6 +133,10 @@ class ApiService {
         },
       );
       return response.data;
+    } on DioException catch (e) {
+      // Extract the specific "detail" from FastAPI if available
+      final detail = e.response?.data?["detail"] ?? "Neural verification failed.";
+      return {"success": false, "detail": detail};
     } catch (e) {
       return {"success": false, "detail": "Connection failed. Is the backend running?"};
     }
@@ -121,5 +158,12 @@ class ApiService {
       print("GOOGLE AUTH ERROR: $e");
       return {"success": false, "detail": "Google synchronization failed."};
     }
+  }
+
+  static String _getBaseUrl() {
+    // We use localhost:8000 for both Windows and Android (via ADB Reverse).
+    // If you are using a physical device, ensure you run:
+    // 'adb reverse tcp:8000 tcp:8000'
+    return "http://localhost:8000";
   }
 }

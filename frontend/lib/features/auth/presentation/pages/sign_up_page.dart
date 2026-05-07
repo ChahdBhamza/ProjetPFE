@@ -19,6 +19,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  String? _validationError;
 
   @override
   void initState() {
@@ -40,35 +41,39 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
   }
 
   Future<void> _handleSignUp() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all identification fields.')),
-      );
+    setState(() => _validationError = null);
+    final email = _emailController.text.trim();
+    if (_nameController.text.isEmpty || email.isEmpty || _passwordController.text.isEmpty) {
+      setState(() => _validationError = 'Identification required. Please fill all fields.');
+      return;
+    }
+
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      setState(() => _validationError = 'Invalid neural address format (email required).');
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
-      );
+      setState(() => _validationError = 'Passwords do not match.');
       return;
     }
 
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.signUp(
-      _emailController.text,
+      email,
       _passwordController.text,
       _nameController.text,
     );
 
     if (success && mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/auth-success', (_) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final activeError = _validationError ?? authProvider.errorMessage;
 
     return CybersightAtmosphere(
       child: SafeArea(
@@ -163,12 +168,35 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                 isPass: true,
                               ),
                               
-                              if (authProvider.errorMessage != null) ...[
-                                const SizedBox(height: 16),
-                                Text(
-                                  authProvider.errorMessage!,
-                                  style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.center,
+                              // Consolidated Error Display (Validation or Backend)
+                              if (activeError != null) ...[
+                                const SizedBox(height: 14),
+                                GlassContainer(
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                                  borderRadius: 14,
+                                  opacity: 0.08,
+                                  blur: 10,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        _validationError != null ? Icons.info_outline_rounded : Icons.error_outline_rounded,
+                                        color: CybersightTheme.accent2,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          activeError,
+                                          style: const TextStyle(
+                                            color: CybersightTheme.accent2,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.1,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
 
@@ -195,7 +223,7 @@ class _SignUpPageState extends State<SignUpPage> with SingleTickerProviderStateM
                                   : () async {
                                       final success = await authProvider.signInWithGoogle();
                                       if (success && mounted) {
-                                        Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+                                        Navigator.pushNamedAndRemoveUntil(context, '/auth-success', (_) => false);
                                       }
                                     },
                               ),

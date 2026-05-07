@@ -63,6 +63,28 @@ class MongoService:
         if not self.client: return None
         return self.users.find_one({"email": email})
 
+    def get_user_inventory(self, email: str):
+        """Fetch the inventory list for a specific user"""
+        if not self.client: return []
+        user = self.users.find_one({"email": email}, {"inventory": 1, "_id": 0})
+        if user and "inventory" in user:
+            return user["inventory"]
+        return []
+
+    def add_to_inventory(self, email: str, item_data: dict):
+        """Add a detected item to the user's inventory"""
+        if not self.client: return False
+        try:
+            item_data["added_at"] = datetime.datetime.now()
+            result = self.users.update_one(
+                {"email": email},
+                {"$push": {"inventory": item_data}}
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            print(f"[MongoDB] Inventory Save Error: {e}")
+            return False
+
     def save_detection(self, brand: str, raw_text: str = None, btu: int = None, details: dict = None):
         """Save a new detection event to the cloud"""
         if not self.client:

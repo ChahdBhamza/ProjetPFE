@@ -149,7 +149,7 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _RowAction extends StatelessWidget {
+class _RowAction extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -164,54 +164,81 @@ class _RowAction extends StatelessWidget {
   });
 
   @override
+  State<_RowAction> createState() => _RowActionState();
+}
+
+class _RowActionState extends State<_RowAction> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        opacity: 0.05,
-        blur: 18,
-        borderRadius: 20,
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                gradient: LinearGradient(
-                  colors: [
-                    CybersightTheme.accent.withOpacity(0.18),
-                    CybersightTheme.accent2.withOpacity(0.10),
-                  ],
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _isHovered = true),
+      onTapUp: (_) => setState(() => _isHovered = false),
+      onTapCancel: () => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()..scale(_isHovered ? 0.98 : 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: _isHovered ? [
+              BoxShadow(
+                color: CybersightTheme.accent.withOpacity(0.15),
+                blurRadius: 15,
+                spreadRadius: 1,
+              )
+            ] : [],
+          ),
+          child: GlassContainer(
+            opacity: _isHovered ? 0.08 : 0.05,
+            blur: 18,
+            borderRadius: 20,
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    gradient: LinearGradient(
+                      colors: [
+                        CybersightTheme.accent.withOpacity(0.18),
+                        CybersightTheme.accent2.withOpacity(0.10),
+                      ],
+                    ),
+                    border: Border.all(color: Colors.white.withOpacity(_isHovered ? 0.15 : 0.08)),
+                  ),
+                  child: Icon(widget.icon, color: _isHovered ? CybersightTheme.accent : Colors.white70, size: 20),
                 ),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
-              ),
-              child: Icon(icon, color: Colors.white70, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
-                  ),
-                ],
-              ),
+                ),
+                widget.trailing,
+              ],
             ),
-            trailing,
-          ],
+          ),
         ),
       ),
     );
@@ -240,27 +267,51 @@ class _Badge extends StatelessWidget {
   }
 }
 
-class _Stat extends StatelessWidget {
+class _Stat extends StatefulWidget {
   final String label;
   final String value;
   const _Stat({required this.label, required this.value});
 
   @override
+  State<_Stat> createState() => _StatState();
+}
+
+class _StatState extends State<_Stat> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: Colors.white.withOpacity(0.02),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label.toUpperCase(), style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, fontSize: 9, letterSpacing: 2.2)),
-          const SizedBox(height: 8),
-          Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
-        ],
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isHovered = true),
+      onTapUp: (_) => setState(() => _isHovered = false),
+      onTapCancel: () => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()..scale(_isHovered ? 0.95 : 1.0),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: _isHovered ? CybersightTheme.accent.withOpacity(0.05) : Colors.white.withOpacity(0.02),
+            border: Border.all(color: _isHovered ? CybersightTheme.accent.withOpacity(0.2) : Colors.white.withOpacity(0.06)),
+            boxShadow: _isHovered ? [
+              BoxShadow(
+                color: CybersightTheme.accent.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 0,
+              )
+            ] : [],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.label.toUpperCase(), style: Theme.of(context).textTheme.labelLarge?.copyWith(color: _isHovered ? CybersightTheme.accent : Colors.white24, fontSize: 9, letterSpacing: 2.2)),
+              const SizedBox(height: 8),
+              Text(widget.value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+            ],
+          ),
+        ),
       ),
     );
   }

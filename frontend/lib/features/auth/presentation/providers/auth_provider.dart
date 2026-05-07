@@ -35,10 +35,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Save session to SharedPreferences
-  Future<void> _saveSession(String email, String name) async {
+  Future<void> _saveSession(String email, String name, String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_email', email);
     await prefs.setString('full_name', name);
+    await prefs.setString('jwt_token', token);
   }
 
   /// Register a new user in MongoDB
@@ -53,7 +54,8 @@ class AuthProvider extends ChangeNotifier {
     if (result["success"] == true) {
       _userEmail = email;
       _fullName = name;
-      await _saveSession(email, name);
+      final token = result["token"];
+      await _saveSession(email, name, token);
       notifyListeners();
       return true;
     } else {
@@ -75,7 +77,8 @@ class AuthProvider extends ChangeNotifier {
     if (result["success"] == true) {
       _userEmail = result["user"]["email"];
       _fullName = result["user"]["full_name"];
-      await _saveSession(_userEmail!, _fullName!);
+      final token = result["token"];
+      await _saveSession(_userEmail!, _fullName!, token);
       notifyListeners();
       return true;
     } else {
@@ -114,7 +117,8 @@ class AuthProvider extends ChangeNotifier {
       if (result["success"] == true) {
         _userEmail = googleUser.email;
         _fullName = googleUser.displayName;
-        await _saveSession(_userEmail!, _fullName!);
+        final token = result["token"];
+        await _saveSession(_userEmail!, _fullName ?? "Google Operator", token);
         _isLoading = false;
         notifyListeners();
         return true;

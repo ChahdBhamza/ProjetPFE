@@ -6,8 +6,67 @@ import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../auth/presentation/widgets/auth_widgets.dart';
 
-class InventoryPage extends StatelessWidget {
+import '../../../../core/network/api_service.dart';
+
+class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
+
+  @override
+  State<InventoryPage> createState() => _InventoryPageState();
+}
+
+class _InventoryPageState extends State<InventoryPage> {
+  final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic>? _allInventoryItems;
+  List<dynamic>? _filteredItems;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInventory();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadInventory() async {
+    final items = await _apiService.fetchInventory();
+    if (mounted) {
+      setState(() {
+        _allInventoryItems = items;
+        _filteredItems = items;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _filterInventory(String query) {
+    if (_allInventoryItems == null) return;
+    
+    setState(() {
+      if (query.isEmpty) {
+        _filteredItems = _allInventoryItems;
+      } else {
+        final lowercaseQuery = query.toLowerCase();
+        _filteredItems = _allInventoryItems!.where((item) {
+          final brand = (item['brand'] ?? '').toString().toLowerCase();
+          final model = (item['model'] ?? '').toString().toLowerCase();
+          final category = (item['metadata']?['category'] ?? '').toString().toLowerCase();
+          final btu = (item['btu'] ?? '').toString().toLowerCase();
+          
+          return brand.contains(lowercaseQuery) || 
+                 model.contains(lowercaseQuery) || 
+                 category.contains(lowercaseQuery) ||
+                 btu.contains(lowercaseQuery);
+        }).toList();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +132,8 @@ class InventoryPage extends StatelessWidget {
                     blur: 15,
                     borderRadius: 14,
                     child: TextField(
+                      controller: _searchController,
+                      onChanged: _filterInventory,
                       style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
                         hintText: 'FILTER DATABASE...',
@@ -101,32 +162,103 @@ class InventoryPage extends StatelessWidget {
             const SizedBox(height: 28),
 
             // 3. DATABASE LIST
-            _InventoryCard(
-              title: 'BIOLUX 12K SHARP',
-              category: 'CLIMATISEUR',
-              serial: 'BLX-2024-X99',
-              status: 'VERIFIED',
-              statusColor: CybersightTheme.ok,
-              btu: '12000',
-            ),
-            const SizedBox(height: 14),
-            _InventoryCard(
-              title: 'SAMSUNG WIND-FREE',
-              category: 'CLIMATISEUR',
-              serial: 'SAM-WF-2024',
-              status: 'SYNCING',
-              statusColor: CybersightTheme.warning,
-              btu: '18000',
-            ),
-            const SizedBox(height: 14),
-            _InventoryCard(
-              title: 'AUX PREMIUM ECO',
-              category: 'CLIMATISEUR',
-              serial: 'AUX-ECO-12',
-              status: 'LOCAL',
-              statusColor: CybersightTheme.accent2,
-              btu: '12000',
-            ),
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.only(top: 80),
+                child: Center(
+                  child: CircularProgressIndicator(color: CybersightTheme.accent),
+                ),
+              )
+            else if (_allInventoryItems == null || _allInventoryItems!.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 60),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80, height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: CybersightTheme.accent.withOpacity(0.05),
+                          border: Border.all(color: CybersightTheme.accent.withOpacity(0.2)),
+                        ),
+                        child: const Icon(Icons.radar_rounded, color: CybersightTheme.accent, size: 36),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'NO EQUIPMENT FOUND',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: CybersightTheme.accent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Your digital inventory is currently empty.\nRun a neural scan to begin tracking assets.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white54,
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_filteredItems == null || _filteredItems!.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 60),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 80, height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: CybersightTheme.accent.withOpacity(0.02),
+                          border: Border.all(color: CybersightTheme.accent.withOpacity(0.1)),
+                        ),
+                        child: Icon(Icons.search_off_rounded, color: CybersightTheme.accent.withOpacity(0.3), size: 36),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'NO MATCHES FOUND',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: CybersightTheme.accent.withOpacity(0.5),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No equipment matches your neural filter.\nTry a different keyword or brand.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white.withOpacity(0.15),
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ..._filteredItems!.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _InventoryCard(
+                  title: (item['brand'] ?? 'UNKNOWN').toString().toUpperCase(),
+                  category: (item['metadata']?['category'] ?? 'CLIMATISEUR').toString().toUpperCase(),
+                  serial: (item['model'] ?? 'N/A').toString().toUpperCase(),
+                  status: 'VERIFIED',
+                  statusColor: CybersightTheme.ok,
+                  btu: (item['btu'] ?? 'N/A').toString(),
+                ),
+              )),
           ],
         ),
       ),
@@ -134,7 +266,7 @@ class InventoryPage extends StatelessWidget {
   }
 }
 
-class _InventoryCard extends StatelessWidget {
+class _InventoryCard extends StatefulWidget {
   final String title;
   final String category;
   final String serial;
@@ -152,55 +284,88 @@ class _InventoryCard extends StatelessWidget {
   });
 
   @override
+  State<_InventoryCard> createState() => _InventoryCardState();
+}
+
+class _InventoryCardState extends State<_InventoryCard> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return CybersightCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white.withOpacity(0.02),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
-                child: Center(
-                  child: Icon(Icons.ac_unit_rounded, color: statusColor.withOpacity(0.4), size: 20),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isHovered = true),
+      onTapUp: (_) => setState(() => _isHovered = false),
+      onTapCancel: () => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()..scale(_isHovered ? 0.98 : 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: _isHovered ? [
+              BoxShadow(
+                color: widget.statusColor.withOpacity(0.15),
+                blurRadius: 15,
+                spreadRadius: 1,
+              )
+            ] : [],
+          ),
+          child: CybersightCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 14),
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: _isHovered ? widget.statusColor.withOpacity(0.1) : Colors.white.withOpacity(0.02),
+                        border: Border.all(color: _isHovered ? widget.statusColor.withOpacity(0.3) : Colors.white.withOpacity(0.05)),
+                      ),
+                      child: Center(
+                        child: Icon(Icons.ac_unit_rounded, color: widget.statusColor.withOpacity(_isHovered ? 0.8 : 0.4), size: 20),
+                      ),
                     ),
-                    Text(
-                      '$category • $serial',
-                      style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.title,
+                            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 14),
+                          ),
+                          Text(
+                            '${widget.category} • ${widget.serial}',
+                            style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.3),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _StatusIndicator(label: widget.status, color: widget.statusColor),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    _MetaTag(label: 'CAPACITY', value: '${widget.btu} BTU'),
+                    const SizedBox(width: 12),
+                    _MetaTag(label: 'LAST SCAN', value: '24H AGO'),
+                    const Spacer(),
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: _isHovered ? 1.0 : 0.2,
+                      child: Icon(Icons.arrow_forward_ios_rounded, color: widget.statusColor, size: 12),
                     ),
                   ],
                 ),
-              ),
-              _StatusIndicator(label: status, color: statusColor),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              _MetaTag(label: 'CAPACITY', value: '$btu BTU'),
-              const SizedBox(width: 12),
-              _MetaTag(label: 'LAST SCAN', value: '24H AGO'),
-              const Spacer(),
-              Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.07), size: 12),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

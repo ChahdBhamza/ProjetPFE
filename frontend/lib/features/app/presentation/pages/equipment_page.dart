@@ -15,7 +15,23 @@ class EquipmentPage extends StatefulWidget {
   State<EquipmentPage> createState() => _EquipmentPageState();
 }
 
-class _EquipmentPageState extends State<EquipmentPage> {
+class _EquipmentPageState extends State<EquipmentPage> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _showPickOptions() async {
@@ -98,10 +114,16 @@ class _EquipmentPageState extends State<EquipmentPage> {
             // MAIN SCANNER AREA
             GestureDetector(
               onTap: isProcessing ? null : _showPickOptions,
-              child: _ScannerHub(
-                isProcessing: isProcessing,
-                hasUpload: hasUpload,
-                capturedFile: detectionProvider.capturedFile,
+              child: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return _ScannerHub(
+                    isProcessing: isProcessing,
+                    hasUpload: hasUpload,
+                    capturedFile: detectionProvider.capturedFile,
+                    pulseValue: isProcessing ? _pulseController.value : 0.0,
+                  );
+                },
               ),
             ),
 
@@ -157,59 +179,113 @@ class _ScannerHub extends StatelessWidget {
   final bool isProcessing;
   final bool hasUpload;
   final File? capturedFile;
+  final double pulseValue;
 
-  const _ScannerHub({required this.isProcessing, required this.hasUpload, this.capturedFile});
+  const _ScannerHub({
+    required this.isProcessing, 
+    required this.hasUpload, 
+    this.capturedFile,
+    this.pulseValue = 0.0,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
+    return Container(
       height: 200,
-      opacity: 0.05,
-      blur: 22,
-      borderRadius: 24,
-      child: Stack(
-        children: [
-          if (hasUpload)
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.4,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Image.file(capturedFile!, fit: BoxFit.cover),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: isProcessing ? [
+          BoxShadow(
+            color: CybersightTheme.accent.withOpacity(0.2 * pulseValue),
+            blurRadius: 40 * pulseValue,
+            spreadRadius: 5 * pulseValue,
+          )
+        ] : [],
+      ),
+      child: GlassContainer(
+        height: 200,
+        opacity: 0.05,
+        blur: 22,
+        borderRadius: 24,
+        child: Stack(
+          children: [
+            if (hasUpload)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.4,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.file(capturedFile!, fit: BoxFit.cover),
+                  ),
                 ),
               ),
-            ),
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GlassContainer(
-                  width: 56,
-                  height: 56,
-                  opacity: 0.05,
-                  blur: 22,
-                  borderRadius: 999,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-                    ),
-                    child: Icon(
-                      isProcessing ? Icons.autorenew_rounded : (hasUpload ? Icons.check_rounded : Icons.cloud_upload_outlined),
-                      color: Colors.black,
-                      size: 26,
+            if (isProcessing)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        CybersightTheme.accent.withOpacity(0.0),
+                        CybersightTheme.accent.withOpacity(0.15 * pulseValue),
+                        CybersightTheme.accent.withOpacity(0.0),
+                      ],
+                      stops: const [0.0, 0.5, 1.0],
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
-                Text(
-                  isProcessing ? 'PROCESSING...' : (hasUpload ? 'SCAN COMPLETE' : 'INITIATE NEURAL SCAN'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.2),
-                ),
-              ],
+              ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Transform.scale(
+                    scale: isProcessing ? 1.0 + (0.1 * pulseValue) : 1.0,
+                    child: GlassContainer(
+                      width: 56,
+                      height: 56,
+                      opacity: 0.05,
+                      blur: 22,
+                      borderRadius: 999,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CybersightTheme.accent.withOpacity(0.4),
+                              blurRadius: 15,
+                              spreadRadius: 2,
+                            )
+                          ],
+                        ),
+                        child: Icon(
+                          isProcessing ? Icons.autorenew_rounded : (hasUpload ? Icons.check_rounded : Icons.cloud_upload_outlined),
+                          color: Colors.black,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    isProcessing ? 'PROCESSING...' : (hasUpload ? 'SCAN COMPLETE' : 'INITIATE NEURAL SCAN'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900, 
+                      letterSpacing: 1.2,
+                      color: isProcessing ? CybersightTheme.accent : Colors.white,
+                      shadows: isProcessing ? [
+                        Shadow(color: CybersightTheme.accent, blurRadius: 10 * pulseValue)
+                      ] : [],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -288,7 +364,7 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
+class _ActionTile extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -296,25 +372,64 @@ class _ActionTile extends StatelessWidget {
   const _ActionTile({required this.icon, required this.title, required this.subtitle, this.onTap});
 
   @override
+  State<_ActionTile> createState() => _ActionTileState();
+}
+
+class _ActionTileState extends State<_ActionTile> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: GlassContainer(
-        opacity: 0.04,
-        borderRadius: 18,
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Icon(icon, color: CybersightTheme.accent, size: 24),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() => _isHovered = true),
+      onTapUp: (_) => setState(() => _isHovered = false),
+      onTapCancel: () => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.identity()..scale(_isHovered ? 0.98 : 1.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: _isHovered ? [
+              BoxShadow(
+                color: CybersightTheme.accent.withOpacity(0.15),
+                blurRadius: 15,
+                spreadRadius: 1,
+              )
+            ] : [],
+          ),
+          child: GlassContainer(
+            opacity: _isHovered ? 0.08 : 0.04,
+            blur: 18,
+            borderRadius: 18,
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-                Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: CybersightTheme.accent.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(widget.icon, color: CybersightTheme.accent, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                      const SizedBox(height: 2),
+                      Text(widget.subtitle, style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.1), size: 14),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -17,6 +17,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   late AnimationController _bgController;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String? _validationError;
 
   @override
   void initState() {
@@ -36,20 +37,35 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   }
 
   Future<void> _handleSignIn() async {
+    setState(() => _validationError = null);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      setState(() => _validationError = 'Identification required. Please fill all fields.');
+      return;
+    }
+
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      setState(() => _validationError = 'Please enter a valid email address.');
+      return;
+    }
+
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.signIn(
-      _emailController.text,
-      _passwordController.text,
+      email,
+      password,
     );
 
     if (success && mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/auth-success', (_) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final activeError = _validationError ?? authProvider.errorMessage;
 
     return CybersightAtmosphere(
       child: SafeArea(
@@ -145,12 +161,35 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                 ),
                               ),
 
-                              if (authProvider.errorMessage != null) ...[
-                                const SizedBox(height: 16),
-                                Text(
-                                  authProvider.errorMessage!,
-                                  style: const TextStyle(color: CybersightTheme.warning, fontSize: 11, fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.center,
+                              // Consolidated Error Display (Validation or Backend)
+                              if (activeError != null) ...[
+                                const SizedBox(height: 14),
+                                GlassContainer(
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                                  borderRadius: 14,
+                                  opacity: 0.08,
+                                  blur: 10,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        _validationError != null ? Icons.info_outline_rounded : Icons.error_outline_rounded,
+                                        color: CybersightTheme.accent2,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          activeError,
+                                          style: const TextStyle(
+                                            color: CybersightTheme.accent2,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.1,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
 
@@ -174,7 +213,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                   : () async {
                                       final success = await authProvider.signInWithGoogle();
                                       if (success && mounted) {
-                                        Navigator.pushNamedAndRemoveUntil(context, '/app', (_) => false);
+                                        Navigator.pushNamedAndRemoveUntil(context, '/auth-success', (_) => false);
                                       }
                                     },
                               ),
