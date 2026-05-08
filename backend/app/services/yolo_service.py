@@ -10,9 +10,11 @@ class YoloService:
             self.model = YOLO(model_name)
             # Define custom classes for zero-shot detection
             custom_classes = [
+                "refrigerator",
                 "air conditioner",
-                "split air conditioner",
-                "vertical air conditioner"
+                "microwave",
+                "laptop",
+                "printer"
             ]
             self.model.set_classes(custom_classes)
             print(f"[YoloService] Loaded YOLO-World model: {model_name} with classes: {custom_classes}")
@@ -51,13 +53,6 @@ class YoloService:
             for box in boxes:
                 x1, y1, x2, y2 = box.xyxy[0].tolist()
                 conf = box.conf[0].item()
-                class_id = int(box.cls[0])
-                
-                # Apply AC Bias
-                if class_id in [0, 1, 2]: # AC variants
-                    conf = min(conf * 1.5, 1.0)
-                elif class_id == 3: # Refrigerator
-                    conf = conf * 0.5
                 
                 if conf > highest_conf:
                     highest_conf = conf
@@ -79,14 +74,14 @@ class YoloService:
         Detects objects in the image and returns the image with ONLY VALID bounding boxes drawn.
         """
         if self.model is None:
-            return image
+            return image, []
         
         try:
-            # Use a very low threshold for visualization so we can see even weak detections
-            results = self.model(image, conf=0.1, verbose=False)
+            # Set a more permissive 0.20 threshold
+            results = self.model(image, conf=0.20, verbose=False)
             
             if not results or len(results) == 0:
-                return image
+                return image, []
                 
             import cv2
             import numpy as np
@@ -103,34 +98,49 @@ class YoloService:
                     conf = box.conf[0].item()
                     class_id = int(box.cls[0])
                     
-                    # BIAS: If it's an AC, we trust it more. If Fridge, we penalize.
-                    effective_conf = conf
-                    if class_id in [0, 1, 2]:
-                        effective_conf = min(conf * 1.5, 1.0)
-                    elif class_id == 3:
-                        effective_conf = conf * 0.5
-                    
-                    # We only draw it if the effective confidence is reasonable
-                    if effective_conf > 0.1:
+                    # BIAS: If it's an Air Conditioner (index 1), we trust it more!
+                    if class_id == 1:
+                        conf = min(conf * 1.4, 1.0)
+
+                    # We only draw it if the confidence is solid (now 0.20)
+                    if conf > 0.20:
                         drawn_boxes += 1
                         class_name = results[0].names[class_id]
-                        label = f"{class_name.capitalize()} {effective_conf:.2f}"
+                        label = f"{class_name.capitalize()} {conf:.2f}"
                         
-                        # Draw Rectangle (Bright Green)
-                        cv2.rectangle(img_cv, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 4)
+                        # Draw Rectangle (Bright Green) - Thicker for visibility
+                        cv2.rectangle(img_cv, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 8)
                         
-                        # Draw Label
-                        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
-                        cv2.rectangle(img_cv, (int(x1), int(y1) - th - 10), (int(x1) + tw, int(y1)), (0, 255, 0), -1)
-                        cv2.putText(img_cv, label, (int(x1), int(y1) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                        # Draw Label - Larger font
+                        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 1.2, 3)
+                        cv2.rectangle(img_cv, (int(x1), int(y1) - th - 15), (int(x1) + tw, int(y1)), (0, 255, 0), -1)
+                        cv2.putText(img_cv, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 3)
             
             if drawn_boxes == 0:
-                return image
+                return image, []
             
             # Convert back to PIL
             img_rgb = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
-            return Image.fromarray(img_rgb)
+            
+            detection_data = []
+            if len(boxes) > 0:
+                for box in boxes:
+                    conf = box.conf[0].item()
+                    class_id = int(box.cls[0])
+                    
+                    if class_id == 1:
+                        conf = min(conf * 1.4, 1.0)
+                        
+                    if conf > 0.20:
+                        class_name = results[0].names[class_id]
+                        detection_data.append({
+                            "category": class_name,
+                            "confidence": float(conf),
+                            "box": box.xyxy[0].tolist()
+                        })
+
+            return Image.fromarray(img_rgb), detection_data
             
         except Exception as e:
             print(f"[YoloService] Error during drawing: {e}")
-            return image
+            return image, []

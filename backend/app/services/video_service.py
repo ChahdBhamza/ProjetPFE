@@ -87,7 +87,7 @@ class VideoService:
                             highest_score_in_window = current_score
                             
                             # Cache the results
-                            boxed_pil = yolo_service.detect_and_draw(pil_frame)
+                            boxed_pil, _ = yolo_service.detect_and_draw(pil_frame)
                             cropped_pil = yolo_service.detect_and_crop(pil_frame)
                             
                             best_frame_in_window = {

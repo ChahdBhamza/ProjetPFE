@@ -142,58 +142,41 @@
                     method: 'POST',
                     body: formData
                 });
-
+ 
                 if (!response.ok) {
                     throw new Error(`Server returned ${response.status}`);
                 }
-
-                // The response is an image blob
-                const imageBlob = await response.blob();
-                const imageObjectURL = URL.createObjectURL(imageBlob);
+ 
+                const data = await response.json();
                 
-                // Display the image
-                resultImage.src = imageObjectURL;
+                // Display the boxed image from Base64
+                resultImage.src = `data:image/jpeg;base64,${data.image}`;
                 resultContainer.style.display = 'flex';
                 
-                // --- NOW RUN HYBRID VISION LLM ON THE SAME IMAGE ---
-                document.getElementById('ocr-result').innerHTML = "<i>Waking up Vision LLM (Neural Net)... This may take 15-30 seconds to read the logo perfectly...</i>";
+                // --- DISPLAY YOLO DETECTION DATA ---
+                let displayHTML = `<div style="color: #4CAF50; font-weight: bold; margin-bottom: 10px;">YOLO Neural Engine Results:</div>`;
                 
-                try {
-                    const ocrResponse = await fetch('/api/ocr', {
-                        method: 'POST',
-                        body: formData
+                if (data.detections && data.detections.length > 0) {
+                    data.detections.forEach(det => {
+                        displayHTML += `
+                        <div style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid #4CAF50; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: #4CAF50; font-size: 1.2em;">CATEGORY:</strong> 
+                                    <span style="color: #fff; font-size: 1.2em; margin-left: 10px;">${det.category.toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #4CAF50;">CONFIDENCE:</strong> 
+                                    <span style="color: #00ff88; font-weight: bold; font-size: 1.1em; margin-left: 10px;">${(det.confidence * 100).toFixed(1)}%</span>
+                                </div>
+                            </div>
+                        </div>`;
                     });
-                    
-                    if (ocrResponse.ok) {
-                        const ocrData = await ocrResponse.json();
-                        let displayHTML = `<div style="color: #4CAF50; font-weight: bold; margin-bottom: 10px;">[Gemini 2.5] Vision Analysis Complete:</div>`;
-                        
-                        // Show Structured Data if it exists
-                        if (ocrData.structured_data) {
-                            const sd = ocrData.structured_data;
-                            displayHTML += `
-                            <div style="background: #111; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-bottom: 15px;">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                    <div><strong>Brand:</strong> <span style="color: #00d2ff;">${sd.brand || 'N/A'}</span></div>
-                                    <div><strong>BTU:</strong> <span style="color: #00d2ff;">${sd.btu || 'N/A'}</span></div>
-                                    <div><strong>Model Ref:</strong> <span style="color: #00d2ff;">${sd.model_reference || 'N/A'}</span></div>
-                                    <div><strong>Confidence:</strong> <span style="color: #00d2ff;">${(sd.confidence * 100).toFixed(0)}%</span></div>
-                                </div>
-                                <div style="margin-top: 10px; border-top: 1px solid #333; padding-top: 10px; font-style: italic; color: #aaa;">
-                                    "${sd.analysis || ''}"
-                                </div>
-                            </div>`;
-                        } else {
-                            displayHTML += `<div style="background: #1a1a1a; padding: 10px; border-radius: 5px; border: 1px solid #333; white-space: pre-wrap;">${ocrData.raw_text || "No text detected."}</div>`;
-                        }
-                        
-                        document.getElementById('ocr-result').innerHTML = displayHTML;
-                    } else {
-                        document.getElementById('ocr-result').innerText = "OCR Failed or endpoint unavailable.";
-                    }
-                } catch (e) {
-                    document.getElementById('ocr-result').innerText = "OCR Error: " + e.message;
+                } else {
+                    displayHTML += `<div style="background: #1a1a1a; padding: 10px; border-radius: 5px; border: 1px solid #333; color: #ff5555;">No objects detected by YOLO. Try adjusting the image or lighting.</div>`;
                 }
+                
+                document.getElementById('ocr-result').innerHTML = displayHTML;
                 
             } catch (error) {
                 console.error('Error:', error);

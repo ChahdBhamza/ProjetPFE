@@ -339,15 +339,20 @@ async def yolo_test_endpoint(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(BytesIO(contents)).convert("RGB")
         
-        # Get image with bounding boxes drawn
-        boxed_image = _yolo_service.detect_and_draw(image)
+        # Get image with bounding boxes drawn and the raw detection data
+        boxed_image, detections = _yolo_service.detect_and_draw(image)
         
-        # Save to buffer
+        # Save to buffer for Base64
         img_byte_arr = BytesIO()
         boxed_image.save(img_byte_arr, format='JPEG')
+        import base64
+        img_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
         
-        # Return as image response
-        return Response(content=img_byte_arr.getvalue(), media_type="image/jpeg")
+        return {
+            "success": True,
+            "image": img_b64,
+            "detections": detections
+        }
         
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})

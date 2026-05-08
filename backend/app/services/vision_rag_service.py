@@ -40,14 +40,15 @@ class VisionRAGService:
         except json.JSONDecodeError as e:
             return {"error": "Failed to parse JSON", "raw_text": text, "exception": str(e)}
 
-    def verify_ac_unit(self, image_data, best_match: dict, similarity_score: float):
+    def verify_equipment(self, image_data, best_match: dict, similarity_score: float):
         """Perform Visual RAG verification with Gemini"""
         
         # Structured Prompt
         prompt = f"""
-        Extract technical AC specifications from the image. Return ONLY a JSON object. 
-        NO preamble. NO conversational text.
-
+        Extract technical specifications from the image of the equipment. 
+        It could be an Air Conditioner, Refrigerator, Microwave, Laptop, or Printer.
+        Return ONLY a JSON object. NO preamble. NO conversational text.
+        
         Input Context (Retrieved DB Match):
         {json.dumps(best_match, indent=2, ensure_ascii=False)}
         (Visual similarity score: {similarity_score})
@@ -56,10 +57,15 @@ class VisionRAGService:
         {{
           "brand": "string",
           "model_identifier": "string",
-          "btu_rating": "string",
-          "energy_class": "string",
+          "category": "string",
+          "specs": {{
+             "capacity": "string (BTU/Litres/Watts as applicable)",
+             "energy_class": "string",
+             "additional": "string"
+          }},
           "analysis": "2-3 sentences of visual reasoning based on pixels",
-          "is_match_verified": boolean
+          "is_match_verified": boolean,
+          "confidence": number (0.0-1.0)
         }}
         """
 
@@ -125,23 +131,32 @@ class VisionRAGService:
         # Using Gemini 2.5 for futuristic accuracy
         model_name = 'gemini-2.5-flash' 
         
-        prompt = """You are a Forensic HVAC Logo & Brand Analyst.
-Your mission is to identify the BRAND of an air conditioner with 100% precision to guide a database search.
+        prompt = """You are a Forensic Equipment Analyst.
+Your mission is to identify the CATEGORY and BRAND of the equipment in the image with 100% precision.
+
+TARGET CATEGORIES:
+1. Refrigerator
+2. Air Conditioner
+3. Microwave
+4. Laptop
+5. Printer
 
 STRICT PROTOCOL:
-1. LOGO INSPECTION: Look specifically for brand wordmarks (Samsung, Gree, LG, Condor, Midea). These are usually in the center or bottom-right of the indoor unit.
-2. TEXT VERIFICATION: Do NOT guess based on the white plastic shape. Many brands use the same chassis. You must find the literal text or a unique stylized logo.
-3. BRAND LIST: Look for common brands: Samsung (rounded text), Gree (stylized 'G'), LG (face logo), Condor (bold text).
-4. BTU DECODING: Look for numbers like '9', '12', '18', '24' on side stickers or in model codes.
+1. IDENTIFY CATEGORY: Determine which of the 5 categories the item belongs to.
+2. LOGO INSPECTION: Look specifically for brand wordmarks (Samsung, LG, Dell, HP, Epson, Gree, Midea, etc). 
+3. TECHNICAL SPECS:
+   - For AC/Fridge: Look for BTU, Model Code, or Capacity in Litres.
+   - For Laptop/Printer: Look for Model Series (e.g., Latitude, ThinkPad, LaserJet).
+   - For Microwave: Look for Wattage or Model.
 
 Return ONLY JSON:
 {
+  "category": "string",
   "brand": "string | null",
   "btu": "string | null",
   "model_reference": "string | null",
-  "technology": "Inverter" | "On/Off" | null,
   "confidence": 0.0-1.0,
-  "analysis": "Describe the EXACT visual evidence (e.g., 'Saw the Samsung logo in the center')"
+  "analysis": "Describe the EXACT visual evidence (e.g., 'Saw the HP logo on the laptop lid')"
 }
 
 If you are not 80% sure about the brand, return "brand": null."""
