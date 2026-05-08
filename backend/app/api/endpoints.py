@@ -3,8 +3,6 @@ from fastapi.responses import JSONResponse
 from PIL import Image
 from io import BytesIO
 import json
-from app.services.classic_ocr_service import ClassicOCRService
-from app.services.hybrid_ocr_service import HybridOCRService
 from app.database import mongo_db
 
 router = APIRouter()
@@ -19,7 +17,6 @@ _ocr_service = None # OCR Engine
 _openai_service = None
 _yolo_service = None
 _video_service = None
-_detectron_service = None
 
 def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None, yolo_service=None):
     global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service, _yolo_service
@@ -216,10 +213,9 @@ async def _perform_search(image, contents, use_vlm=False, use_openai=False):
 async def ocr_endpoint(file: UploadFile = File(...)):
     """Dedicated endpoint for raw OCR text extraction"""
     global _ocr_service
-    if _ocr_service is None:
-        print("[LazyLoad] Initializing OCR Service...")
-        from app.services.hybrid_ocr_service import HybridOCRService
-        _ocr_service = HybridOCRService()
+    if _vision_service is None:
+        from app.services.vision_rag_service import VisionRAGService
+        _vision_service = VisionRAGService()
         
     try:
         contents = await file.read()
@@ -239,11 +235,6 @@ async def ocr_endpoint(file: UploadFile = File(...)):
         cropped_bytes = img_byte_arr.getvalue()
         
         # 3. Use Gemini Vision LLM for 100% flawless logo extraction!
-        global _vision_service
-        if _vision_service is None:
-            from app.services.vision_rag_service import VisionRAGService
-            _vision_service = VisionRAGService()
-            
         print("[OCR] Sending cropped image to Gemini for analysis...")
         gemini_result = _vision_service.identify_from_raw_image(cropped_bytes)
         
@@ -256,49 +247,14 @@ async def ocr_endpoint(file: UploadFile = File(...)):
     except Exception as e:
         return {"error": f"OCR Failed: {str(e)}"}
 @router.post("/ocr/classic")
-async def classic_ocr_endpoint(
-    file: UploadFile = File(...),
-    lang_combo: str = Form("en_fr")
-):
-    """Dumb OCR endpoint for raw text comparison"""
-    try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents))
-        
-        # Crop the image first so we don't OCR the ceiling!
-        global _yolo_service
-        if _yolo_service is None:
-            from app.services.yolo_service import YoloService
-            _yolo_service = YoloService()
-            
-        cropped_image = _yolo_service.detect_and_crop(image)
-        
-        ocr = ClassicOCRService()
-        return ocr.process_image(cropped_image, combo=lang_combo)
-        
-    except Exception as e:
-        return {"error": f"Classic OCR Failed: {str(e)}", "status": "error"}
+async def classic_ocr_endpoint(file: UploadFile = File(...)):
+    """Legacy endpoint now powered by Gemini for maximum accuracy"""
+    return await ocr_endpoint(file)
 
 @router.post("/ocr/hybrid")
 async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
-    """Hybrid Pipeline: EasyOCR -> Text LLM"""
-    try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents))
-        
-        # 1.1 Optional YOLO Cropping
-        if _yolo_service:
-            print("[HybridOCR] Running YOLO detection for cropping...")
-            cropped_image = _yolo_service.detect_and_crop(image)
-            if cropped_image != image:
-                print("[HybridOCR] Image cropped by YOLO.")
-                image = cropped_image
-        
-        hybrid_service = HybridOCRService()
-        return await hybrid_service.process_image(image)
-        
-    except Exception as e:
-        return {"success": False, "error": f"Hybrid Pipeline Failed: {str(e)}"}
+    """Legacy endpoint now powered by Gemini for maximum accuracy"""
+    return await ocr_endpoint(file)
 
 @router.post("/inventory/save")
 async def save_to_inventory(data: dict):
@@ -357,44 +313,7 @@ async def yolo_test_endpoint(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})
 
-@router.post("/detectron/test")
-async def detectron_test_endpoint(file: UploadFile = File(...)):
-    """Run Detectron2 Mask R-CNN inference and return annotated image + detections JSON"""
-    global _detectron_service
 
-    if _detectron_service is None:
-        from app.services.detectron_service import DetectronService
-        _detectron_service = DetectronService()
-
-    if not _detectron_service.is_available():
-        return JSONResponse(
-            status_code=503,
-            content={
-                "success": False,
-                "error": "Detectron2 is not installed on this server.",
-                "install_hint": "pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch2.0/index.html",
-            },
-        )
-
-    try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents)).convert("RGB")
-
-        result = _detectron_service.run_inference(image)
-
-        annotated_b64 = _detectron_service.pil_to_base64(result["annotated_image"])
-
-        return {
-            "success":        True,
-            "annotated_image": annotated_b64,
-            "detections":     result["detections"],
-            "count":          result["count"],
-            "device":         result["device"],
-            "model":          result["model"],
-        }
-
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
 
 
 @router.post("/video/extract-frames")
