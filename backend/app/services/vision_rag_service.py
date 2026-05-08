@@ -15,11 +15,14 @@ class VisionRAGService:
         if not self.api_key:
             raise ValueError("GOOGLE_API_KEY not found. Please check your .env file.")
         
-        self.client = genai.Client(api_key=self.api_key)
+        # Use v1beta to access the newest models (3.1, 2.5, etc.)
+        self.client = genai.Client(api_key=self.api_key, http_options={'api_version': 'v1beta'})
         # Use stable models that are widely available
         self.models_to_try = [
-            'gemini-2.5-flash',
-            'gemini-2.0-flash'
+            'gemini-1.5-flash',
+            'gemini-2.0-flash',
+            'gemini-1.5-flash-8b',
+            'gemini-1.5-pro'
         ]
 
     def _extract_json(self, text: str) -> dict:
@@ -43,31 +46,34 @@ class VisionRAGService:
     def verify_equipment(self, image_data, best_match: dict, similarity_score: float):
         """Perform Visual RAG verification with Gemini"""
         
-        # Structured Prompt
-        prompt = f"""
-        Extract technical specifications from the image of the equipment. 
-        It could be an Air Conditioner, Refrigerator, Microwave, Laptop, or Printer.
-        Return ONLY a JSON object. NO preamble. NO conversational text.
-        
-        Input Context (Retrieved DB Match):
-        {json.dumps(best_match, indent=2, ensure_ascii=False)}
-        (Visual similarity score: {similarity_score})
+        # Structured Forensic Verification Prompt
+        prompt = f"""You are a High-Precision Forensic Validator. 
+Your task is to verify if the physical object in the photo is EXACTLY the same model as the database entry provided.
 
-        Required JSON structure:
-        {{
-          "brand": "string",
-          "model_identifier": "string",
-          "category": "string",
-          "specs": {{
-             "capacity": "string (BTU/Litres/Watts as applicable)",
-             "energy_class": "string",
-             "additional": "string"
-          }},
-          "analysis": "2-3 sentences of visual reasoning based on pixels",
-          "is_match_verified": boolean,
-          "confidence": number (0.0-1.0)
-        }}
-        """
+DATABASE MATCH DATA:
+{json.dumps(best_match, indent=2, ensure_ascii=False)}
+
+VALIDATION PROTOCOL:
+1. PHYSICAL AUDIT: Compare the visual features (vents, buttons, display type) with the database description.
+2. DISCREPANCY CHECK: Look for any "Red Flags" (e.g., the DB says 'Inverter' but the photo shows a standard label).
+3. SERIAL/MODEL MATCH: If a model code is visible, does it match or belong to the same series as the DB entry?
+4. LOGO PLACEMENT: Is the brand logo positioned exactly where it should be for this specific brand?
+
+Return ONLY a JSON object:
+{{
+  "brand": "string",
+  "model_identifier": "string",
+  "category": "string",
+  "specs": {{
+     "capacity": "extracted capacity",
+     "energy_class": "extracted class (A++, etc)",
+     "is_inverter": "boolean | null",
+     "additional_features": "string"
+  }},
+  "analysis": "Provide a 3-step forensic reasoning: 1. Logo check, 2. Feature match, 3. Final verdict.",
+  "is_match_verified": boolean (True ONLY if Brand and Capacity match),
+  "confidence": number (0.0-1.0)
+}}"""
 
         config = types.GenerateContentConfig(
             tools=[{"google_search": {}}],
@@ -126,28 +132,17 @@ class VisionRAGService:
                         print(f"[VisionRAG] Model {model_name} failed: {e}")
                         break # Move to next model
         
-    def identify_from_raw_image(self, image_data):
-        """High-Precision Visual Identification for RAG filtering"""
-        # Using Gemini 2.5 for futuristic accuracy
-        model_name = 'gemini-2.5-flash' 
-        
-        prompt = """You are a Forensic Equipment Analyst.
-Your mission is to identify the CATEGORY and BRAND of the equipment in the image with 100% precision.
-
-TARGET CATEGORIES:
-1. Refrigerator
-2. Air Conditioner
-3. Microwave
-4. Laptop
-5. Printer
+    def identify_with_dual_vision(self, color_image_data, gray_image_data):
+        """Analyze both Color (Design DNA) and Grayscale (Specs) in one pass with robust failover"""
+        prompt = """You are a Master Industrial Design Analyst.
+I am providing two views of the same equipment:
+1. COLOR VIEW: Use this to identify Brand Design Language, Logo Colors, and Physical DNA (handles, hinges, finish).
+2. FORENSIC VIEW: Use this high-contrast view to read small alphanumeric text or technical labels.
 
 STRICT PROTOCOL:
-1. IDENTIFY CATEGORY: Determine which of the 5 categories the item belongs to.
-2. LOGO INSPECTION: Look specifically for brand wordmarks (Samsung, LG, Dell, HP, Epson, Gree, Midea, etc). 
-3. TECHNICAL SPECS:
-   - For AC/Fridge: Look for BTU, Model Code, or Capacity in Litres.
-   - For Laptop/Printer: Look for Model Series (e.g., Latitude, ThinkPad, LaserJet).
-   - For Microwave: Look for Wattage or Model.
+- IDENTIFY BRAND: Use your internal knowledge of product design. Does the handle shape match Samsung? Does the silver finish match LG?
+- READ SPECS: Look for BTU, Model Codes, or Capacity in the Forensic View.
+- REASONING: Explain which visual cues led you to the brand.
 
 Return ONLY JSON:
 {
@@ -156,19 +151,79 @@ Return ONLY JSON:
   "btu": "string | null",
   "model_reference": "string | null",
   "confidence": 0.0-1.0,
-  "analysis": "Describe the EXACT visual evidence (e.g., 'Saw the HP logo on the laptop lid')"
-}
+  "analysis": "Provide a 2-step reason: 1. Physical DNA analysis, 2. Label/Sticker confirmation."
+}"""
+        
+        max_retries = 3
+        retry_delay = 5
 
-If you are not 80% sure about the brand, return "brand": null."""
-        try:
-            # Correctly wrap the image bytes
-            image_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")
-            
-            response = self.client.models.generate_content(
-                model=model_name,
-                contents=[prompt, image_part]
-            )
-            return self._extract_json(response.text)
-        except Exception as e:
-            print(f"[VisionRAG] Raw identification failed: {e}")
-            return {"brand": "Unknown", "model": "Unknown", "btu": "Unknown"}
+        for model_name in self.models_to_try:
+            print(f"[VisionRAG] Dual-Vision attempting with: {model_name}")
+            for attempt in range(max_retries):
+                try:
+                    # Resize images to be smaller to save tokens
+                    from PIL import Image
+                    from io import BytesIO
+                    
+                    def resize_for_ai(data, size=(800, 800)):
+                        img = Image.open(BytesIO(data))
+                        img.thumbnail(size)
+                        out = BytesIO()
+                        img.save(out, format="JPEG", quality=70)
+                        return out.getvalue()
+
+                    color_small = resize_for_ai(color_image_data)
+                    gray_small = resize_for_ai(gray_image_data)
+
+                    color_part = types.Part.from_bytes(data=color_small, mime_type="image/jpeg")
+                    gray_part = types.Part.from_bytes(data=gray_small, mime_type="image/jpeg")
+                    
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=[prompt, color_part, gray_part]
+                    )
+                    return self._extract_json(response.text)
+                except Exception as e:
+                    error_msg = str(e).lower()
+                    if ("404" in error_msg):
+                        print(f"[VisionRAG] Model {model_name} not found, trying next...")
+                        break # Try next model
+                    if ("429" in error_msg or "503" in error_msg) and attempt < max_retries - 1:
+                        print(f"[VisionRAG] Quota hit on {model_name}, waiting {retry_delay}s...")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2
+                    else:
+                        print(f"[VisionRAG] Model {model_name} failed: {e}")
+                        break
+        
+        return {"brand": "Unknown", "category": "Equipment", "analysis": "All models exhausted."}
+
+    def identify_from_raw_image(self, image_data):
+        """High-Precision Visual Identification for RAG filtering"""
+        max_retries = 3
+        retry_delay = 5
+
+        for model_name in self.models_to_try:
+            print(f"[VisionRAG] Identification attempting with: {model_name}")
+            for attempt in range(max_retries):
+                try:
+                    img_part = types.Part.from_bytes(data=image_data, mime_type="image/jpeg")
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=[prompt, img_part]
+                    )
+                    return self._extract_json(response.text)
+                except Exception as e:
+                    error_msg = str(e).lower()
+                    if "404" in error_msg:
+                        print(f"[VisionRAG] Model {model_name} not found, trying next...")
+                        break
+                    if ("429" in error_msg or "503" in error_msg) and attempt < max_retries - 1:
+                        print(f"[VisionRAG] Quota hit on {model_name}, waiting {retry_delay}s...")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2
+                    else:
+                        print(f"[VisionRAG] Model {model_name} failed: {e}")
+                        break
+
+        return {"brand": "Unknown", "category": "Equipment", "analysis": "All models exhausted."}

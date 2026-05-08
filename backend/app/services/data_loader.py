@@ -5,7 +5,8 @@ import json
 from tqdm import tqdm
 from app.services.clip_embedder import CLIPEmbedder
 from app.services.vector_store import VectorStore
-
+from app.services.yolo_service import YoloService
+from PIL import Image
 
 class DataLoader:
     def __init__(self, data_root: str = "../dataequipment"):
@@ -18,6 +19,8 @@ class DataLoader:
         self.data_root = Path(data_root)
         self.embedder = CLIPEmbedder()
         self.vector_store = VectorStore()
+        # Initialize YOLO for image cleaning
+        self.yolo_service = YoloService()
     
     def load_climatiseurs_dataset(self) -> List[Dict]:
         """Loads all climatiseurs from the dataequipment/climatiseurs folder"""
@@ -40,7 +43,7 @@ class DataLoader:
             image_dir = brand_dir / "images" # Our exporter uses 'images' plural
             
             if text_dir.exists():
-                for text_file in text_dir.glob("*.txt"):
+                for text_file in text_dir.glob("*.json"): # Using JSON now
                     climatiseur = self._process_climatiseur_file(
                         brand_name,
                         text_file,
@@ -52,10 +55,10 @@ class DataLoader:
         return climatiseurs
     
     def _process_climatiseur_file(self, brand: str, text_file: Path, image_dir: Path) -> Optional[Dict]:
-        """Reads a text file and finds its matching image"""
+        """Reads a JSON file and finds its matching image"""
         try:
             with open(text_file, 'r', encoding='utf-8') as f:
-                specs_text = f.read().strip()
+                data = json.load(f)
             
             model_name = text_file.stem
             # Create a simple numeric/string ID for Qdrant
@@ -74,7 +77,7 @@ class DataLoader:
                 'id': climatiseur_id,
                 'brand': brand,
                 'model_name': model_name,
-                'specs_text': specs_text,
+                'specs_json': data,
                 'image_path': image_path,
                 'file_path': text_file
             }
@@ -82,8 +85,11 @@ class DataLoader:
             print(f"   ⚠️ Error processing {text_file}: {e}")
             return None
     
-    def index_dataset(self):
-        """Processes the dataset and saves everything to the Vector Database"""
+    def index_dataset(self, use_yolo_crop: bool = False):
+        """
+        Processes the dataset and saves everything to the Vector Database.
+        Optionally crops images using YOLO before enhancement.
+        """
         climatiseurs = self.load_climatiseurs_dataset()
         print(f"🚀 Found {len(climatiseurs)} climatiseurs. Starting AI indexing...")
         
@@ -91,18 +97,35 @@ class DataLoader:
         
         for item in tqdm(climatiseurs, desc="Indexing"):
             try:
-                # 1. Choose which embedding to use (Image is priority for visual search)
+                embedding = None
+                
+                # 1. Image Priority with ENHANCEMENT
                 if item['image_path']:
-                    embedding = self.embedder.embed_image(item['image_path'])
-                else:
-                    embedding = self.embedder.embed_text(item['specs_text'])
+                    # Open the catalog image
+                    raw_img = Image.open(item['image_path']).convert("RGB")
+                    
+                    # Optional YOLO Crop (Useful if DB images are raw photos)
+                    processed_img = raw_img
+                    if use_yolo_crop:
+                        processed_img = self.yolo_service.detect_and_crop(raw_img)
+                    
+                    # Always apply enhancement (Grayscale/Contrast/Sharpen)
+                    final_img = self.yolo_service.enhance_for_ocr(processed_img)
+                    
+                    embedding = self.embedder.embed_image(final_img)
+                
+                # 2. Fallback to text embedding
+                if embedding is None:
+                    # Convert JSON to a flat string for CLIP text embedding
+                    specs_str = f"{item['brand']} {item['model_name']} " + " ".join([str(v) for v in item['specs_json'].values()])
+                    embedding = self.embedder.embed_text(specs_str)
                 
                 if embedding is None:
                     continue
 
-                # 2. Save to Vector Store
+                # 3. Save to Vector Store
                 metadata = {
-                    "specs": item['specs_text'],
+                    **item['specs_json'],
                     "text_file": str(item['file_path']),
                     "image_file": str(item['image_path']) if item['image_path'] else "N/A"
                 }

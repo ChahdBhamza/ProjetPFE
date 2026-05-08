@@ -7,8 +7,8 @@ class VectorStore:
     def __init__(self, collection_name="climatiseurs", path="qdrant_db"):
         """Initialize Qdrant Vector Store"""
         self.collection_name = collection_name
-        # Ensure we always use the same database folder in backend/qdrant_db
-        db_path = os.path.join(os.getcwd(), "qdrant_db")
+        # Ensure we use the provided path
+        db_path = os.path.join(os.getcwd(), path)
         print(f"[VectorStore] Connecting to DB at: {db_path}")
         self.client = QdrantClient(path=db_path)
         
@@ -53,12 +53,24 @@ class VectorStore:
             ))
             
         if btu_filter and btu_filter != "Unknown":
-            conditions.append(models.Filter(
-                should=[
-                    models.FieldCondition(key="btu", match=models.MatchValue(value=btu_filter)),
-                    models.FieldCondition(key="capacity_btu", match=models.MatchValue(value=btu_filter))
-                ]
-            ))
+            try:
+                btu_val = int(btu_filter)
+                conditions.append(models.Filter(
+                    should=[
+                        # Exact match
+                        models.FieldCondition(key="btu", match=models.MatchValue(value=str(btu_val))),
+                        # Fuzzy Range Match (±10% to account for AI estimation errors)
+                        models.FieldCondition(
+                            key="btu", 
+                            range=models.Range(
+                                gte=btu_val * 0.9,
+                                lte=btu_val * 1.1
+                            )
+                        )
+                    ]
+                ))
+            except:
+                conditions.append(models.FieldCondition(key="btu", match=models.MatchValue(value=btu_filter)))
             
         if conditions:
             query_filter = models.Filter(must=conditions)

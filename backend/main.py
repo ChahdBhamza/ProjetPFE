@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 # Import services
-from app.api.endpoints import router as api_router, init_services
+from app.api.endpoints import router as api_router
 
 # Load Env
 load_dotenv()
@@ -46,6 +46,13 @@ async def serve_yolo_ui():
 @app.get("/video")
 async def serve_video_ui():
     html_path = os.path.join(os.path.dirname(__file__), "video_test_ui.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "UI file not found"}
+
+@app.get("/forensic")
+async def serve_forensic_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "forensic_test_ui.html")
     if os.path.exists(html_path):
         return FileResponse(html_path)
     return {"error": "UI file not found"}

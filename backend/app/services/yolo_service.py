@@ -1,6 +1,7 @@
-import os
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageOps
 import io
+import numpy as np
+import cv2
 
 class YoloService:
     def __init__(self, model_name="yolov8s-world.pt"):
@@ -67,6 +68,32 @@ class YoloService:
             
         except Exception as e:
             print(f"[YoloService] Error during detection/cropping: {e}")
+            return image
+
+    def enhance_for_ocr(self, image: Image.Image) -> Image.Image:
+        """
+        Applies computer vision filters to make labels and text stand out.
+        Helps Gemini/OCR models read small or blurry text.
+        """
+        try:
+            # 1. Convert to Grayscale
+            enhanced = ImageOps.grayscale(image)
+            
+            # 2. Boost Contrast significantly
+            enhancer = ImageEnhance.Contrast(enhanced)
+            enhanced = enhancer.enhance(2.0)
+            
+            # 3. Increase Sharpness
+            sharpener = ImageEnhance.Sharpness(enhanced)
+            enhanced = sharpener.enhance(2.5)
+            
+            # 4. Final Brightness adjustment (prevent it from being too dark)
+            brightener = ImageEnhance.Brightness(enhanced)
+            enhanced = brightener.enhance(1.2)
+            
+            return enhanced
+        except Exception as e:
+            print(f"[YoloService] Enhancement failed: {e}")
             return image
 
     def detect_and_draw(self, image: Image.Image) -> Image.Image:

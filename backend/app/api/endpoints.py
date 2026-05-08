@@ -85,10 +85,15 @@ async def _perform_search(image, contents, use_vlm=False, use_openai=False):
             if cropped_image != image:
                 print("[Endpoints] Image cropped by YOLO.")
                 image = cropped_image
-                # Update contents for the models that read raw bytes
-                img_byte_arr = BytesIO()
-                image.save(img_byte_arr, format='JPEG')
-                contents = img_byte_arr.getvalue()
+            
+            # Enhancement: Clean the image for better AI reading (only if YOLO available)
+            print("[Endpoints] Enhancing image for AI analysis...")
+            image = _yolo_service.enhance_for_ocr(image)
+        
+        # Update contents for the models that read raw bytes
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format='JPEG')
+        contents = img_byte_arr.getvalue()
         
         # 2. Embed the image
         query_vector = _embedder.embed_image(image)
@@ -229,7 +234,10 @@ async def ocr_endpoint(file: UploadFile = File(...)):
                 print("[OCR] Image cropped by YOLO.")
                 image = cropped_image
                 
-        # 2. Convert cropped image back to bytes for Gemini
+        # 2. Enhance and convert back to bytes for Gemini
+        print("[OCR] Enhancing cropped image for high-precision extraction...")
+        image = _yolo_service.enhance_for_ocr(image)
+        
         img_byte_arr = BytesIO()
         image.save(img_byte_arr, format='JPEG')
         cropped_bytes = img_byte_arr.getvalue()
@@ -370,4 +378,158 @@ async def extract_frames_endpoint(
             "message": f"Extracted {len(frames)} key frames with full AI pipeline."
         }
     except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@router.post("/forensic/search")
+async def forensic_search_endpoint(file: UploadFile = File(...)):
+    """Advanced Forensic Pipeline: Crop -> Enhance -> Gemini ID -> V2 Vector Search -> Gemini Verify"""
+    global _vision_service, _yolo_service, _embedder
+    
+    # 1. Lazy Initialization
+    if _vision_service is None:
+        from app.services.vision_rag_service import VisionRAGService
+        _vision_service = VisionRAGService()
+    if _yolo_service is None:
+        from app.services.yolo_service import YoloService
+        _yolo_service = YoloService()
+    if _embedder is None:
+        from app.services.clip_embedder import CLIPEmbedder
+        _embedder = CLIPEmbedder()
+        
+    # We use a dedicated VectorStore for V2 Forensic DB
+    from app.services.vector_store import VectorStore
+    v2_store = VectorStore(collection_name="climatiseurs_forensic", path="qdrant_db_v2")
+
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+
+        # 2. Forensic Pre-processing (Crop + Enhance)
+        print("[ForensicAPI] Detecting and cropping (Color)...")
+        cropped_color = _yolo_service.detect_and_crop(image)
+        
+        print("[ForensicAPI] Generating Forensic Enhanced View...")
+        enhanced_gray = _yolo_service.enhance_for_ocr(cropped_color)
+        
+        # Convert both to bytes
+        # 1. Color for Design/Brand DNA
+        color_buf = BytesIO()
+        cropped_color.save(color_buf, format='JPEG', quality=95)
+        color_bytes = color_buf.getvalue()
+        
+        # 2. Grayscale for Technical Specs
+        gray_buf = BytesIO()
+        enhanced_gray.save(gray_buf, format='JPEG', quality=95)
+        gray_bytes = gray_buf.getvalue()
+        
+        # For UI display (Enhanced)
+        import base64
+        enhanced_b64 = base64.b64encode(gray_bytes).decode('utf-8')
+
+        # 3. AI Perception (Gemini Identification with DUAL VISION)
+        print("[ForensicAPI] Requesting Gemini Identification (Dual Vision)...")
+        # We pass BOTH images to the service
+        ai_perception = _vision_service.identify_with_dual_vision(color_bytes, gray_bytes)
+        
+        # 4. Vector Search (V2 DB)
+        print("[ForensicAPI] Searching V2 Forensic Database...")
+        query_vector = _embedder.embed_image(cropped_color) # Use color for visual search
+        
+        results = v2_store.hybrid_search(
+            query_vector=query_vector,
+            text_query=ai_perception.get('analysis', ""),
+            limit=3,
+            brand_filter=ai_perception.get('brand'),
+            btu_filter=ai_perception.get('btu')
+        )
+
+        if not results:
+            return {"success": False, "error": "No matches found in Forensic V2 DB."}
+
+        best_match = results[0].payload
+        similarity_score = results[0].score
+
+        # 5. Final Verification (Gemini)
+        print("[ForensicAPI] Requesting Final Verification...")
+        verification = _vision_service.verify_equipment(gray_bytes, best_match, similarity_score)
+
+        return {
+            "success": True,
+            "enhanced_image": enhanced_b64,
+            "ai_perception": ai_perception,
+            "best_match": {
+                "item": best_match,
+                "score": float(similarity_score)
+            },
+            "verification": verification,
+            "all_matches": [
+                {"brand": r.payload.get("brand"), "model": r.payload.get("model_name"), "score": float(r.score)} 
+                for r in results
+            ]
+        }
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+
+@router.post("/forensic/search_rag_only")
+async def forensic_search_rag_only(file: UploadFile = File(...)):
+    """Dual-RAG Comparison: Original Image vs Forensic Crop (No Gemini)"""
+    global _yolo_service, _embedder
+    
+    if _yolo_service is None:
+        from app.services.yolo_service import YoloService
+        _yolo_service = YoloService()
+    if _embedder is None:
+        from app.services.clip_embedder import CLIPEmbedder
+        _embedder = CLIPEmbedder()
+        
+    # 1. Setup ONE Vector Store connection
+    from app.services.vector_store import VectorStore
+    v_store = VectorStore(collection_name="climatiseurs_forensic", path="qdrant_db_v2")
+
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+
+        # A. Search in RAW Collection (Original vs Original)
+        print("[RAG-Only] Searching in RAW Collection...")
+        raw_vector = _embedder.embed_image(image)
+        
+        # Temporarily swap collection to 'raw' for this search
+        v_store.collection_name = "climatiseurs_raw"
+        raw_results = v_store.search(raw_vector, limit=3)
+        
+        # B. Search in FORENSIC Collection (Enhanced vs Enhanced)
+        print("[RAG-Only] Searching in FORENSIC Collection...")
+        v_store.collection_name = "climatiseurs_forensic" # Swap back
+        cropped_color = _yolo_service.detect_and_crop(image)
+        enhanced_gray = _yolo_service.enhance_for_ocr(cropped_color)
+        
+        forensic_vector = _embedder.embed_image(enhanced_gray)
+        forensic_results = v_store.search(forensic_vector, limit=3)
+
+        # Base64 for display
+        import base64
+        img_byte_arr = BytesIO()
+        cropped_color.save(img_byte_arr, format='JPEG')
+        enhanced_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+
+        return {
+            "success": True,
+            "enhanced_image": enhanced_b64,
+            "raw_matches": [
+                {"brand": r.payload.get("brand"), "model": r.payload.get("model_name"), "score": float(r.score)} 
+                for r in raw_results
+            ],
+            "forensic_matches": [
+                {"brand": r.payload.get("brand"), "model": r.payload.get("model_name"), "score": float(r.score)} 
+                for r in forensic_results
+            ]
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"success": False, "error": str(e)}
