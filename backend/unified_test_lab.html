@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersight | Unified AI Test Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --card-bg: #0d0d0d;
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --text: #ffffff;
+            --accent: #ff0055;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(112, 0, 255, 0.05) 0%, transparent 40%);
+        }
+
+        header {
+            width: 100%;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .upload-area {
+            width: 100%;
+            height: 350px;
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: var(--glass);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(0, 242, 255, 0.02);
+        }
+
+        #preview {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 18px;
+            display: none;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1.2rem;
+            margin-top: 1.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .result-image-box {
+            width: 100%;
+            background: #000;
+            border-radius: 20px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        #result-img {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 18px;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: rgba(255, 255, 255, 0.2);
+            font-style: italic;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .meta-item {
+            background: var(--glass);
+            padding: 1rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 242, 255, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .detection-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">CYBERSIGHT AI</div>
+        <div class="status-badge">Unified Engine v2.0</div>
+    </header>
+
+    <main>
+        <div class="card">
+            <h2>1. Upload Evidence</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <i>📁</i>
+                <p>Drop file or click to browse</p>
+                <img id="preview">
+            </div>
+            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+            
+            <button class="btn-primary" id="detectBtn" onclick="runUnifiedDetection()" disabled>
+                <span>RUN UNIFIED AI SCAN</span>
+            </button>
+        </div>
+
+        <div class="results-container">
+            <div class="card">
+                <h2>2. Forensic Analysis</h2>
+                <div class="result-image-box">
+                    <div class="loading-spinner" id="spinner"></div>
+                    <p class="placeholder-text" id="placeholder">Scan results will appear here...</p>
+                    <img id="result-img">
+                    <div class="detection-badge" id="source-badge">ROBOFLOW</div>
+                </div>
+                
+                <div class="meta-grid" id="meta-grid" style="margin-top: 1.5rem; display: none;">
+                    <div class="meta-item">
+                        <p class="meta-label">IDENTIFIED CLASS</p>
+                        <p class="meta-value" id="res-class">-</p>
+                    </div>
+                    <div class="meta-item">
+                        <p class="meta-label">SOURCE PIPELINE</p>
+                        <p class="meta-value" id="res-source">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const output = document.getElementById('preview');
+                output.src = reader.result;
+                output.style.display = 'block';
+                document.getElementById('detectBtn').disabled = false;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        async function runUnifiedDetection() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            // UI State
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('result-img').style.display = 'none';
+            document.getElementById('detectBtn').disabled = true;
+            document.getElementById('source-badge').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/detect/unified', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log("Detection Results:", data);
+
+                if (data.image) {
+                    const resultImg = document.getElementById('result-img');
+                    resultImg.src = `data:image/jpeg;base64,${data.image}`;
+                    resultImg.style.display = 'block';
+                } else {
+                    // Fallback to original image if no annotated one returned
+                    const resultImg = document.getElementById('result-img');
+                    resultImg.src = document.getElementById('preview').src;
+                    resultImg.style.display = 'block';
+                }
+
+                document.getElementById('meta-grid').style.display = 'grid';
+                document.getElementById('res-class').textContent = data.category || 'Unknown';
+                document.getElementById('res-source').textContent = data.source || 'N/A';
+                
+                const badge = document.getElementById('source-badge');
+                badge.textContent = data.source || 'N/A';
+                badge.style.display = 'block';
+                badge.style.background = data.source === 'yolov5' ? '#00f2ff' : '#7000ff';
+
+            } catch (error) {
+                console.error("Detection error:", error);
+                alert("Scan failed. Check server logs.");
+            } finally {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('detectBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

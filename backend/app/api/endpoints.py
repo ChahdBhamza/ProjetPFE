@@ -16,9 +16,11 @@ _local_vlm = None # Qwen/Moondream
 _openai_service = None
 _video_service = None
 _yolov5_service = None
+_roboflow_service = None
+_orchestrator_service = None
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None, yolov5_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service, _yolov5_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None, yolov5_service=None, roboflow_service=None, orchestrator_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service, _yolov5_service, _roboflow_service, _orchestrator_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -27,6 +29,8 @@ def init_services(embedder, vector_store, vision_service, web_service, local_vlm
     _ocr_service = ocr_service
     _openai_service = openai_service
     _yolov5_service = yolov5_service
+    _roboflow_service = roboflow_service
+    _orchestrator_service = orchestrator_service
 
 def normalize_btu(btu_str):
     """Normalize '12' or '12k' to '12000' for reliable DB filtering"""
@@ -456,3 +460,105 @@ async def yolov5_detect_endpoint(file: UploadFile = File(...)):
         traceback.print_exc()
         from fastapi.responses import JSONResponse
         return JSONResponse(status_code=500, content={"error": f"YOLOv5 Failed: {str(e)}"})
+
+@router.post("/roboflow/detect")
+async def roboflow_detect_endpoint(
+    file: UploadFile = File(...), 
+    workflow_id: str = "detect-count-and-visualize"
+):
+    """Roboflow Workflow Detection (Implemented from directory 'a')"""
+    global _roboflow_service
+    
+    if _roboflow_service is None:
+        print("[LazyLoad] Initializing Roboflow Service...")
+        from app.services.roboflow_service import RoboflowService
+        _roboflow_service = RoboflowService()
+        
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+        
+        # 1. Run detection
+        result = _roboflow_service.detect(image, workflow_id=workflow_id)
+        
+        if "error" in result:
+            return JSONResponse(status_code=500, content=result)
+            
+        detections = result["detections"]
+        
+        # 2. Draw for visualization
+        boxed_image = _roboflow_service.draw_detections(image.copy(), detections)
+        
+        # 3. Convert to Base64 for UI
+        img_byte_arr = BytesIO()
+        boxed_image.save(img_byte_arr, format='JPEG')
+        import base64
+        img_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        
+        return {
+            "success": True,
+            "message": f"Roboflow found {len(detections)} object(s) using workflow '{workflow_id}'",
+            "detections": detections,
+            "image": img_b64,
+            "total": len(detections),
+            "workflow": workflow_id
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": f"Roboflow Integration Failed: {str(e)}"})
+
+@router.post("/detect/unified")
+async def unified_detect(file: UploadFile = File(...)):
+    """Automatic routing: Laptop (YOLOv5) -> Refrigerator (Roboflow) -> AC (Roboflow)"""
+    global _orchestrator_service, _yolov5_service, _roboflow_service
+    
+    if _orchestrator_service is None:
+        print("[LazyLoad] Initializing Orchestrator Service...")
+        from app.services.yolov5_service import YOLOv5Service
+        from app.services.roboflow_service import RoboflowService
+        from app.services.orchestrator_service import OrchestratorService
+        
+        if _yolov5_service is None:
+            _yolov5_service = YOLOv5Service()
+        if _roboflow_service is None:
+            _roboflow_service = RoboflowService()
+            
+        _orchestrator_service = OrchestratorService(_yolov5_service, _roboflow_service)
+    
+    try:
+        contents = await file.read()
+        results = _orchestrator_service.auto_detect(contents)
+        
+        # Add visual bounding boxes to the result image
+        try:
+            from io import BytesIO
+            import base64
+            image = Image.open(BytesIO(contents)).convert("RGB")
+            
+            if results["source"] == "yolov5":
+                detections = results["detections"]
+                boxed_image = _yolov5_service.draw_detections(image, detections)
+            elif results["source"] == "roboflow":
+                # If roboflow already provided an annotated image, use it!
+                if results.get("image"):
+                    results["image"] = results["image"] # Already base64
+                    boxed_image = None # Skip local drawing
+                else:
+                    detections = results.get("detections", [])
+                    boxed_image = _roboflow_service.draw_detections(image, detections)
+            else:
+                boxed_image = None
+                
+            if boxed_image:
+                img_byte_arr = BytesIO()
+                boxed_image.save(img_byte_arr, format='JPEG')
+                results["image"] = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        except Exception as draw_error:
+            print(f"⚠️ Visualization failed: {draw_error}")
+            
+        return results
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": f"Unified Detection Failed: {str(e)}"})

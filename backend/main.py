@@ -50,6 +50,20 @@ async def serve_video_ui():
         return FileResponse(html_path)
     return {"error": "UI file not found"}
 
+@app.get("/roboflow")
+async def serve_roboflow_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "roboflow_test_ui.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "UI file not found"}
+
+@app.get("/detect")
+async def serve_unified_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "unified_test_lab.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "UI file not found"}
+
 @app.get("/forensic")
 async def serve_forensic_ui():
     html_path = os.path.join(os.path.dirname(__file__), "forensic_test_ui.html")
