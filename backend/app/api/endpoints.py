@@ -15,11 +15,10 @@ _web_service = None
 _local_vlm = None # Qwen/Moondream
 _ocr_service = None # OCR Engine
 _openai_service = None
-_yolo_service = None
 _video_service = None
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None, yolo_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service, _yolo_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -27,7 +26,6 @@ def init_services(embedder, vector_store, vision_service, web_service, local_vlm
     _local_vlm = local_vlm
     _ocr_service = ocr_service
     _openai_service = openai_service
-    _yolo_service = yolo_service
 
 def normalize_btu(btu_str):
     """Normalize '12' or '12k' to '12000' for reliable DB filtering"""
@@ -65,31 +63,17 @@ async def _perform_search(image, contents, use_vlm=False, use_openai=False):
         from app.services.clip_embedder import CLIPEmbedder
         from app.services.vector_store import VectorStore
         from app.services.vision_rag_service import VisionRAGService
-        from app.services.yolo_service import YoloService
         
         try:
             _embedder = CLIPEmbedder()
             _vector_store = VectorStore()
             _vision_service = VisionRAGService()
-            _yolo_service = YoloService()
             print("[LazyLoad] Neural Link Established!")
         except Exception as e:
             print(f"[LazyLoad] CRITICAL FAILURE: {e}")
             return {"success": False, "error": "AI Services failed to wake up."}
 
     try:
-        # 1.1 Optional YOLO Cropping
-        if _yolo_service:
-            print("[Endpoints] Running YOLO detection for cropping...")
-            cropped_image = _yolo_service.detect_and_crop(image)
-            if cropped_image != image:
-                print("[Endpoints] Image cropped by YOLO.")
-                image = cropped_image
-            
-            # Enhancement: Clean the image for better AI reading (only if YOLO available)
-            print("[Endpoints] Enhancing image for AI analysis...")
-            image = _yolo_service.enhance_for_ocr(image)
-        
         # Update contents for the models that read raw bytes
         img_byte_arr = BytesIO()
         image.save(img_byte_arr, format='JPEG')
@@ -226,25 +210,16 @@ async def ocr_endpoint(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(BytesIO(contents))
         
-        # 1.1 Optional YOLO Cropping
-        if _yolo_service:
-            print("[OCR] Running YOLO detection for cropping...")
-            cropped_image = _yolo_service.detect_and_crop(image)
-            if cropped_image != image:
-                print("[OCR] Image cropped by YOLO.")
-                image = cropped_image
-                
         # 2. Enhance and convert back to bytes for Gemini
-        print("[OCR] Enhancing cropped image for high-precision extraction...")
-        image = _yolo_service.enhance_for_ocr(image)
+        print("[OCR] Processing image for high-precision extraction...")
         
         img_byte_arr = BytesIO()
         image.save(img_byte_arr, format='JPEG')
-        cropped_bytes = img_byte_arr.getvalue()
+        processed_bytes = img_byte_arr.getvalue()
         
         # 3. Use Gemini Vision LLM for 100% flawless logo extraction!
-        print("[OCR] Sending cropped image to Gemini for analysis...")
-        gemini_result = _vision_service.identify_from_raw_image(cropped_bytes)
+        print("[OCR] Sending image to Gemini for analysis...")
+        gemini_result = _vision_service.identify_from_raw_image(processed_bytes)
         
         return {
             "success": True,
@@ -289,37 +264,6 @@ async def save_to_inventory(data: dict):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-@router.post("/yolo/test")
-async def yolo_test_endpoint(file: UploadFile = File(...)):
-    """Test endpoint to visualize YOLO bounding boxes on an image"""
-    global _yolo_service
-    
-    # Lazy init YOLO if needed
-    if _yolo_service is None:
-        from app.services.yolo_service import YoloService
-        _yolo_service = YoloService()
-        
-    try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents)).convert("RGB")
-        
-        # Get image with bounding boxes drawn and the raw detection data
-        boxed_image, detections = _yolo_service.detect_and_draw(image)
-        
-        # Save to buffer for Base64
-        img_byte_arr = BytesIO()
-        boxed_image.save(img_byte_arr, format='JPEG')
-        import base64
-        img_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
-        
-        return {
-            "success": True,
-            "image": img_b64,
-            "detections": detections
-        }
-        
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": f"YOLO failed: {str(e)}"})
 
 
 
@@ -338,13 +282,7 @@ async def extract_frames_endpoint(
     try:
         contents = await file.read()
         
-        # Ensure YOLO is ready for extraction validation
-        global _yolo_service
-        if _yolo_service is None:
-            from app.services.yolo_service import YoloService
-            _yolo_service = YoloService()
-
-        frames = _video_service.process_video_bytes(contents, yolo_service=_yolo_service)
+        frames = _video_service.process_video_bytes(contents)
         
         if not frames:
             return {"success": False, "error": "No clear key frames detected."}
@@ -353,17 +291,15 @@ async def extract_frames_endpoint(
         for f in frames:
             processed_frames.append({
                 "raw": _video_service.pil_to_base64(f["raw"]),
-                "boxed": _video_service.pil_to_base64(f.get("boxed", f["raw"])),
-                "cropped": _video_service.pil_to_base64(f["cropped"]),
                 "frame_idx": f["frame_idx"]
             })
 
         search_result = None
         if auto_search and len(frames) > 0:
             best_frame_data = frames[0]
-            best_frame = best_frame_data["cropped"]
+            best_frame = best_frame_data["raw"]
             
-            print("[Video] Auto-searching on best frame (cropped)...")
+            print("[Video] Auto-searching on best frame...")
             img_byte_arr = BytesIO()
             best_frame.save(img_byte_arr, format='JPEG')
             best_frame_bytes = img_byte_arr.getvalue()
@@ -383,15 +319,12 @@ async def extract_frames_endpoint(
 @router.post("/forensic/search")
 async def forensic_search_endpoint(file: UploadFile = File(...)):
     """Advanced Forensic Pipeline: Crop -> Enhance -> Gemini ID -> V2 Vector Search -> Gemini Verify"""
-    global _vision_service, _yolo_service, _embedder
+    global _vision_service, _embedder
     
     # 1. Lazy Initialization
     if _vision_service is None:
         from app.services.vision_rag_service import VisionRAGService
         _vision_service = VisionRAGService()
-    if _yolo_service is None:
-        from app.services.yolo_service import YoloService
-        _yolo_service = YoloService()
     if _embedder is None:
         from app.services.clip_embedder import CLIPEmbedder
         _embedder = CLIPEmbedder()
@@ -403,37 +336,27 @@ async def forensic_search_endpoint(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         image = Image.open(BytesIO(contents)).convert("RGB")
-
-        # 2. Forensic Pre-processing (Crop + Enhance)
-        print("[ForensicAPI] Detecting and cropping (Color)...")
-        cropped_color = _yolo_service.detect_and_crop(image)
         
-        print("[ForensicAPI] Generating Forensic Enhanced View...")
-        enhanced_gray = _yolo_service.enhance_for_ocr(cropped_color)
+        # 2. Forensic Pre-processing (Enhance only)
+        # In forensic mode, we keep the original aspect but ensure high quality
+        enhanced_image = image
         
-        # Convert both to bytes
-        # 1. Color for Design/Brand DNA
+        # Convert to bytes
         color_buf = BytesIO()
-        cropped_color.save(color_buf, format='JPEG', quality=95)
+        enhanced_image.save(color_buf, format='JPEG', quality=95)
         color_bytes = color_buf.getvalue()
         
-        # 2. Grayscale for Technical Specs
-        gray_buf = BytesIO()
-        enhanced_gray.save(gray_buf, format='JPEG', quality=95)
-        gray_bytes = gray_buf.getvalue()
-        
-        # For UI display (Enhanced)
+        # For UI display (COLOR VERSION)
         import base64
-        enhanced_b64 = base64.b64encode(gray_bytes).decode('utf-8')
+        enhanced_b64 = base64.b64encode(color_bytes).decode('utf-8')
 
-        # 3. AI Perception (Gemini Identification with DUAL VISION)
-        print("[ForensicAPI] Requesting Gemini Identification (Dual Vision)...")
-        # We pass BOTH images to the service
-        ai_perception = _vision_service.identify_with_dual_vision(color_bytes, gray_bytes)
+        # 3. AI Perception (Gemini Identification)
+        print("[ForensicAPI] Requesting Gemini Identification...")
+        ai_perception = _vision_service.identify_from_raw_image(color_bytes)
         
         # 4. Vector Search (V2 DB)
         print("[ForensicAPI] Searching V2 Forensic Database...")
-        query_vector = _embedder.embed_image(cropped_color) # Use color for visual search
+        query_vector = _embedder.embed_image(image) # Use color for visual search
         
         results = v2_store.hybrid_search(
             query_vector=query_vector,
@@ -451,7 +374,7 @@ async def forensic_search_endpoint(file: UploadFile = File(...)):
 
         # 5. Final Verification (Gemini)
         print("[ForensicAPI] Requesting Final Verification...")
-        verification = _vision_service.verify_equipment(gray_bytes, best_match, similarity_score)
+        verification = _vision_service.verify_equipment(color_bytes, best_match, similarity_score)
 
         return {
             "success": True,
@@ -471,17 +394,13 @@ async def forensic_search_endpoint(file: UploadFile = File(...)):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        from fastapi.responses import JSONResponse
-        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
+        return {"success": False, "error": str(e)}
 
 @router.post("/forensic/search_rag_only")
 async def forensic_search_rag_only(file: UploadFile = File(...)):
-    """Dual-RAG Comparison: Original Image vs Forensic Crop (No Gemini)"""
-    global _yolo_service, _embedder
+    """Dual-RAG Comparison: Original Image vs Enhanced (No Gemini)"""
+    global _embedder
     
-    if _yolo_service is None:
-        from app.services.yolo_service import YoloService
-        _yolo_service = YoloService()
     if _embedder is None:
         from app.services.clip_embedder import CLIPEmbedder
         _embedder = CLIPEmbedder()
@@ -505,16 +424,14 @@ async def forensic_search_rag_only(file: UploadFile = File(...)):
         # B. Search in FORENSIC Collection (Enhanced vs Enhanced)
         print("[RAG-Only] Searching in FORENSIC Collection...")
         v_store.collection_name = "climatiseurs_forensic" # Swap back
-        cropped_color = _yolo_service.detect_and_crop(image)
-        enhanced_gray = _yolo_service.enhance_for_ocr(cropped_color)
         
-        forensic_vector = _embedder.embed_image(enhanced_gray)
+        forensic_vector = _embedder.embed_image(image)
         forensic_results = v_store.search(forensic_vector, limit=3)
 
         # Base64 for display
         import base64
         img_byte_arr = BytesIO()
-        cropped_color.save(img_byte_arr, format='JPEG')
+        image.save(img_byte_arr, format='JPEG')
         enhanced_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
 
         return {

@@ -36,13 +36,6 @@ app.include_router(auth_router, prefix="/api/auth")
 async def read_root():
     return {"message": "Cybersight Neural Link Active"}
 
-@app.get("/yolo")
-async def serve_yolo_ui():
-    html_path = os.path.join(os.path.dirname(__file__), "yolo_test_ui.html")
-    if os.path.exists(html_path):
-        return FileResponse(html_path)
-    return {"error": "UI file not found"}
-
 @app.get("/video")
 async def serve_video_ui():
     html_path = os.path.join(os.path.dirname(__file__), "video_test_ui.html")

@@ -17,11 +17,11 @@ class VideoService:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return cv2.Laplacian(gray, cv2.CV_64F).var()
 
-    def extract_key_frames(self, video_path, max_frames=5, yolo_service=None):
+    def extract_key_frames(self, video_path, max_frames=5):
         """
         Intelligent 'Hero Shot' Extraction:
         Divides the video into segments and picks the single best frame from each segment
-        based on a combined score of Sharpness and YOLO confidence.
+        based on sharpness.
         """
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
@@ -41,108 +41,28 @@ class VideoService:
             end_frame = start_frame + window_size
             
             best_frame_in_window = None
-            highest_score_in_window = -1
+            highest_sharpness = -1
             
-            # Sample N frames within this window to find the best one
-            # We skip some frames for speed, but scan the window thoroughly
-            sample_rate = 5 # Check every 5th frame in the window
+            # Sample N frames within this window to find the sharpest one
+            sample_rate = 5 
             
             for frame_idx in range(start_frame, end_frame, sample_rate):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
                 ret, frame = cap.read()
                 if not ret: break
                 
-                # 1. Calculate Sharpness (Laplacian Variance)
+                # Calculate Sharpness (Laplacian Variance)
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 sharpness = cv2.Laplacian(gray, cv2.CV_64F).var()
                 
-                # 2. Get AI Confidence
-                confidence = 0.1 # Baseline if no YOLO
-                boxed_pil = None
-                cropped_pil = None
-                
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                pil_frame = Image.fromarray(rgb_frame)
-                
-                if yolo_service:
-                    # Run a very permissive detection
-                    results = yolo_service.model(pil_frame, conf=0.1, verbose=False)
-                    if results and len(results[0].boxes) > 0:
-                        box = results[0].boxes[0]
-                        confidence = box.conf[0].item()
-                        class_id = int(box.cls[0])
-                        
-                        # AGGRESSIVE BIAS: Force-prefer AC over Refrigerator
-                        if class_id in [0, 1, 2]: # AC variants
-                            confidence = min(confidence * 1.5, 1.0)
-                        elif class_id == 3: # Refrigerator
-                            confidence = confidence * 0.5
-                        
-                        # We normalize sharpness roughly to 0-100 scale for scoring
-                        normalized_sharpness = min(sharpness / 100.0, 1.0)
-                        current_score = confidence * normalized_sharpness
-                        
-                        # Sweet Spot Mode: Sharpness > 50 and confidence > 0.30
-                        if sharpness > 50 and confidence > 0.30 and current_score > highest_score_in_window:
-                            highest_score_in_window = current_score
-                            
-                            # Cache the results
-                            boxed_pil, _ = yolo_service.detect_and_draw(pil_frame)
-                            cropped_pil = yolo_service.detect_and_crop(pil_frame)
-                            
-                            best_frame_in_window = {
-                                "raw": pil_frame,
-                                "boxed": boxed_pil,
-                                "cropped": cropped_pil,
-                                "frame_idx": frame_idx,
-                                "score": current_score,
-                                "conf": confidence,
-                                "sharp": sharpness
-                            }
-                else:
-                    # If for some reason yolo isn't provided, we fall back to sharpest
-                    if sharpness > highest_score_in_window:
-                        highest_score_in_window = sharpness
-                        best_frame_in_window = {
-                            "raw": pil_frame,
-                            "cropped": pil_frame,
-                            "frame_idx": frame_idx,
-                            "score": sharpness,
-                            "conf": 0,
-                            "sharp": sharpness
-                        }
-            
-            # --- FALLBACK LOGIC ---
-            if best_frame_in_window is None:
-                # If AI found nothing, take the sharpest frame from this window as a fallback
-                # (Re-cap the sharpest frame or use the last known sharpest)
-                print(f"[VideoService] Window {i}: No AI detections. Falling back to sharpest frame.")
-                # We reuse the window loop's logic but without the YOLO check
-                cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-                temp_best_sharp = -1
-                temp_best_frame = None
-                
-                for f in range(start_frame, end_frame, sample_rate):
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, f)
-                    ret, frame = cap.read()
-                    if not ret: break
-                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    s = cv2.Laplacian(gray, cv2.CV_64F).var()
-                    if s > temp_best_sharp:
-                        temp_best_sharp = s
-                        temp_best_frame = frame
-                
-                if temp_best_frame is not None:
-                    rgb_f = cv2.cvtColor(temp_best_frame, cv2.COLOR_BGR2RGB)
-                    pil_f = Image.fromarray(rgb_f)
+                if sharpness > highest_sharpness:
+                    highest_sharpness = sharpness
+                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    pil_frame = Image.fromarray(rgb_frame)
                     best_frame_in_window = {
-                        "raw": pil_f,
-                        "boxed": pil_f,
-                        "cropped": pil_f,
-                        "frame_idx": start_frame, # Rough estimate
-                        "score": temp_best_sharp,
-                        "conf": 0,
-                        "sharp": temp_best_sharp
+                        "raw": pil_frame,
+                        "frame_idx": frame_idx,
+                        "sharp": sharpness
                     }
 
             if best_frame_in_window:
@@ -151,13 +71,13 @@ class VideoService:
                 try:
                     os.makedirs("debug_frames", exist_ok=True)
                     f_idx = best_frame_in_window['frame_idx']
-                    best_frame_in_window['boxed'].save(f"debug_frames/frame_{f_idx}_boxed.jpg")
+                    best_frame_in_window['raw'].save(f"debug_frames/frame_{f_idx}.jpg")
                 except: pass
 
         cap.release()
         return key_frames_data
 
-    def process_video_bytes(self, video_bytes, max_frames=5, yolo_service=None):
+    def process_video_bytes(self, video_bytes, max_frames=5):
         """
         Write bytes to temporary file, extract frames, then delete file.
         """
@@ -166,7 +86,7 @@ class VideoService:
             f.write(video_bytes)
             
         try:
-            frames = self.extract_key_frames(temp_path, max_frames=max_frames, yolo_service=yolo_service)
+            frames = self.extract_key_frames(temp_path, max_frames=max_frames)
             return frames
         finally:
             if os.path.exists(temp_path):

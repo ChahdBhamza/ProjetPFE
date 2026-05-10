@@ -5,7 +5,6 @@ import json
 from tqdm import tqdm
 from app.services.clip_embedder import CLIPEmbedder
 from app.services.vector_store import VectorStore
-from app.services.yolo_service import YoloService
 from PIL import Image
 
 class DataLoader:
@@ -19,8 +18,6 @@ class DataLoader:
         self.data_root = Path(data_root)
         self.embedder = CLIPEmbedder()
         self.vector_store = VectorStore()
-        # Initialize YOLO for image cleaning
-        self.yolo_service = YoloService()
     
     def load_climatiseurs_dataset(self) -> List[Dict]:
         """Loads all climatiseurs from the dataequipment/climatiseurs folder"""
@@ -85,10 +82,9 @@ class DataLoader:
             print(f"   ⚠️ Error processing {text_file}: {e}")
             return None
     
-    def index_dataset(self, use_yolo_crop: bool = False):
+    def index_dataset(self):
         """
         Processes the dataset and saves everything to the Vector Database.
-        Optionally crops images using YOLO before enhancement.
         """
         climatiseurs = self.load_climatiseurs_dataset()
         print(f"🚀 Found {len(climatiseurs)} climatiseurs. Starting AI indexing...")
@@ -99,19 +95,10 @@ class DataLoader:
             try:
                 embedding = None
                 
-                # 1. Image Priority with ENHANCEMENT
+                # 1. Image Priority
                 if item['image_path']:
                     # Open the catalog image
-                    raw_img = Image.open(item['image_path']).convert("RGB")
-                    
-                    # Optional YOLO Crop (Useful if DB images are raw photos)
-                    processed_img = raw_img
-                    if use_yolo_crop:
-                        processed_img = self.yolo_service.detect_and_crop(raw_img)
-                    
-                    # Always apply enhancement (Grayscale/Contrast/Sharpen)
-                    final_img = self.yolo_service.enhance_for_ocr(processed_img)
-                    
+                    final_img = Image.open(item['image_path']).convert("RGB")
                     embedding = self.embedder.embed_image(final_img)
                 
                 # 2. Fallback to text embedding
