@@ -46,16 +46,41 @@ class RoboflowService:
             # Normalize response (Workflow API returns {'outputs': [...]})
             if "outputs" in res_json and len(res_json["outputs"]) > 0:
                 output = res_json["outputs"][0]
-                # Combine predictions and annotated image into a flat dict
-                normalized = {
-                    "detections": output.get("predictions", output.get("detections", [])),
-                    "image": output.get("annotated_image", {}).get("value")
-                }
-                # Support nested predictions (some workflows return {'predictions': {'predictions': [...]}})
-                if isinstance(normalized["detections"], dict) and "predictions" in normalized["detections"]:
-                    normalized["detections"] = normalized["detections"]["predictions"]
                 
-                return normalized
+                # Extract detections and annotated image
+                predictions = output.get("predictions", output.get("detections", []))
+                # Support nested predictions
+                if isinstance(predictions, dict) and "predictions" in predictions:
+                    predictions = predictions["predictions"]
+                
+                annotated_base64 = output.get("annotated_image", {}).get("value")
+                
+                # Convert predictions to standard format [x1, y1, x2, y2]
+                normalized_detections = []
+                if isinstance(predictions, list):
+                    for pred in predictions:
+                        # Standardize coordinate format
+                        if "x" in pred and "y" in pred and "width" in pred and "height" in pred:
+                            # Center-based to corner-based
+                            x1 = pred["x"] - pred["width"] / 2
+                            y1 = pred["y"] - pred["height"] / 2
+                            x2 = pred["x"] + pred["width"] / 2
+                            y2 = pred["y"] + pred["height"] / 2
+                            bbox = [x1, y1, x2, y2]
+                        else:
+                            # Fallback or already in corner-based format
+                            bbox = pred.get("bbox", [0, 0, 0, 0])
+
+                        normalized_detections.append({
+                            "class": pred.get("class", "object"),
+                            "confidence": pred.get("confidence", 0.0),
+                            "bbox": bbox
+                        })
+
+                return {
+                    "detections": normalized_detections,
+                    "image": annotated_base64
+                }
                 
             return res_json
         
