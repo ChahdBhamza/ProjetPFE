@@ -13,12 +13,11 @@ _vector_store = None
 _vision_service = None # Gemini
 _web_service = None
 _local_vlm = None # Qwen/Moondream
-_ocr_service = None # OCR Engine
 _openai_service = None
 _video_service = None
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, ocr_service=None, openai_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _ocr_service, _openai_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -198,46 +197,6 @@ async def _perform_search(image, contents, use_vlm=False, use_openai=False):
         print(f"[Backend Error] {e}")
         return {"error": str(e)}
 
-@router.post("/ocr")
-async def ocr_endpoint(file: UploadFile = File(...)):
-    """Dedicated endpoint for raw OCR text extraction"""
-    global _ocr_service
-    if _vision_service is None:
-        from app.services.vision_rag_service import VisionRAGService
-        _vision_service = VisionRAGService()
-        
-    try:
-        contents = await file.read()
-        image = Image.open(BytesIO(contents))
-        
-        # 2. Enhance and convert back to bytes for Gemini
-        print("[OCR] Processing image for high-precision extraction...")
-        
-        img_byte_arr = BytesIO()
-        image.save(img_byte_arr, format='JPEG')
-        processed_bytes = img_byte_arr.getvalue()
-        
-        # 3. Use Gemini Vision LLM for 100% flawless logo extraction!
-        print("[OCR] Sending image to Gemini for analysis...")
-        gemini_result = _vision_service.identify_from_raw_image(processed_bytes)
-        
-        return {
-            "success": True,
-            "structured_data": gemini_result,
-            "raw_text": gemini_result.get("analysis", "Powered by Gemini 2.5 Vision")
-        }
-        
-    except Exception as e:
-        return {"error": f"OCR Failed: {str(e)}"}
-@router.post("/ocr/classic")
-async def classic_ocr_endpoint(file: UploadFile = File(...)):
-    """Legacy endpoint now powered by Gemini for maximum accuracy"""
-    return await ocr_endpoint(file)
-
-@router.post("/ocr/hybrid")
-async def hybrid_ocr_endpoint(file: UploadFile = File(...)):
-    """Legacy endpoint now powered by Gemini for maximum accuracy"""
-    return await ocr_endpoint(file)
 
 @router.post("/inventory/save")
 async def save_to_inventory(data: dict):
