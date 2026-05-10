@@ -12,3 +12,9 @@ qdrant-client
 torch
 transformers
 Pillow
+PyYAML
+matplotlib
+scipy
+opencv-python
+seaborn
+pandas

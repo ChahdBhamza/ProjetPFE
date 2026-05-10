@@ -15,9 +15,10 @@ _web_service = None
 _local_vlm = None # Qwen/Moondream
 _openai_service = None
 _video_service = None
+_yolov5_service = None
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None, yolov5_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service, _yolov5_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -25,6 +26,7 @@ def init_services(embedder, vector_store, vision_service, web_service, local_vlm
     _local_vlm = local_vlm
     _ocr_service = ocr_service
     _openai_service = openai_service
+    _yolov5_service = yolov5_service
 
 def normalize_btu(btu_str):
     """Normalize '12' or '12k' to '12000' for reliable DB filtering"""
@@ -409,3 +411,48 @@ async def forensic_search_rag_only(file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         return {"success": False, "error": str(e)}
+
+@router.post("/yolov5/detect")
+async def yolov5_detect_endpoint(file: UploadFile = File(...)):
+    """Standalone YOLOv5 Laptop Detection (Implemented from YOLO_APP_FINAL)"""
+    global _yolov5_service
+    
+    if _yolov5_service is None:
+        print("[LazyLoad] Initializing YOLOv5 Service...")
+        from app.services.yolov5_service import YOLOv5Service
+        _yolov5_service = YOLOv5Service()
+        
+    try:
+        contents = await file.read()
+        image = Image.open(BytesIO(contents)).convert("RGB")
+        
+        # 1. Run detection
+        detections = _yolov5_service.detect(image)
+        
+        # 2. Draw for visualization
+        boxed_image = _yolov5_service.draw_detections(image, detections)
+        
+        # 3. Convert to Base64 for UI
+        img_byte_arr = BytesIO()
+        boxed_image.save(img_byte_arr, format='JPEG')
+        import base64
+        img_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        
+        # 4. Message logic
+        if len(detections) == 0:
+            message = "No laptops detected! That's not a laptop."
+        else:
+            message = f"Found {len(detections)} laptop(s)!"
+            
+        return {
+            "success": True,
+            "message": message,
+            "detections": detections,
+            "image": img_b64,
+            "total": len(detections)
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        from fastapi.responses import JSONResponse
+        return JSONResponse(status_code=500, content={"error": f"YOLOv5 Failed: {str(e)}"})
