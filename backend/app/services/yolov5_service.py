@@ -9,16 +9,20 @@ from PIL import Image
 
 # Add yolov5 directory to path so we can import models and utils
 # This must happen BEFORE importing from models or utils
-YOLO_DIR = str(Path(__file__).parent.parent.parent / "yolov5")
+YOLO_DIR = str(Path(__file__).parent.parent.parent / "vision_engine" / "yolov5")
 if YOLO_DIR not in sys.path:
     sys.path.append(YOLO_DIR)
 
 from models.common import AutoShape
 
 class YOLOv5Service:
-    def __init__(self, model_path='yolov5s.pt'):
+    def __init__(self, model_path=None):
         from utils.torch_utils import select_device
         
+        # Default path to the weights in the new structure
+        if model_path is None:
+            model_path = str(Path(__file__).parent.parent.parent / "vision_engine" / "weights" / "yolov5s.pt")
+            
         self.device = select_device('')
         print(f"🚀 Loading YOLOv5 model: {model_path}")
         
