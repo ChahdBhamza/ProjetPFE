@@ -42,7 +42,8 @@ def run_unified_detection(image_path="sample.jpg"):
     print("-" * 50)
     print(f"🎯 RESULT SUMMARY:")
     print(f"  Source Model: {result['source'].upper()}")
-    print(f"  Detected Category: {result['category'].upper()}")
+    print(f"  Category:     {result['category'].upper()}")
+    print(f"  Tracked Eq:   {'✅ YES' if result['is_known_equipment'] else '❌ NO'}")
     
     detections = result.get('detections', [])
     if not detections:

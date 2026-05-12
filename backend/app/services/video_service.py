@@ -44,7 +44,7 @@ class VideoService:
             highest_sharpness = -1
             
             # Sample N frames within this window to find the sharpest one
-            sample_rate = 5 
+            sample_rate = 2 
             
             for frame_idx in range(start_frame, end_frame, sample_rate):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)

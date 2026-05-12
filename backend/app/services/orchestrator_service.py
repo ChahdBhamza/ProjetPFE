@@ -37,6 +37,7 @@ class OrchestratorService:
             return {
                 "source": "roboflow",
                 "category": "refrigerator",
+                "is_known_equipment": True,
                 "detections": detections,
                 "image": fridge_results.get("image")
             }
@@ -58,6 +59,7 @@ class OrchestratorService:
             return {
                 "source": "roboflow",
                 "category": "air-conditioner",
+                "is_known_equipment": True,
                 "detections": detections,
                 "image": ac_results.get("image")
             }
@@ -67,14 +69,26 @@ class OrchestratorService:
         yolo_results = self.yolo.detect(img)
         
         # Determine category based on YOLO detections
-        category = "general"
-        if any(det['class'] == 'laptop' for det in yolo_results):
-            category = "laptop"
-            print("✅ [Orchestrator] Laptop detected via YOLOv5!")
+        category = "unrecognized"
+        is_known = False
+        
+        # We look for laptop, but also 'tv' or 'monitor' which are common YOLOv5 aliases for laptops
+        target_yolo_classes = ['laptop', 'tv', 'monitor']
+        
+        for det in yolo_results:
+            if det['class'] in target_yolo_classes and det['confidence'] > 0.35:
+                category = "laptop" # Treat as laptop for your PFE context
+                is_known = True
+                print(f"✅ [Orchestrator] {det['class']} detected (treating as laptop)!")
+                break
+        
+        if not is_known:
+            print("❌ [Orchestrator] No tracked equipment (AC, Fridge, Laptop) found in this frame.")
 
         return {
-            "source": "yolov5",
+            "source": "yolov5" if not is_known else "yolov5",
             "category": category,
+            "is_known_equipment": is_known,
             "detections": yolo_results,
-            "image": None # YOLOv5 service returns raw detections
+            "image": None 
         }

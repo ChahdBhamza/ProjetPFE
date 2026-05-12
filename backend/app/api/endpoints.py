@@ -562,3 +562,124 @@ async def unified_detect(file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": f"Unified Detection Failed: {str(e)}"})
+@router.post("/video/unified-stream")
+async def unified_video_stream(file: UploadFile = File(...)):
+    """
+    Intelligent Video Stream Analysis:
+    1. Extracts high-quality key frames (VideoService)
+    2. Filters and routes each frame (OrchestratorService)
+    3. Returns results for each frame found
+    """
+    global _video_service, _orchestrator_service, _yolov5_service, _roboflow_service
+    
+    # 1. Lazy load all necessary services
+    if _video_service is None:
+        from app.services.video_service import VideoService
+        _video_service = VideoService()
+    
+    if _orchestrator_service is None:
+        from app.services.yolov5_service import YOLOv5Service
+        from app.services.roboflow_service import RoboflowService
+        from app.services.orchestrator_service import OrchestratorService
+        
+        if _yolov5_service is None:
+            _yolov5_service = YOLOv5Service()
+        if _roboflow_service is None:
+            _roboflow_service = RoboflowService()
+            
+        _orchestrator_service = OrchestratorService(_yolov5_service, _roboflow_service)
+
+    try:
+        contents = await file.read()
+        
+        # 2. Extract sharpest frames (Scene Detection)
+        # Increased to 10 frames for better coverage
+        frames = _video_service.process_video_bytes(contents, max_frames=10)
+        
+        if not frames:
+            return {"success": False, "error": "No clear key frames found in video."}
+            
+        # 3. Process each frame through the Unified Orchestrator
+        raw_stream_results = []
+        for f_data in frames:
+            pil_img = f_data["raw"]
+            
+            # Convert PIL to bytes for the orchestrator
+            img_byte_arr = BytesIO()
+            pil_img.save(img_byte_arr, format='JPEG')
+            frame_bytes = img_byte_arr.getvalue()
+            
+            # Run unified detection (YOLO -> Roboflow routing)
+            res = _orchestrator_service.auto_detect(frame_bytes)
+            
+            # Add visualization
+            try:
+                import base64
+                res_b64 = None
+                if res["source"] == "yolov5":
+                    boxed_img = _yolov5_service.draw_detections(pil_img, res["detections"])
+                else:
+                    # For Roboflow, if we have a base64 image from the cloud, use it, 
+                    # otherwise draw locally
+                    if res.get("image"):
+                        res_b64 = res["image"]
+                        boxed_img = None
+                    else:
+                        boxed_img = _roboflow_service.draw_detections(pil_img, res["detections"])
+                
+                if boxed_img:
+                    out_buf = BytesIO()
+                    boxed_img.save(out_buf, format='JPEG')
+                    res_b64 = base64.b64encode(out_buf.getvalue()).decode('utf-8')
+                
+                if res_b64:
+                    res["image"] = res_b64
+            except:
+                pass
+                
+            raw_stream_results.append({
+                "frame_idx": f_data["frame_idx"],
+                "analysis": res
+            })
+
+        # 4. INTELLIGENT DEDUPLICATION
+        # We only want the "Best" frame for each unique equipment type
+        best_results_by_category = {}
+        
+        for item in raw_stream_results:
+            category = item["analysis"]["category"]
+            
+            # Skip unrecognized frames for the "Best Of" selection
+            if not item["analysis"]["is_known_equipment"]:
+                continue
+                
+            # Get the confidence of the best detection in this frame
+            detections = item["analysis"].get("detections", [])
+            max_conf = max([d.get("confidence", 0) for d in detections]) if detections else 0
+            
+            # If this is the first time we see this category, or if it's better than the previous one
+            if category not in best_results_by_category or max_conf > best_results_by_category[category]["conf"]:
+                best_results_by_category[category] = {
+                    "data": item,
+                    "conf": max_conf
+                }
+        
+        # Final list contains only the "Hero Shots"
+        deduplicated_results = [val["data"] for val in best_results_by_category.values()]
+        
+        # If no known equipment was found at all, show the unrecognized frames as a fallback
+        if not deduplicated_results:
+            deduplicated_results = raw_stream_results[:3]
+
+        return {
+            "success": True,
+            "results": deduplicated_results,
+            "total_raw_processed": len(raw_stream_results),
+            "total_deduplicated": len(deduplicated_results),
+            "message": f"Detected {len(best_results_by_category.keys())} unique equipment types."
+        }
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
