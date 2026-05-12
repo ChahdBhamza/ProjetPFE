@@ -1,10 +1,12 @@
 from inference_sdk import InferenceHTTPClient
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Connect to Roboflow
 client = InferenceHTTPClient(
     api_url="https://serverless.roboflow.com",
-    api_key="oesPLELo2uEPnMKXp8dM" # Your API Key
+    api_key=os.getenv("ROBOFLOW_API_KEY") 
 )
 
 def run_fridge_test(image_path="refrigerator_sample.jpg"):
@@ -14,7 +16,7 @@ def run_fridge_test(image_path="refrigerator_sample.jpg"):
 
     # Run the Refrigerator Detector workflow
     result = client.run_workflow(
-        workspace_name="devileyess-workspace",
+        workspace_name=os.getenv("ROBOFLOW_WORKSPACE"),
         workflow_id="refrigerator-detector-1778362486109",
         images={
             "image": image_path

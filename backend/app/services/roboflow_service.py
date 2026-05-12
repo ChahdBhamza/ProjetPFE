@@ -7,8 +7,13 @@ from PIL import Image, ImageDraw, ImageFont
 
 class RoboflowService:
     def __init__(self, api_key=None, workspace=None):
-        self.api_key = api_key or os.getenv("ROBOFLOW_API_KEY", "oesPLELo2uEPnMKXp8dM")
-        self.workspace = workspace or os.getenv("ROBOFLOW_WORKSPACE", "devileyess-workspace")
+        self.api_key = api_key or os.getenv("ROBOFLOW_API_KEY")
+        self.workspace = workspace or os.getenv("ROBOFLOW_WORKSPACE")
+        
+        if not self.api_key:
+            print("⚠️ [Roboflow] WARNING: No API key found in environment!")
+        if not self.workspace:
+            print("⚠️ [Roboflow] WARNING: No workspace found in environment!")
         self.base_url = "https://serverless.roboflow.com"
 
     def detect(self, image: Image.Image, workflow_id="detect-count-and-visualize"):
