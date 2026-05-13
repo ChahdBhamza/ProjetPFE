@@ -1,8 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, Form, Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from PIL import Image
 from io import BytesIO
 import json
+import os
 from app.database import mongo_db
 
 router = APIRouter()
@@ -683,3 +685,128 @@ async def unified_video_stream(file: UploadFile = File(...)):
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+class SelectedFramesRequest(BaseModel):
+    session_id: str
+    filenames: list[str]
+
+@router.post("/video/process-selected-frames")
+async def process_selected_frames_endpoint(req: SelectedFramesRequest):
+    """
+    Runs the specialized workflow only on specific frames selected by the user.
+    """
+    from app.services.workflow_service import WorkflowService
+    workflow_service = WorkflowService()
+    
+    final_results = []
+    base_dir = os.path.join("sessions", req.session_id, "processed")
+    
+    for f in req.filenames:
+        img_path = os.path.join(base_dir, f)
+        if not os.path.exists(img_path): continue
+        
+        res = workflow_service.run_specialized_workflow(img_path)
+        final_results.append({
+            "filename": f,
+            "raw_image": res.get("raw_image"),
+            "ai_image": res.get("ai_image"),
+            "raw_output": res.get("raw_output"),
+            "has_ai": res.get("has_ai", False),
+            "error": res.get("error")
+        })
+        
+    return {"success": True, "frames": final_results}
+
+@router.post("/video/script-process")
+async def video_script_process_endpoint(file: UploadFile = File(...)):
+    """
+    Deduplication Only Pipeline:
+    1. Run extract_frames.py
+    2. Run deduplicate_frames.py
+    3. Return frames WITHOUT AI (waiting for user selection)
+    """
+    import subprocess
+    import shutil
+    import base64
+    import os
+    import sys
+    import uuid
+    
+    session_id = f"lab_{uuid.uuid4().hex[:8]}"
+    base_dir = os.path.join("sessions", session_id)
+    raw_dir = os.path.join(base_dir, "raw")
+    proc_dir = os.path.join(base_dir, "processed")
+    
+    os.makedirs(raw_dir, exist_ok=True)
+    os.makedirs(proc_dir, exist_ok=True)
+    
+    video_path = os.path.join(base_dir, "video.mp4")
+
+    try:
+        with open(video_path, "wb") as f:
+            f.write(await file.read())
+            
+        extract_script = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\scripts\extract_frames.py"
+        subprocess.run([sys.executable, extract_script, "--input", video_path, "--output", raw_dir, "--interval", "10"], check=True)
+        
+        for f in os.listdir(raw_dir):
+            shutil.copy(os.path.join(raw_dir, f), os.path.join(proc_dir, f))
+            
+        dedup_script = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\scripts\deduplicate_frames.py"
+        subprocess.run([sys.executable, dedup_script, "--dir", proc_dir, "--window", "10"], check=True)
+
+        final_results = []
+        survivors = sorted([f for f in os.listdir(proc_dir) if f.endswith(".jpg")])
+        
+        for f in survivors:
+            img_path = os.path.join(proc_dir, f)
+            with open(img_path, "rb") as img_f:
+                b64 = base64.b64encode(img_f.read()).decode('utf-8')
+            final_results.append({"filename": f, "image": b64})
+
+        return {
+            "success": True,
+            "message": f"Deduplication finished. Select frames to run AI.",
+            "frames": final_results,
+            "session_id": session_id
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+@router.get("/api/sfm/sessions")
+async def list_sfm_sessions():
+    """List subfolders in the SFM project's processed_frames directory."""
+    import os
+    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\processed_frames"
+    if not os.path.exists(sfm_path):
+        return []
+    sessions = [{"name": d} for d in os.listdir(sfm_path) if os.path.isdir(os.path.join(sfm_path, d))]
+    return sessions
+
+@router.get("/api/sfm/frames")
+async def get_sfm_frames(session_id: str):
+    """Retrieve frames from a specific SFM session folder."""
+    import os
+    import base64
+    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\processed_frames"
+    session_path = os.path.join(sfm_path, session_id)
+    
+    if not os.path.exists(session_path):
+        return []
+        
+    frames = []
+    files = sorted([f for f in os.listdir(session_path) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    
+    for f in files:
+        with open(os.path.join(session_path, f), "rb") as img_f:
+            b64 = base64.b64encode(img_f.read()).decode('utf-8')
+            frames.append({"filename": f, "image": b64})
+    
+    return frames
+
+
+
+

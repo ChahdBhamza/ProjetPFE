@@ -71,6 +71,22 @@ async def serve_forensic_ui():
         return FileResponse(html_path)
     return {"error": "UI file not found"}
 
+@app.get("/script-lab")
+async def serve_script_lab_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "script_lab.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "Script Lab UI file not found"}
+
+@app.get("/legacy-gallery")
+async def serve_legacy_gallery_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "legacy_gallery.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "Legacy Gallery UI file not found"}
+
+
+
 
 if __name__ == "__main__":
 

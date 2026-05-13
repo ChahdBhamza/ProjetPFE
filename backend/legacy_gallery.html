@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFM Legacy Gallery</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --accent: #1f6feb;
+            --radius: 6px;
+        }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .session-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+            cursor: pointer; transition: 0.2s;
+        }
+        .session-card:hover { border-color: var(--accent); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+        .img-wrap { border-radius: 4px; overflow: hidden; border: 1px solid var(--border); background: #000; }
+        .img-wrap img { width: 100%; display: block; }
+        .back-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📂 SFM Legacy Gallery</h1>
+        <p style="color:#8b949e">Viewing processed frames from <code>sfm_project/backend/processed_frames</code></p>
+        <hr style="border:0; border-top:1px solid var(--border); margin: 1.5rem 0;">
+    </header>
+
+    <div id="session-list"></div>
+    
+    <div id="frame-view" style="display:none">
+        <button class="back-btn" onclick="showSessions()">← Back to Sessions</button>
+        <h2 id="current-session-title" style="margin-bottom:1rem; font-size:1.1rem;"></h2>
+        <div class="grid" id="frame-grid"></div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8000';
+
+    async function loadSessions() {
+        const r = await fetch(`${API}/api/sfm/sessions`);
+        const sessions = await r.json();
+        const list = document.getElementById('session-list');
+        list.innerHTML = '';
+        
+        if (sessions.length === 0) {
+            list.innerHTML = '<p>No processed sessions found in the SFM project.</p>';
+            return;
+        }
+
+        sessions.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'session-card';
+            div.innerHTML = `<strong>${s.name}</strong> <span style="font-size:0.8rem; color:#8b949e; float:right;">Folder: ${s.name}</span>`;
+            div.onclick = () => loadFrames(s.name);
+            list.appendChild(div);
+        });
+    }
+
+    async function loadFrames(sessionName) {
+        document.getElementById('session-list').style.display = 'none';
+        document.getElementById('frame-view').style.display = 'block';
+        document.getElementById('current-session-title').innerText = `Session: ${sessionName}`;
+        
+        const r = await fetch(`${API}/api/sfm/frames?session_id=${sessionName}`);
+        const frames = await r.json();
+        const grid = document.getElementById('frame-grid');
+        grid.innerHTML = '';
+
+        frames.forEach(f => {
+            const wrap = document.createElement('div');
+            wrap.className = 'img-wrap';
+            wrap.innerHTML = `<img src="data:image/jpeg;base64,${f.image}" alt="${f.filename}">`;
+            grid.appendChild(wrap);
+        });
+    }
+
+    function showSessions() {
+        document.getElementById('session-list').style.display = 'block';
+        document.getElementById('frame-view').style.display = 'none';
+    }
+
+    loadSessions();
+</script>
+
+</body>
+</html>
