@@ -26,6 +26,16 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI
 app = FastAPI(title="DetectionAppPFE - Lazy RAG", lifespan=lifespan)
 
+# Add CORS Middleware
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"], # Allows all methods
+    allow_headers=["*"], # Allows all headers
+)
+
 # Register API endpoints
 app.include_router(api_router, prefix="/api")
 # Import auth router here to avoid circular dependencies if any
@@ -87,6 +97,12 @@ async def serve_legacy_gallery_ui():
 
 
 
+@app.get("/spec-lookup")
+async def serve_spec_lookup_ui():
+    html_path = os.path.join(os.path.dirname(__file__), "spec_lookup_ui.html")
+    if os.path.exists(html_path):
+        return FileResponse(html_path)
+    return {"error": "Spec Lookup UI file not found"}
 
 if __name__ == "__main__":
 

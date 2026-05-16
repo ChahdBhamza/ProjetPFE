@@ -1,116 +1,94 @@
-import requests
+from inference_sdk import InferenceHTTPClient
 import base64
 import os
+import json
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class WorkflowService:
     def __init__(self):
-        self.api_key = "oesPLELo2uEPnMKXp8dM"
+        self.api_key = os.getenv("ROBOFLOW_API_KEY", "oesPLELo2uEPnMKXp8dM")
         self.workspace = "devileyess-workspace"
-        self.workflow_id = "custom-workflow-2"
-        # Using the EXACT URL pattern that works for your other workflow
-        self.api_url = f"https://serverless.roboflow.com/{self.workspace}/workflows/{self.workflow_id}"
+        self.workflow_id = "custom-workflow-3"
+        
+        # Initialize official client
+        self.client = InferenceHTTPClient(
+            api_url="https://serverless.roboflow.com",
+            api_key=self.api_key
+        )
 
     def run_specialized_workflow(self, image_path: str):
         try:
-            # 1. Read and encode image (No prefix needed for this endpoint)
-            img = Image.open(image_path).convert("RGB")
-            buffered = BytesIO()
-            img.save(buffered, format="JPEG")
-            img_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            print(f"📡 SDK Processing: {image_path}")
             
-            # 2. Prepare payload
-            payload = {
-                "api_key": self.api_key,
-                "inputs": {
-                    "image": {
-                        "type": "base64",
-                        "value": img_b64
-                    }
-                }
-            }
+            # 1. Run workflow via SDK (Detection + Annotation)
+            result = self.client.run_workflow(
+                workspace_name=self.workspace,
+                workflow_id=self.workflow_id,
+                images={"image": image_path},
+                use_cache=False
+            )
+
+            item = result[0] if result and isinstance(result, list) else {}
+            display_b64 = item.get("annotated_image")
+            preds_data = item.get("predictions", [])
             
-            # 3. Call Roboflow API using requests
-            response = requests.post(self.api_url, json=payload)
-            if response.status_code != 200:
-                print(f"Error: {response.text}")
-                response.raise_for_status()
+            predictions = []
+            if isinstance(preds_data, dict) and "predictions" in preds_data:
+                predictions = preds_data["predictions"]
+            elif isinstance(preds_data, list):
+                predictions = preds_data
+
+            print(f"✅ AI Result: Found {len(predictions)} items")
+
+            # 2. Forensic Step: Using original SFM Project scripts (IDENTIFICATION ONLY)
+            forensic_data = {}
+            if len(predictions) > 0:
+                print("🧠 Identifying Brand (SFM logic)...")
                 
-            workflow_res = response.json()
-            
-            print("\n" + "="*50)
-            print("🚀 RAW ROBOFLOW WORKFLOW RESPONSE:")
-            import json
-            print(json.dumps(workflow_res, indent=2))
-            print("="*50 + "\n")
-            
-            display_b64 = None
-            found_ai = False
-            raw_output_data = workflow_res
-            
-            # 4. Parse Results
-            if "outputs" in workflow_res and len(workflow_res["outputs"]) > 0:
-                output = workflow_res["outputs"][0]
+                import sys
+                sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend"
+                if sfm_path not in sys.path:
+                    sys.path.append(sfm_path)
                 
-                # If there's an annotated image returned natively, use it
-                if "annotated_image" in output and "value" in output["annotated_image"]:
-                    display_b64 = output["annotated_image"]["value"]
-                    found_ai = True
-                
-                # Otherwise, we DRAW IT OURSELVES (This is how we fixed the other workflow!)
-                else:
-                    predictions = output.get("predictions", output.get("detections", []))
-                    if isinstance(predictions, dict) and "predictions" in predictions:
-                        predictions = predictions["predictions"]
-                        
-                    if predictions and isinstance(predictions, list) and len(predictions) > 0:
-                        print("Drawing manual boxes...")
-                        display_b64 = self.draw_manual_boxes(img, predictions)
-                        found_ai = True
-                        raw_output_data = predictions
+                try:
+                    from frame_detector import process_frame
+                    from spec_retriever import get_equipment_specs
+                    
+                    # 1. Identify Brand & Model using SFM process_frame (Fast-ish)
+                    sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"))
+                    llm_data = sfm_result.get("result", {})
+                    
+                    # Return identification immediately
+                    forensic_data = llm_data
+                    
+                    # We will handle spec fetching in a background flow elsewhere if needed
+                    # For now, we return the identity so the user sees the brand immediately
+                except Exception as e:
+                    print(f"❌ SFM ID Error: {e}")
+                    forensic_data = {"brand": "Unknown", "error": str(e)}
+
+            # 3. Read raw image for UI display
+            with open(image_path, "rb") as f:
+                raw_b64 = base64.b64encode(f.read()).decode('utf-8')
 
             return {
                 "success": True,
-                "raw_image": img_b64,
+                "raw_image": raw_b64,
                 "ai_image": display_b64,
-                "has_ai": found_ai,
-                "raw_output": raw_output_data
+                "has_ai": len(predictions) > 0,
+                "raw_output": predictions,
+                "forensic_data": forensic_data
             }
             
         except Exception as e:
-            print(f"Workflow Error: {e}")
+            print(f"❌ Workflow Error: {e}")
             try:
                 with open(image_path, "rb") as f:
                     img_b64 = base64.b64encode(f.read()).decode('utf-8')
-                return {"success": False, "raw_image": img_b64, "ai_image": None, "has_ai": False, "error": str(e)}
+                return {"success": False, "raw_image": img_b64, "error": str(e)}
             except:
-                return {"success": False, "raw_image": None, "ai_image": None, "has_ai": False, "error": str(e)}
-
-    def draw_manual_boxes(self, image: Image.Image, predictions: list):
-        """Draws boxes manually using PIL if the API only returns coordinates."""
-        draw = ImageDraw.Draw(image)
-        try:
-            font = ImageFont.load_default()
-        except:
-            font = None
-
-        for pred in predictions:
-            # Check format
-            if "x" in pred and "y" in pred and "width" in pred:
-                x1 = pred["x"] - pred["width"] / 2
-                y1 = pred["y"] - pred["height"] / 2
-                x2 = pred["x"] + pred["width"] / 2
-                y2 = pred["y"] + pred["height"] / 2
-            else:
-                x1, y1, x2, y2 = pred.get("bbox", [0, 0, 0, 0])
-
-            label = f"{pred.get('class', 'Object')} {pred.get('confidence', 0):.2f}"
-            
-            draw.rectangle((x1, y1, x2, y2), outline="#58a6ff", width=5)
-            draw.rectangle((x1, y1 - 25, x1 + 200, y1), fill="#58a6ff")
-            draw.text((x1 + 5, y1 - 20), label, fill="black", font=font)
-            
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG")
-        return base64.b64encode(buffered.getvalue()).decode("utf-8")
+                return {"success": False, "error": str(e)}

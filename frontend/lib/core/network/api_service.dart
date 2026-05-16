@@ -9,8 +9,8 @@ class ApiService {
 
   ApiService() : _dio = Dio(BaseOptions(
     baseUrl: _getBaseUrl(),
-    connectTimeout: const Duration(seconds: 30),
-    receiveTimeout: const Duration(seconds: 30),
+    connectTimeout: const Duration(seconds: 600),
+    receiveTimeout: const Duration(seconds: 600),
   )) {
     // Interceptor to automatically attach the JWT token to every request
     _dio.interceptors.add(InterceptorsWrapper(
@@ -62,6 +62,38 @@ class ApiService {
       return null;
     } catch (e) {
       print("Video Detection API Error: $e");
+      return null;
+    }
+  }
+
+  /// Script Lab: Extract and deduplicate frames
+  Future<Map<String, dynamic>?> scriptProcessVideo(XFile videoFile) async {
+    try {
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(videoFile.path, filename: "lab_video.mp4"),
+      });
+
+      Response response = await _dio.post("/api/video/script-process", data: formData);
+      return response.data;
+    } catch (e) {
+      print("Script Lab Extraction Error: $e");
+      return null;
+    }
+  }
+
+  /// Script Lab: Run AI on specific frame filenames
+  Future<Map<String, dynamic>?> processSelectedFrames(String sessionId, List<String> filenames) async {
+    try {
+      Response response = await _dio.post(
+        "/api/video/process-selected-frames",
+        data: {
+          "session_id": sessionId,
+          "filenames": filenames,
+        },
+      );
+      return response.data;
+    } catch (e) {
+      print("Script Lab AI Error: $e");
       return null;
     }
   }
@@ -161,9 +193,29 @@ class ApiService {
   }
 
   static String _getBaseUrl() {
-    // We use localhost:8000 for both Windows and Android (via ADB Reverse).
+    // For emulator, use 10.0.2.2
+    // For physical device, use the IP of your computer or localhost with adb reverse
     // If you are using a physical device, ensure you run:
     // 'adb reverse tcp:8000 tcp:8000'
     return "http://localhost:8000";
+  }
+
+  Future<Map<String, dynamic>> getSpecs(String brand, String model, String type) async {
+    final response = await _dio.post('/api/video/get-specs', data: {
+      'brand': brand,
+      'model': model,
+      'equipment_type': type,
+    });
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> processVideoScript(File video) async {
+    String fileName = video.path.split('/').last;
+    FormData formData = FormData.fromMap({
+      "file": await MultipartFile.fromFile(video.path, filename: fileName),
+    });
+
+    final response = await _dio.post('/api/video/script-process', data: formData);
+    return response.data;
   }
 }

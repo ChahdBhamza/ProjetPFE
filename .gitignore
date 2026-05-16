@@ -19,6 +19,7 @@ build/
 
 # Database
 qdrant_db/
+backend/sessions/
 
 # OS
 .DS_Store

@@ -36,8 +36,8 @@ class YOLOv5Service:
         self.model.to(self.device)
         self.model.eval()
         
-        self.confidence_threshold = 0.25
-        self.allowed_classes = ['laptop'] # As per the standalone app logic
+        self.confidence_threshold = 0.30
+        self.allowed_classes = [] # Allow all, smart_extract will filter
 
     def detect(self, image: Image.Image):
         """

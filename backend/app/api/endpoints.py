@@ -1,10 +1,19 @@
-from fastapi import APIRouter, UploadFile, File, Form, Response
+from fastapi import APIRouter, UploadFile, File, Form, Response, BackgroundTasks
+from typing import Optional
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from PIL import Image
 from io import BytesIO
 import json
 import os
+import sys
+import uuid
+import shutil
+import asyncio
+import base64
+import cv2
+import numpy as np
+from collections import deque
 from app.database import mongo_db
 
 router = APIRouter()
@@ -20,9 +29,10 @@ _video_service = None
 _yolov5_service = None
 _roboflow_service = None
 _orchestrator_service = None
+_ocr_service = None # Added for consistency, even if unused currently
 
-def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None, yolov5_service=None, roboflow_service=None, orchestrator_service=None):
-    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service, _yolov5_service, _roboflow_service, _orchestrator_service
+def init_services(embedder, vector_store, vision_service, web_service, local_vlm=None, openai_service=None, yolov5_service=None, roboflow_service=None, orchestrator_service=None, ocr_service=None):
+    global _embedder, _vector_store, _vision_service, _web_service, _local_vlm, _openai_service, _yolov5_service, _roboflow_service, _orchestrator_service, _ocr_service
     _embedder = embedder
     _vector_store = vector_store
     _vision_service = vision_service
@@ -42,14 +52,35 @@ def normalize_btu(btu_str):
     # Extract numbers
     nums = re.findall(r'\d+', str(btu_str))
     if not nums: return None
+    
     val = int(nums[0])
-    # If they said '12' or '18', convert to '12000'
-    if val in [9, 12, 18, 24, 30, 36, 48, 60]:
-        return str(val * 1000)
-    # If they said '12000', return as is
-    if val >= 7000:
-        return str(val)
-    return str(val)
+    if val < 100: # It's in kBTU (e.g. 12 or 18)
+        return val * 1000
+    return val
+
+# --- FORENSIC HELPERS FOR HERO SELECTION ---
+ALLOWED_KEYWORDS = ["air", "ac", "conditioner", "microwave", "refrigerator", "fridge", "laptop", "computer", "tv", "monitor"]
+
+def is_allowed(cls_name):
+    """Checks if the detected class is actually forensic equipment"""
+    name = cls_name.lower()
+    if any(kw in name for kw in ["microwave", "refrigerator", "fridge", "laptop", "computer", "tv", "monitor"]):
+        return True
+    if "conditioner" in name or "ac" == name or "ac " in name or " ac" in name or "air cond" in name:
+        return True
+    return False
+
+def calculate_center_score(bbox, img_w, img_h):
+    """Scores how centered an object is in the frame"""
+    x1, y1, x2, y2 = bbox
+    obj_center_x = (x1 + x2) / 2
+    obj_center_y = (y1 + y2) / 2
+    img_center_x = img_w / 2
+    img_center_y = img_h / 2
+    dist_x = abs(obj_center_x - img_center_x) / img_center_x
+    dist_y = abs(obj_center_y - img_center_y) / img_center_y
+    centering = 1.0 - (dist_x + dist_y) / 2
+    return max(0, centering)
 
 @router.post("/search")
 async def search_endpoint(
@@ -694,37 +725,86 @@ class SelectedFramesRequest(BaseModel):
 @router.post("/video/process-selected-frames")
 async def process_selected_frames_endpoint(req: SelectedFramesRequest):
     """
-    Runs the specialized workflow only on specific frames selected by the user.
+    Runs Roboflow + Brand ID in PARALLEL for all selected frames.
     """
     from app.services.workflow_service import WorkflowService
-    workflow_service = WorkflowService()
+    from fastapi.concurrency import run_in_threadpool
+    import asyncio
     
-    final_results = []
+    workflow_service = WorkflowService()
     base_dir = os.path.join("sessions", req.session_id, "processed")
     
-    for f in req.filenames:
+    async def process_single_frame(f):
         img_path = os.path.join(base_dir, f)
-        if not os.path.exists(img_path): continue
+        if not os.path.exists(img_path): return None
         
-        res = workflow_service.run_specialized_workflow(img_path)
-        final_results.append({
+        # Run the heavy AI work in a thread pool so it doesn't block
+        res = await run_in_threadpool(workflow_service.run_specialized_workflow, img_path)
+        
+        return {
             "filename": f,
             "raw_image": res.get("raw_image"),
             "ai_image": res.get("ai_image"),
             "raw_output": res.get("raw_output"),
             "has_ai": res.get("has_ai", False),
-            "error": res.get("error")
-        })
+            "forensic_data": res.get("forensic_data"),
+            "specs_status": "none"
+        }
+
+    # Launch all AI tasks at once!
+    tasks = [process_single_frame(f) for f in req.filenames]
+    results = await asyncio.gather(*tasks)
+    
+    # Filter out None results
+    final_results = [r for r in results if r is not None]
         
     return {"success": True, "frames": final_results}
 
+@router.post("/video/get-specs")
+async def get_specs_endpoint(req: dict):
+    print("🔔 [DEBUG] get_specs_endpoint CALLED!")
+    print(f"📦 [DEBUG] Request Data: {req}")
+    brand = req.get("brand")
+    model = req.get("model", "standard")
+    eq_type = req.get("equipment_type", "equipment")
+    
+    # Smart brand recovery: if brand is unknown but model has it
+    if (not brand or brand.lower() == "unknown") and model != "standard":
+        brand = model.split()[0] # Try the first word of the model (e.g. "Lenovo")
+        print(f"💡 [Smart Recovery] Brand was Unknown, extracted '{brand}' from model.")
+
+    import sys
+    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend"
+    if sfm_path not in sys.path:
+        sys.path.insert(0, sfm_path) # Force priority
+    
+    try:
+        from spec_retriever import get_equipment_specs
+        print(f"🌐 [On-Demand] START: {brand} | {model} | {eq_type}")
+        specs = get_equipment_specs(
+            brand=brand,
+            model=model,
+            equipment_type=eq_type,
+            gemini_key=os.getenv("OPENROUTER_API_KEY")
+        )
+        print(f"✅ [On-Demand] COMPLETE: Found {len(specs.get('specs', {}) or {})} spec keys")
+        return specs
+    except Exception as e:
+        print(f"❌ On-Demand Spec Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e)}
+
 @router.post("/video/script-process")
-async def video_script_process_endpoint(file: UploadFile = File(...)):
+async def video_script_process_endpoint(
+    file: Optional[UploadFile] = File(None),
+    video: Optional[UploadFile] = File(None)
+):
     """
-    Deduplication Only Pipeline:
-    1. Run extract_frames.py
-    2. Run deduplicate_frames.py
-    3. Return frames WITHOUT AI (waiting for user selection)
+    SMART AUTO-SELECT PIPELINE (V3 - FFmpeg Hybrid):
+    1. FFmpeg High-Speed Extraction
+    2. Dual-AI Scan (YOLOv5 + Roboflow)
+    3. Spatial & Temporal Hero Selection
     """
     import subprocess
     import shutil
@@ -732,49 +812,105 @@ async def video_script_process_endpoint(file: UploadFile = File(...)):
     import os
     import sys
     import uuid
+    import asyncio
+    from fastapi.concurrency import run_in_threadpool
+    from PIL import Image
+    
+    # Handle both 'file' and 'video' field names
+    actual_file = file or video
+    if not actual_file:
+        return {"success": False, "error": "No file or video field provided in multipart form data."}
     
     session_id = f"lab_{uuid.uuid4().hex[:8]}"
     base_dir = os.path.join("sessions", session_id)
     raw_dir = os.path.join(base_dir, "raw")
-    proc_dir = os.path.join(base_dir, "processed")
-    
     os.makedirs(raw_dir, exist_ok=True)
-    os.makedirs(proc_dir, exist_ok=True)
-    
+
     video_path = os.path.join(base_dir, "video.mp4")
+    # Read the entire file content asynchronously
+    contents = await actual_file.read()
+    with open(video_path, "wb") as buffer:
+        buffer.write(contents)
 
+    # 1. FFmpeg Extraction (3 frames per second for high detail)
+    print(f"🎬 [FFmpeg] Extracting frames for session {session_id} from {video_path}...")
     try:
-        with open(video_path, "wb") as f:
-            f.write(await file.read())
-            
-        extract_script = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\scripts\extract_frames.py"
-        subprocess.run([sys.executable, extract_script, "--input", video_path, "--output", raw_dir, "--interval", "10"], check=True)
-        
-        for f in os.listdir(raw_dir):
-            shutil.copy(os.path.join(raw_dir, f), os.path.join(proc_dir, f))
-            
-        dedup_script = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\scripts\deduplicate_frames.py"
-        subprocess.run([sys.executable, dedup_script, "--dir", proc_dir, "--window", "10"], check=True)
+        result = subprocess.run([
+            "ffmpeg", "-y", "-i", video_path, 
+            "-vf", "fps=3", 
+            os.path.join(raw_dir, "frame_%04d.png")
+        ], check=True, capture_output=True, text=True)
+        print(f"✅ [FFmpeg] Success: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ [FFmpeg] Failed with code {e.returncode}")
+        print(f"❌ [FFmpeg] Stderr: {e.stderr}")
+        return {"success": False, "error": f"FFmpeg failed: {e.stderr}"}
 
-        final_results = []
-        survivors = sorted([f for f in os.listdir(proc_dir) if f.endswith(".jpg")])
-        
-        for f in survivors:
-            img_path = os.path.join(proc_dir, f)
-            with open(img_path, "rb") as img_f:
-                b64 = base64.b64encode(img_f.read()).decode('utf-8')
-            final_results.append({"filename": f, "image": b64})
-
-        return {
-            "success": True,
-            "message": f"Deduplication finished. Select frames to run AI.",
-            "frames": final_results,
-            "session_id": session_id
-        }
+    # 2. Path Setup
+    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend"
+    if sfm_path not in sys.path: sys.path.insert(0, sfm_path)
+    
+    global _yolov5_service, _roboflow_service
+    if _yolov5_service is None:
+        from app.services.yolov5_service import YOLOv5Service
+        _yolov5_service = YOLOv5Service()
+    if _roboflow_service is None:
+        from app.services.roboflow_service import RoboflowService
+        _roboflow_service = RoboflowService()
+    
+    # 3. Execute the "Perfect" Smart Extract Script
+    print(f"🚀 [Backend] Running smart_extract.py for session {session_id}...")
+    
+    # Define ROOT_DIR relative to this file (backend/app/api/endpoints.py)
+    # Move up 3 levels to reach the project root
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    script_path = os.path.join(ROOT_DIR, "sfm_project", "backend", "scripts", "smart_extract.py")
+    
+    try:
+        # We run the script to process the video and extract forensic heroes
+        result = subprocess.run([
+            sys.executable, script_path,
+            "--input", video_path,
+            "--output", base_dir,
+            "--interval", "8", # Every 8 frames for a good balance of speed/detail
+            "--strict", "1"    # Forensic whitelist active
+        ], capture_output=True, text=True, check=True, encoding='utf-8', errors='replace')
+        print(f"✅ Script Success: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Script Error (Code {e.returncode}):")
+        print(f"❌ Stderr: {e.stderr}")
+        return {"success": False, "error": f"Script failed: {e.stderr}"}
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        print(f"❌ Execution Error: {e}")
         return {"success": False, "error": str(e)}
+
+    # 4. Collect the resulting Hero Shots from the output folder
+    final_dir = os.path.join(base_dir, "final_shots")
+    if not os.path.exists(final_dir):
+        return {"success": False, "error": "Final shots directory not created."}
+        
+    hero_files = sorted([f for f in os.listdir(final_dir) if f.endswith((".jpg", ".png"))])
+    final_frames = []
+    
+    for f in hero_files:
+        path = os.path.join(final_dir, f)
+        with open(path, "rb") as img_file:
+            b64 = base64.b64encode(img_file.read()).decode('utf-8')
+            final_frames.append({
+                "filename": f,
+                "image": b64,
+                "has_ai": True,
+                "is_hero": True,
+                "detected_class": f.replace("hero_", "").replace(".jpg", "").replace("_", " ")
+            })
+
+    print(f"✅ Smart Extraction Complete. Found {len(final_frames)} Hero Shots.")
+    return {
+        "success": True,
+        "session_id": session_id,
+        "frames": final_frames,
+        "heros": final_frames
+    }
 
 @router.get("/api/sfm/sessions")
 async def list_sfm_sessions():
@@ -806,6 +942,31 @@ async def get_sfm_frames(session_id: str):
             frames.append({"filename": f, "image": b64})
     
     return frames
+
+
+@router.post("/spec-lookup")
+async def spec_lookup_endpoint(req: dict):
+    """
+    Agentic Spec Retrieval Pipeline:
+    DuckDuckGo (Search) -> BeautifulSoup (Scrape) -> Gemini (Verify & Extract)
+    """
+    from app.services.spec_service import SpecService
+
+    brand = req.get("brand", "")
+    model = req.get("model", "")
+    equipment_type = req.get("equipment_type", "equipment")
+
+    if not brand:
+        return JSONResponse(status_code=400, content={"error": "Brand is required"})
+
+    try:
+        spec_service = SpecService()
+        result = spec_service.get_full_identity(brand, model, equipment_type)
+        return {"success": True, "data": result}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
 
 
 

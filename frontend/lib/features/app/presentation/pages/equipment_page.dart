@@ -7,6 +7,7 @@ import 'package:equipment_detection_app/core/design_system/cybersight_theme.dart
 import 'package:equipment_detection_app/core/widgets/hud_widgets.dart';
 import 'package:equipment_detection_app/features/app/presentation/providers/detection_provider.dart';
 import 'package:equipment_detection_app/features/auth/presentation/providers/auth_provider.dart';
+import 'script_lab_page.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
@@ -66,6 +67,19 @@ class _EquipmentPageState extends State<EquipmentPage> with SingleTickerProvider
               title: 'Video Neural Scan', 
               subtitle: 'Extract frames from video', 
               onTap: () => _handleVideoPick(provider)
+            ),
+            const SizedBox(height: 12),
+            _ActionTile(
+              icon: Icons.biotech_outlined, 
+              title: 'Neural Script Lab', 
+              subtitle: 'Advanced frame selection & analysis', 
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ScriptLabPage()),
+                );
+              }
             ),
           ],
         ),

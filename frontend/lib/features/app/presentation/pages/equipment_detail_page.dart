@@ -133,7 +133,7 @@ class EquipmentDetailPage extends StatelessWidget {
                         children: [
                           _SpecCard(label: 'ENERGY CLASS', value: metadata['energy_class'] ?? 'A++', icon: Icons.bolt_rounded),
                           _SpecCard(label: 'REFRIGERANT', value: metadata['gas'] ?? 'R32', icon: Icons.opacity_rounded),
-                          _SpecCard(label: 'INVERTER', value: metadata['inverter'] == true ? 'YES' : 'NO', icon: Icons.Settings_input_component_rounded),
+                          _SpecCard(label: 'INVERTER', value: metadata['inverter'] == true ? 'YES' : 'NO', icon: Icons.settings_input_component_rounded),
                           _SpecCard(label: 'WIFI LINK', value: 'ESTABLISHED', icon: Icons.wifi_rounded),
                         ],
                       ),

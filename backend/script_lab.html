@@ -111,7 +111,16 @@
             const data = await r.json();
             if (data.success) {
                 currentSessionId = data.session_id;
-                renderGallery(data.frames);
+                gallery.innerHTML = ''; // Clear gallery
+                
+                // Render Heroes (with badge)
+                if (data.heros) {
+                    renderGallery(data.heros, true);
+                }
+                
+                // Render Sample Gallery
+                renderGallery(data.frames, false);
+                
                 aiBtn.style.display = 'block';
             }
         } catch (e) { alert(e.message); }
@@ -119,15 +128,16 @@
         extractBtn.disabled = false;
     };
 
-    function renderGallery(frames) {
-        gallery.innerHTML = '';
+    function renderGallery(frames, isHero = false) {
         frames.forEach(f => {
             const div = document.createElement('div');
             div.className = 'frame';
             div.dataset.filename = f.filename;
             div.innerHTML = `
                 <img src="data:image/jpeg;base64,${f.image}">
-                <div class="badge">AI PROCESSED</div>
+                <div class="badge" style="${isHero ? 'display:block; background: #facc15; color: black;' : ''}">
+                    ${isHero ? 'FORENSIC HERO' : 'AI PROCESSED'}
+                </div>
             `;
             div.onclick = () => toggleSelect(div);
             gallery.appendChild(div);

@@ -1,0 +1,41 @@
+# --- Core Backend ---
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-multipart
+python-dotenv
+requests
+
+# --- Database & Storage ---
+pymongo
+sqlalchemy
+alembic
+qdrant-client
+
+# --- AI & Vision (Local) ---
+torch
+torchvision
+ultralytics
+transformers
+opencv-python
+Pillow
+numpy
+
+# --- AI & Vision (Cloud/API) ---
+google-genai
+inference-sdk
+roboflow
+
+# --- RAG & Search ---
+beautifulsoup4
+duckduckgo_search
+clip
+ollama
+
+# --- Data Science & Analysis ---
+matplotlib
+scipy
+seaborn
+pandas
+PyYAML
