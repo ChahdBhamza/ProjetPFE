@@ -543,167 +543,168 @@ async def roboflow_detect_endpoint(
 
 @router.post("/detect/unified")
 async def unified_detect(file: UploadFile = File(...)):
-    """Automatic routing: Laptop (YOLOv5) -> Refrigerator (Roboflow) -> AC (Roboflow)"""
-    global _orchestrator_service, _yolov5_service, _roboflow_service
+    """Automatic routing utilizing central custom-workflow-3 (WorkflowService) + VLM Brand ID"""
+    from app.services.workflow_service import WorkflowService
+    from fastapi.concurrency import run_in_threadpool
     
-    if _orchestrator_service is None:
-        print("[LazyLoad] Initializing Orchestrator Service...")
-        from app.services.yolov5_service import YOLOv5Service
-        from app.services.roboflow_service import RoboflowService
-        from app.services.orchestrator_service import OrchestratorService
-        
-        if _yolov5_service is None:
-            _yolov5_service = YOLOv5Service()
-        if _roboflow_service is None:
-            _roboflow_service = RoboflowService()
-            
-        _orchestrator_service = OrchestratorService(_yolov5_service, _roboflow_service)
+    workflow_service = WorkflowService()
+    
+    # Save upload to temporary file for the SDK client
+    temp_id = str(uuid.uuid4())
+    temp_path = f"temp_detect_{temp_id}.jpg"
     
     try:
         contents = await file.read()
-        results = _orchestrator_service.auto_detect(contents)
+        with open(temp_path, "wb") as f:
+            f.write(contents)
+            
+        # Run workflow via the centralized workflow engine
+        res = await run_in_threadpool(workflow_service.run_specialized_workflow, temp_path)
         
-        # Add visual bounding boxes to the result image
-        try:
-            from io import BytesIO
-            import base64
-            image = Image.open(BytesIO(contents)).convert("RGB")
+        raw_output = res.get("raw_output", [])
+        category = "unrecognized"
+        is_known = False
+        detections = []
+        
+        if raw_output:
+            best_det = max(raw_output, key=lambda d: d.get("confidence", 0))
+            category = best_det.get("class", "unrecognized")
+            is_known = True
             
-            if results["source"] == "yolov5":
-                detections = results["detections"]
-                boxed_image = _yolov5_service.draw_detections(image, detections)
-            elif results["source"] == "roboflow":
-                # If roboflow already provided an annotated image, use it!
-                if results.get("image"):
-                    results["image"] = results["image"] # Already base64
-                    boxed_image = None # Skip local drawing
-                else:
-                    detections = results.get("detections", [])
-                    boxed_image = _roboflow_service.draw_detections(image, detections)
-            else:
-                boxed_image = None
+            for d in raw_output:
+                x_c, y_c, w, h = d.get("x", 0), d.get("y", 0), d.get("width", 0), d.get("height", 0)
+                x1 = x_c - w / 2
+                y1 = y_c - h / 2
+                x2 = x_c + w / 2
+                y2 = y_c + h / 2
+                detections.append({
+                    "class": d.get("class"),
+                    "confidence": d.get("confidence"),
+                    "bbox": [x1, y1, x2, y2]
+                })
                 
-            if boxed_image:
-                img_byte_arr = BytesIO()
-                boxed_image.save(img_byte_arr, format='JPEG')
-                results["image"] = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
-        except Exception as draw_error:
-            print(f"⚠️ Visualization failed: {draw_error}")
-            
-        return results
+        return {
+            "success": res.get("success", False),
+            "source": "roboflow/workflow-service",
+            "category": category,
+            "is_known_equipment": is_known,
+            "detections": detections,
+            "image": res.get("ai_image") if is_known else res.get("raw_image"),
+            "forensic_data": res.get("forensic_data", {})
+        }
     except Exception as e:
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": f"Unified Detection Failed: {str(e)}"})
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
 @router.post("/video/unified-stream")
 async def unified_video_stream(file: UploadFile = File(...)):
     """
     Intelligent Video Stream Analysis:
     1. Extracts high-quality key frames (VideoService)
-    2. Filters and routes each frame (OrchestratorService)
-    3. Returns results for each frame found
+    2. Runs each keyframe through the unified custom-workflow-3 (WorkflowService) in parallel
+    3. Executes deduplication to yield only unique equipment "Hero Shots" with detailed brand specs
     """
-    global _video_service, _orchestrator_service, _yolov5_service, _roboflow_service
+    global _video_service
+    from app.services.workflow_service import WorkflowService
+    from fastapi.concurrency import run_in_threadpool
     
-    # 1. Lazy load all necessary services
     if _video_service is None:
         from app.services.video_service import VideoService
         _video_service = VideoService()
-    
-    if _orchestrator_service is None:
-        from app.services.yolov5_service import YOLOv5Service
-        from app.services.roboflow_service import RoboflowService
-        from app.services.orchestrator_service import OrchestratorService
         
-        if _yolov5_service is None:
-            _yolov5_service = YOLOv5Service()
-        if _roboflow_service is None:
-            _roboflow_service = RoboflowService()
-            
-        _orchestrator_service = OrchestratorService(_yolov5_service, _roboflow_service)
-
+    workflow_service = WorkflowService()
+    
     try:
         contents = await file.read()
         
-        # 2. Extract sharpest frames (Scene Detection)
-        # Increased to 10 frames for better coverage
+        # 1. Extract sharpest frames (Scene Detection)
         frames = _video_service.process_video_bytes(contents, max_frames=10)
         
         if not frames:
             return {"success": False, "error": "No clear key frames found in video."}
             
-        # 3. Process each frame through the Unified Orchestrator
-        raw_stream_results = []
-        for f_data in frames:
+        async def process_frame_data(f_data):
             pil_img = f_data["raw"]
+            f_idx = f_data["frame_idx"]
             
-            # Convert PIL to bytes for the orchestrator
-            img_byte_arr = BytesIO()
-            pil_img.save(img_byte_arr, format='JPEG')
-            frame_bytes = img_byte_arr.getvalue()
+            # Save frame temporarily to feed the SDK
+            temp_id = str(uuid.uuid4())
+            temp_path = f"temp_frame_{temp_id}_{f_idx}.jpg"
             
-            # Run unified detection (YOLO -> Roboflow routing)
-            res = _orchestrator_service.auto_detect(frame_bytes)
-            
-            # Add visualization
             try:
-                import base64
-                res_b64 = None
-                if res["source"] == "yolov5":
-                    boxed_img = _yolov5_service.draw_detections(pil_img, res["detections"])
-                else:
-                    # For Roboflow, if we have a base64 image from the cloud, use it, 
-                    # otherwise draw locally
-                    if res.get("image"):
-                        res_b64 = res["image"]
-                        boxed_img = None
-                    else:
-                        boxed_img = _roboflow_service.draw_detections(pil_img, res["detections"])
+                pil_img.save(temp_path, format="JPEG")
+                res = await run_in_threadpool(workflow_service.run_specialized_workflow, temp_path)
                 
-                if boxed_img:
-                    out_buf = BytesIO()
-                    boxed_img.save(out_buf, format='JPEG')
-                    res_b64 = base64.b64encode(out_buf.getvalue()).decode('utf-8')
+                raw_output = res.get("raw_output", [])
+                category = "unrecognized"
+                is_known = False
+                detections = []
                 
-                if res_b64:
-                    res["image"] = res_b64
-            except:
-                pass
+                if raw_output:
+                    best_det = max(raw_output, key=lambda d: d.get("confidence", 0))
+                    category = best_det.get("class", "unrecognized")
+                    is_known = True
+                    
+                    for d in raw_output:
+                        x_c, y_c, w, h = d.get("x", 0), d.get("y", 0), d.get("width", 0), d.get("height", 0)
+                        x1 = x_c - w / 2
+                        y1 = y_c - h / 2
+                        x2 = x_c + w / 2
+                        y2 = y_c + h / 2
+                        detections.append({
+                            "class": d.get("class"),
+                            "confidence": d.get("confidence"),
+                            "bbox": [x1, y1, x2, y2]
+                        })
+                        
+                analysis = {
+                    "source": "roboflow/workflow-service",
+                    "category": category,
+                    "is_known_equipment": is_known,
+                    "detections": detections,
+                    "image": res.get("ai_image") if is_known else res.get("raw_image"),
+                    "forensic_data": res.get("forensic_data", {})
+                }
                 
-            raw_stream_results.append({
-                "frame_idx": f_data["frame_idx"],
-                "analysis": res
-            })
+                return {
+                    "frame_idx": f_idx,
+                    "analysis": analysis
+                }
+            finally:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
 
-        # 4. INTELLIGENT DEDUPLICATION
-        # We only want the "Best" frame for each unique equipment type
+        # 2. Process all extracted frames in parallel
+        tasks = [process_frame_data(f) for f in frames]
+        raw_stream_results = await asyncio.gather(*tasks)
+        
+        # 3. INTELLIGENT DEDUPLICATION
         best_results_by_category = {}
         
         for item in raw_stream_results:
             category = item["analysis"]["category"]
             
-            # Skip unrecognized frames for the "Best Of" selection
             if not item["analysis"]["is_known_equipment"]:
                 continue
                 
-            # Get the confidence of the best detection in this frame
             detections = item["analysis"].get("detections", [])
             max_conf = max([d.get("confidence", 0) for d in detections]) if detections else 0
             
-            # If this is the first time we see this category, or if it's better than the previous one
             if category not in best_results_by_category or max_conf > best_results_by_category[category]["conf"]:
                 best_results_by_category[category] = {
                     "data": item,
                     "conf": max_conf
                 }
-        
-        # Final list contains only the "Hero Shots"
+                
         deduplicated_results = [val["data"] for val in best_results_by_category.values()]
         
-        # If no known equipment was found at all, show the unrecognized frames as a fallback
         if not deduplicated_results:
             deduplicated_results = raw_stream_results[:3]
-
+            
         return {
             "success": True,
             "results": deduplicated_results,
@@ -711,11 +712,11 @@ async def unified_video_stream(file: UploadFile = File(...)):
             "total_deduplicated": len(deduplicated_results),
             "message": f"Detected {len(best_results_by_category.keys())} unique equipment types."
         }
-        
     except Exception as e:
         import traceback
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 
 class SelectedFramesRequest(BaseModel):
@@ -846,10 +847,7 @@ async def video_script_process_endpoint(
         print(f"❌ [FFmpeg] Stderr: {e.stderr}")
         return {"success": False, "error": f"FFmpeg failed: {e.stderr}"}
 
-    # 2. Path Setup
-    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend"
-    if sfm_path not in sys.path: sys.path.insert(0, sfm_path)
-    
+    # 2. Path Setup (Unified Backend)
     global _yolov5_service, _roboflow_service
     if _yolov5_service is None:
         from app.services.yolov5_service import YOLOv5Service
@@ -861,10 +859,9 @@ async def video_script_process_endpoint(
     # 3. Execute the "Perfect" Smart Extract Script
     print(f"🚀 [Backend] Running smart_extract.py for session {session_id}...")
     
-    # Define ROOT_DIR relative to this file (backend/app/api/endpoints.py)
-    # Move up 3 levels to reach the project root
-    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    script_path = os.path.join(ROOT_DIR, "sfm_project", "backend", "scripts", "smart_extract.py")
+    # Define script_path
+    import pathlib
+    script_path = os.path.join(pathlib.Path(__file__).parent.parent, "scripts", "smart_extract.py")
     
     try:
         # We run the script to process the video and extract forensic heroes
@@ -914,9 +911,10 @@ async def video_script_process_endpoint(
 
 @router.get("/api/sfm/sessions")
 async def list_sfm_sessions():
-    """List subfolders in the SFM project's processed_frames directory."""
+    """List subfolders in the unified processed_frames directory."""
     import os
-    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\processed_frames"
+    import pathlib
+    sfm_path = os.path.join(pathlib.Path(__file__).parent.parent.parent, "processed_frames")
     if not os.path.exists(sfm_path):
         return []
     sessions = [{"name": d} for d in os.listdir(sfm_path) if os.path.isdir(os.path.join(sfm_path, d))]
@@ -924,10 +922,11 @@ async def list_sfm_sessions():
 
 @router.get("/api/sfm/frames")
 async def get_sfm_frames(session_id: str):
-    """Retrieve frames from a specific SFM session folder."""
+    """Retrieve frames from a specific session folder."""
     import os
     import base64
-    sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend\processed_frames"
+    import pathlib
+    sfm_path = os.path.join(pathlib.Path(__file__).parent.parent.parent, "processed_frames")
     session_path = os.path.join(sfm_path, session_id)
     
     if not os.path.exists(session_path):

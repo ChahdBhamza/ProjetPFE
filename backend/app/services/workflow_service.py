@@ -49,15 +49,8 @@ class WorkflowService:
             if len(predictions) > 0:
                 print("🧠 Identifying Brand (SFM logic)...")
                 
-                import sys
-                sfm_path = r"c:\Users\chahd\Desktop\DetectionAppPFE\sfm_project\backend"
-                if sfm_path not in sys.path:
-                    sys.path.append(sfm_path)
-                
                 try:
-                    from frame_detector import process_frame
-                    from spec_retriever import get_equipment_specs
-                    
+                    from app.services.frame_detector import process_frame
                     # 1. Identify Brand & Model using SFM process_frame (Fast-ish)
                     sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"))
                     llm_data = sfm_result.get("result", {})
