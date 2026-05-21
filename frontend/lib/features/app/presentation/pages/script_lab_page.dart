@@ -35,7 +35,7 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
     try {
       // We'll use the same endpoint as the web Script Lab
       final res = await _apiService.processVideoScript(File(video.path));
-      if (res['success']) {
+      if (res['success'] == true && res['frames'] != null) {
         setState(() {
           _frames = List<Map<String, dynamic>>.from(res['frames']);
           _sessionId = res['session_id'];
@@ -46,10 +46,25 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
               .toSet();
           _isExtracting = false;
         });
+      } else {
+        final err = res['error']?.toString() ?? 'Unknown error';
+        final hint = res['hint']?.toString();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                hint != null ? '$err\n$hint' : err,
+                style: const TextStyle(fontSize: 13),
+              ),
+              duration: const Duration(seconds: 8),
+            ),
+          );
+        }
       }
-      else {
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Extraction failed. Check backend logs.')),
+          SnackBar(content: Text('Extraction error: $e')),
         );
       }
     } finally {

@@ -15,12 +15,12 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("="*60)
-    print("🚀  CYBERSIGHT FORENSIC API ONLINE  🚀")
+    print("CYBERSIGHT FORENSIC API ONLINE")
     print("[STATUS] API Layer Activated | Waiting for first mobile request...")
     print("="*60)
     yield
     print("="*60)
-    print("🛡️  TERMINATING CYBERSIGHT SERVICES CLEANLY...")
+    print("TERMINATING CYBERSIGHT SERVICES CLEANLY...")
     print("="*60)
 
 # Initialize FastAPI
@@ -57,4 +57,4 @@ async def read_root():
 
 if __name__ == "__main__":
     # Standard Port 8000 for ADB Reverse USB Link in local mobile development
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_level="info", reload=True)

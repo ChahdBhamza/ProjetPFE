@@ -627,11 +627,40 @@ async def unified_video_stream(file: UploadFile = File(...)):
         if not frames:
             return {"success": False, "error": "No clear key frames found in video."}
             
-        async def process_frame_data(f_data):
+        # 2. YOLOv5 Local Gatekeeper & Deduplication (FAST)
+        global _yolov5_service
+        if _yolov5_service is None:
+            from app.services.yolov5_service import YOLOv5Service
+            _yolov5_service = YOLOv5Service()
+            
+        yolo_pool = []
+        for f_data in frames:
+            pil_img = f_data["raw"]
+            hits = _yolov5_service.detect(pil_img)
+            if hits:
+                best_hit = max(hits, key=lambda x: x['confidence'])
+                yolo_pool.append({
+                    "frame_data": f_data,
+                    "class": best_hit['class'],
+                    "confidence": best_hit['confidence']
+                })
+                
+        # Deduplicate locally BEFORE cloud
+        yolo_pool.sort(key=lambda x: x["confidence"], reverse=True)
+        final_hero_frames = []
+        seen_classes = set()
+        for item in yolo_pool:
+            if item["class"] not in seen_classes:
+                seen_classes.add(item["class"])
+                final_hero_frames.append(item["frame_data"])
+                
+        if not final_hero_frames:
+            return {"success": True, "results": [], "message": "No forensic equipment detected in video."}
+
+        # 3. Process ONLY the Deduplicated Hero Frames in the Cloud
+        async def process_hero_frame(f_data):
             pil_img = f_data["raw"]
             f_idx = f_data["frame_idx"]
-            
-            # Save frame temporarily to feed the SDK
             temp_id = str(uuid.uuid4())
             temp_path = f"temp_frame_{temp_id}_{f_idx}.jpg"
             
@@ -648,69 +677,37 @@ async def unified_video_stream(file: UploadFile = File(...)):
                     best_det = max(raw_output, key=lambda d: d.get("confidence", 0))
                     category = best_det.get("class", "unrecognized")
                     is_known = True
-                    
                     for d in raw_output:
                         x_c, y_c, w, h = d.get("x", 0), d.get("y", 0), d.get("width", 0), d.get("height", 0)
-                        x1 = x_c - w / 2
-                        y1 = y_c - h / 2
-                        x2 = x_c + w / 2
-                        y2 = y_c + h / 2
                         detections.append({
-                            "class": d.get("class"),
-                            "confidence": d.get("confidence"),
-                            "bbox": [x1, y1, x2, y2]
+                            "class": d.get("class"), "confidence": d.get("confidence"),
+                            "bbox": [x_c - w/2, y_c - h/2, x_c + w/2, y_c + h/2]
                         })
                         
-                analysis = {
-                    "source": "roboflow/workflow-service",
-                    "category": category,
-                    "is_known_equipment": is_known,
-                    "detections": detections,
-                    "image": res.get("ai_image") if is_known else res.get("raw_image"),
-                    "forensic_data": res.get("forensic_data", {})
-                }
-                
                 return {
                     "frame_idx": f_idx,
-                    "analysis": analysis
+                    "analysis": {
+                        "source": "roboflow/workflow-service",
+                        "category": category,
+                        "is_known_equipment": is_known,
+                        "detections": detections,
+                        "image": res.get("ai_image") if is_known else res.get("raw_image"),
+                        "forensic_data": res.get("forensic_data", {})
+                    }
                 }
             finally:
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
+                if os.path.exists(temp_path): os.remove(temp_path)
 
-        # 2. Process all extracted frames in parallel
-        tasks = [process_frame_data(f) for f in frames]
-        raw_stream_results = await asyncio.gather(*tasks)
+        # 4. Fire Roboflow/Gemini on the final Hero frames
+        tasks = [process_hero_frame(f) for f in final_hero_frames]
+        final_results = await asyncio.gather(*tasks)
         
-        # 3. INTELLIGENT DEDUPLICATION
-        best_results_by_category = {}
-        
-        for item in raw_stream_results:
-            category = item["analysis"]["category"]
-            
-            if not item["analysis"]["is_known_equipment"]:
-                continue
-                
-            detections = item["analysis"].get("detections", [])
-            max_conf = max([d.get("confidence", 0) for d in detections]) if detections else 0
-            
-            if category not in best_results_by_category or max_conf > best_results_by_category[category]["conf"]:
-                best_results_by_category[category] = {
-                    "data": item,
-                    "conf": max_conf
-                }
-                
-        deduplicated_results = [val["data"] for val in best_results_by_category.values()]
-        
-        if not deduplicated_results:
-            deduplicated_results = raw_stream_results[:3]
-            
         return {
             "success": True,
-            "results": deduplicated_results,
-            "total_raw_processed": len(raw_stream_results),
-            "total_deduplicated": len(deduplicated_results),
-            "message": f"Detected {len(best_results_by_category.keys())} unique equipment types."
+            "results": final_results,
+            "total_raw_processed": len(frames),
+            "total_deduplicated": len(final_results),
+            "message": f"Detected {len(final_results)} unique equipment types."
         }
     except Exception as e:
         import traceback
@@ -733,10 +730,11 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest):
     import asyncio
     
     workflow_service = WorkflowService()
-    base_dir = os.path.join("sessions", req.session_id, "processed")
+    import os
+    base_dir_actual = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "processed_frames", req.session_id, "final_shots")
     
     async def process_single_frame(f):
-        img_path = os.path.join(base_dir, f)
+        img_path = os.path.join(base_dir_actual, f)
         if not os.path.exists(img_path): return None
         
         # Run the heavy AI work in a thread pool so it doesn't block
@@ -781,17 +779,17 @@ async def get_specs_endpoint(req: dict):
     
     try:
         from spec_retriever import get_equipment_specs
-        print(f"🌐 [On-Demand] START: {brand} | {model} | {eq_type}")
+        print(f"[On-Demand] START: {brand} | {model} | {eq_type}")
         specs = get_equipment_specs(
             brand=brand,
             model=model,
             equipment_type=eq_type,
             gemini_key=os.getenv("OPENROUTER_API_KEY")
         )
-        print(f"✅ [On-Demand] COMPLETE: Found {len(specs.get('specs', {}) or {})} spec keys")
+        print(f"[On-Demand] COMPLETE: Found {len(specs.get('specs', {}) or {})} spec keys")
         return specs
     except Exception as e:
-        print(f"❌ On-Demand Spec Error: {e}")
+        print(f"[On-Demand] Spec Error: {e}")
         import traceback
         traceback.print_exc()
         return {"status": "error", "message": str(e)}
@@ -833,18 +831,22 @@ async def video_script_process_endpoint(
     with open(video_path, "wb") as buffer:
         buffer.write(contents)
 
-    # 1. FFmpeg Extraction (3 frames per second for high detail)
-    print(f"🎬 [FFmpeg] Extracting frames for session {session_id} from {video_path}...")
-    try:
-        result = subprocess.run([
-            "ffmpeg", "-y", "-i", video_path, 
-            "-vf", "fps=3", 
-            os.path.join(raw_dir, "frame_%04d.png")
+    # 1. FFmpeg: ~1 frame/sec for better temporal coverage (sharpness picks the best)
+    # Using .jpg instead of .png for a massive write-speed boost, run inside run_in_threadpool to keep FastAPI fully non-blocking
+    print(f"[FFmpeg] Extracting frames for session {session_id} from {video_path}...")
+    def _run_ffmpeg():
+        return subprocess.run([
+            "ffmpeg", "-y", "-i", video_path,
+            "-vf", "fps=1",
+            os.path.join(raw_dir, "frame_%04d.jpg")
         ], check=True, capture_output=True, text=True)
-        print(f"✅ [FFmpeg] Success: {result.stdout}")
+
+    try:
+        result = await run_in_threadpool(_run_ffmpeg)
+        print(f"[FFmpeg] Success: {result.stdout}")
     except subprocess.CalledProcessError as e:
-        print(f"❌ [FFmpeg] Failed with code {e.returncode}")
-        print(f"❌ [FFmpeg] Stderr: {e.stderr}")
+        print(f"[FFmpeg] Failed with code {e.returncode}")
+        print(f"[FFmpeg] Stderr: {e.stderr}")
         return {"success": False, "error": f"FFmpeg failed: {e.stderr}"}
 
     # 2. Path Setup (Unified Backend)
@@ -856,29 +858,29 @@ async def video_script_process_endpoint(
         from app.services.roboflow_service import RoboflowService
         _roboflow_service = RoboflowService()
     
-    # 3. Execute the "Perfect" Smart Extract Script
-    print(f"🚀 [Backend] Running smart_extract.py for session {session_id}...")
+    # 3. Execute Smart Extract in-process (No Python process spawning or reloading YOLO weights!)
+    print(f"[Backend] Running smart_extract in-process (reusing in-memory neural engine) for session {session_id}...")
     
-    # Define script_path
-    import pathlib
-    script_path = os.path.join(pathlib.Path(__file__).parent.parent, "scripts", "smart_extract.py")
+    from app.scripts.smart_extract import smart_extract
+    
+    def _run_smart_extract():
+        smart_extract(
+            video_path=video_path,
+            output_dir=base_dir,
+            interval=1,
+            strict=True,
+            max_frames=28,
+            yolo=_yolov5_service,
+            roboflow=_roboflow_service
+        )
     
     try:
-        # We run the script to process the video and extract forensic heroes
-        result = subprocess.run([
-            sys.executable, script_path,
-            "--input", video_path,
-            "--output", base_dir,
-            "--interval", "8", # Every 8 frames for a good balance of speed/detail
-            "--strict", "1"    # Forensic whitelist active
-        ], capture_output=True, text=True, check=True, encoding='utf-8', errors='replace')
-        print(f"✅ Script Success: {result.stdout}")
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Script Error (Code {e.returncode}):")
-        print(f"❌ Stderr: {e.stderr}")
-        return {"success": False, "error": f"Script failed: {e.stderr}"}
+        await run_in_threadpool(_run_smart_extract)
+        print(f"[Script] In-process Smart Extract completed successfully!")
     except Exception as e:
-        print(f"❌ Execution Error: {e}")
+        print(f"[Script] Execution Error: {e}")
+        import traceback
+        traceback.print_exc()
         return {"success": False, "error": str(e)}
 
     # 4. Collect the resulting Hero Shots from the output folder
@@ -901,7 +903,7 @@ async def video_script_process_endpoint(
                 "detected_class": f.replace("hero_", "").replace(".jpg", "").replace("_", " ")
             })
 
-    print(f"✅ Smart Extraction Complete. Found {len(final_frames)} Hero Shots.")
+    print(f"[Smart Extract] Complete. Found {len(final_frames)} Hero Shots.")
     return {
         "success": True,
         "session_id": session_id,

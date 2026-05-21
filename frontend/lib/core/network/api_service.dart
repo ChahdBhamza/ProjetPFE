@@ -193,11 +193,20 @@ class ApiService {
   }
 
   static String _getBaseUrl() {
-    // For emulator, use 10.0.2.2
-    // For physical device, use the IP of your computer or localhost with adb reverse
-    // If you are using a physical device, ensure you run:
-    // 'adb reverse tcp:8000 tcp:8000'
-    return "http://localhost:8000";
+    // Optional: flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8000
+    const fromEnv = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+    if (fromEnv.isNotEmpty) {
+      return fromEnv.endsWith('/')
+          ? fromEnv.substring(0, fromEnv.length - 1)
+          : fromEnv;
+    }
+    // Physical phone + USB: run `adb reverse tcp:8000 tcp:8000` then 127.0.0.1 reaches the PC.
+    // Some Android builds resolve "localhost" oddly; 127.0.0.1 is more reliable with reverse.
+    // Android emulator (no reverse): flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+    if (Platform.isAndroid) {
+      return 'http://127.0.0.1:8000';
+    }
+    return 'http://localhost:8000';
   }
 
   Future<Map<String, dynamic>> getSpecs(String brand, String model, String type) async {
@@ -215,7 +224,30 @@ class ApiService {
       "file": await MultipartFile.fromFile(video.path, filename: fileName),
     });
 
-    final response = await _dio.post('/api/video/script-process', data: formData);
-    return response.data;
+    try {
+      final response = await _dio.post(
+        '/api/video/script-process',
+        data: formData,
+        options: Options(
+          sendTimeout: const Duration(seconds: 600),
+          receiveTimeout: const Duration(seconds: 600),
+        ),
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) return data;
+      return {'success': false, 'error': 'Unexpected response from server'};
+    } on DioException catch (e) {
+      final msg = e.message ?? 'Network error';
+      final detail = e.response?.data;
+      final backend = detail is Map ? detail['error'] ?? detail['detail'] : detail;
+      return {
+        'success': false,
+        'error': backend?.toString() ?? msg,
+        'hint':
+            'Phone cannot reach the API. USB: run `adb reverse tcp:8000 tcp:8000`. Wi‑Fi: set --dart-define=API_BASE_URL=http://YOUR_PC_IP:8000',
+      };
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
   }
 }

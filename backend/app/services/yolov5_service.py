@@ -36,8 +36,9 @@ class YOLOv5Service:
         self.model.to(self.device)
         self.model.eval()
         
-        self.confidence_threshold = 0.30
-        self.allowed_classes = [] # Allow all, smart_extract will filter
+        self.confidence_threshold = 0.25
+        self.appliance_classes = {"microwave", "refrigerator", "laptop", "oven"}
+        self.allowed_classes = ["laptop", "refrigerator", "microwave", "oven"]
 
     def detect(self, image: Image.Image):
         """
@@ -55,15 +56,19 @@ class YOLOv5Service:
         if preds is not None and len(preds) > 0:
             for *box, conf, cls in preds:
                 confidence = float(conf)
-                
-                if confidence < self.confidence_threshold:
-                    continue
-                    
                 class_name = self.model.names[int(cls)].lower()
+
+                min_conf = 0.20 if class_name in self.appliance_classes else self.confidence_threshold
+                if confidence < min_conf:
+                    continue
                 
                 # Only include allowed classes if specified
                 if self.allowed_classes and class_name not in self.allowed_classes:
                     continue
+                
+                # Map 'oven' to 'microwave' to improve recall without exposing 'oven' to the user
+                if class_name == "oven":
+                    class_name = "microwave"
                 
                 # Get coordinates
                 x1, y1, x2, y2 = map(float, box)
