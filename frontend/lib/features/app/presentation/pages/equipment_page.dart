@@ -33,10 +33,8 @@ class _EquipmentPageState extends State<EquipmentPage> with SingleTickerProvider
     _pulseController.dispose();
     super.dispose();
   }
-  final ImagePicker _picker = ImagePicker();
 
-  Future<void> _showPickOptions() async {
-    final provider = context.read<DetectionProvider>();
+  void _showPickOptions() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -49,37 +47,16 @@ class _EquipmentPageState extends State<EquipmentPage> with SingleTickerProvider
             const _SectionTitle('Neural Input Source'),
             const SizedBox(height: 24),
             _ActionTile(
-              icon: Icons.camera_alt_outlined, 
-              title: 'Camera Scan', 
-              subtitle: 'Capture live equipment', 
-              onTap: () => _handlePick(ImageSource.camera, provider)
-            ),
-            const SizedBox(height: 12),
-            _ActionTile(
-              icon: Icons.photo_library_outlined, 
-              title: 'Gallery Scan', 
-              subtitle: 'Select from media library', 
-              onTap: () => _handlePick(ImageSource.gallery, provider)
-            ),
-            const SizedBox(height: 12),
-            _ActionTile(
-              icon: Icons.video_collection_outlined, 
-              title: 'Video Neural Scan', 
-              subtitle: 'Extract frames from video', 
-              onTap: () => _handleVideoPick(provider)
-            ),
-            const SizedBox(height: 12),
-            _ActionTile(
-              icon: Icons.biotech_outlined, 
-              title: 'Neural Script Lab', 
-              subtitle: 'Advanced frame selection & analysis', 
+              icon: Icons.biotech_outlined,
+              title: 'Neural Script Lab',
+              subtitle: 'Advanced frame selection & analysis',
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ScriptLabPage()),
                 );
-              }
+              },
             ),
           ],
         ),
@@ -87,19 +64,7 @@ class _EquipmentPageState extends State<EquipmentPage> with SingleTickerProvider
     );
   }
 
-  Future<void> _handlePick(ImageSource source, DetectionProvider provider) async {
-    Navigator.pop(context);
-    final XFile? file = await _picker.pickImage(source: source);
-    if (file == null) return;
-    provider.detectEquipment(File(file.path));
-  }
 
-  Future<void> _handleVideoPick(DetectionProvider provider) async {
-    Navigator.pop(context);
-    final XFile? file = await _picker.pickVideo(source: ImageSource.gallery);
-    if (file == null) return;
-    provider.detectFromVideo(File(file.path));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -311,14 +276,97 @@ class _IdentityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brand = (result.vectorMatch?.item.brand as String? ?? 'UNKNOWN').toUpperCase();
+    final modelName = result.vectorMatch?.item.modelName as String? ?? 'No model data';
+    final confidence = (result.vectorMatch?.confidence as double? ?? 0.0);
+    final details = result.verifiedDetails as Map<String, dynamic>?;
+    final equipmentType = details?['equipment_type'] as String?;
+    final candidates = details?['model_candidates'] as List<dynamic>?;
+    final visualCues = details?['visual_cues'] as List<dynamic>?;
+
     return CybersightCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('IDENTIFIED UNIT', style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 8, letterSpacing: 2)),
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('IDENTIFIED UNIT', style: const TextStyle(color: Colors.white24, fontWeight: FontWeight.w900, fontSize: 8, letterSpacing: 2)),
+              if (equipmentType != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: CybersightTheme.accent.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: CybersightTheme.accent.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    equipmentType.toUpperCase(),
+                    style: const TextStyle(color: CybersightTheme.accent, fontSize: 8, fontWeight: FontWeight.w800, letterSpacing: 1.5),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 12),
-          Text(result.vectorMatch?.item.brand.toUpperCase() ?? 'UNKNOWN', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-          Text(result.vectorMatch?.item.modelName ?? 'No model data', style: const TextStyle(color: Colors.white60)),
+
+          // Brand + Model
+          Text(brand, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 2),
+          Text(modelName, style: const TextStyle(color: Colors.white60, fontSize: 13)),
+          const SizedBox(height: 10),
+
+          // Confidence badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: CybersightTheme.accent.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: CybersightTheme.accent.withOpacity(0.25)),
+            ),
+            child: Text(
+              '${(confidence * 100).toStringAsFixed(0)}% CONFIDENCE',
+              style: const TextStyle(color: CybersightTheme.accent, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+            ),
+          ),
+
+          // Alternative candidates
+          if (candidates != null && candidates.length > 1) ...[
+            const SizedBox(height: 14),
+            const Text('ALTERNATIVES', style: TextStyle(color: Colors.white24, fontSize: 8, letterSpacing: 2)),
+            const SizedBox(height: 6),
+            ...candidates.skip(1).take(2).map((c) {
+              final m = c as Map<String, dynamic>;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.chevron_right, color: Colors.white24, size: 14),
+                    const SizedBox(width: 4),
+                    Expanded(child: Text(m['model']?.toString() ?? '', style: const TextStyle(color: Colors.white38, fontSize: 11))),
+                    Text('${m['confidence']}%', style: const TextStyle(color: Colors.white24, fontSize: 10)),
+                  ],
+                ),
+              );
+            }),
+          ],
+
+          // Visual cues
+          if (visualCues != null && visualCues.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Text('VISUAL EVIDENCE', style: TextStyle(color: Colors.white24, fontSize: 8, letterSpacing: 2)),
+            const SizedBox(height: 6),
+            ...visualCues.take(2).map((cue) => Padding(
+              padding: const EdgeInsets.only(bottom: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('· ', style: TextStyle(color: CybersightTheme.accent, fontSize: 12)),
+                  Expanded(child: Text(cue.toString(), style: const TextStyle(color: Colors.white38, fontSize: 10, height: 1.4))),
+                ],
+              ),
+            )),
+          ],
         ],
       ),
     );

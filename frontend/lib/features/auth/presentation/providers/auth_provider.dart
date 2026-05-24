@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/network/api_service.dart';
+import '../../../../core/network/api_exception.dart';
 
 class AuthProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -23,23 +24,23 @@ class AuthProvider extends ChangeNotifier {
     _loadSession();
   }
 
-  /// Load session from SharedPreferences
+  /// Load session from Secure Storage
   Future<void> _loadSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    _userEmail = prefs.getString('user_email');
-    _fullName = prefs.getString('full_name');
+    const storage = FlutterSecureStorage();
+    _userEmail = await storage.read(key: 'user_email');
+    _fullName = await storage.read(key: 'full_name');
     if (_userEmail != null) {
       print("[Auth] Session restored for: $_userEmail");
       notifyListeners();
     }
   }
 
-  /// Save session to SharedPreferences
+  /// Save session to Secure Storage
   Future<void> _saveSession(String email, String name, String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_email', email);
-    await prefs.setString('full_name', name);
-    await prefs.setString('jwt_token', token);
+    const storage = FlutterSecureStorage();
+    await storage.write(key: 'user_email', value: email);
+    await storage.write(key: 'full_name', value: name);
+    await storage.write(key: 'jwt_token', value: token);
   }
 
   /// Register a new user in MongoDB
@@ -48,18 +49,22 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final result = await _apiService.signUp(email, password, name);
-    
-    _isLoading = false;
-    if (result["success"] == true) {
-      _userEmail = email;
-      _fullName = name;
-      final token = result["token"];
-      await _saveSession(email, name, token);
-      notifyListeners();
-      return true;
-    } else {
-      _errorMessage = result["detail"] ?? "Sign up failed.";
+    try {
+      final result = await _apiService.signUp(email, password, name);
+      
+      _isLoading = false;
+      if (result["success"] == true) {
+        _userEmail = email;
+        _fullName = name;
+        final token = result["token"];
+        await _saveSession(email, name, token);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } on ApiException catch (e) {
+      _isLoading = false;
+      _errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -71,18 +76,22 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final result = await _apiService.signIn(email, password);
-    
-    _isLoading = false;
-    if (result["success"] == true) {
-      _userEmail = result["user"]["email"];
-      _fullName = result["user"]["full_name"];
-      final token = result["token"];
-      await _saveSession(_userEmail!, _fullName!, token);
-      notifyListeners();
-      return true;
-    } else {
-      _errorMessage = result["detail"] ?? "Login failed.";
+    try {
+      final result = await _apiService.signIn(email, password);
+      
+      _isLoading = false;
+      if (result["success"] == true) {
+        _userEmail = result["user"]["email"];
+        _fullName = result["user"]["full_name"];
+        final token = result["token"];
+        await _saveSession(_userEmail!, _fullName!, token);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } on ApiException catch (e) {
+      _isLoading = false;
+      _errorMessage = e.message;
       notifyListeners();
       return false;
     }
@@ -123,11 +132,16 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = result["detail"] ?? "Google synchronization failed.";
+        _errorMessage = "Google synchronization failed.";
         _isLoading = false;
         notifyListeners();
         return false;
       }
+    } on ApiException catch (e) {
+      _isLoading = false;
+      _errorMessage = e.message;
+      notifyListeners();
+      return false;
     } catch (e) {
       print("GOOGLE PLUGIN ERROR: $e");
       _isLoading = false;
@@ -138,8 +152,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    const storage = FlutterSecureStorage();
+    await storage.deleteAll();
     await _googleSignIn.signOut();
     _userEmail = null;
     _fullName = null;

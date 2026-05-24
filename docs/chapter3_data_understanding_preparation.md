@@ -337,6 +337,22 @@ The YOLOv5 filter alone eliminated **7 out of 10 candidates** before a single cl
 
 Our data preparation strategy acts as an automated quality firewall between raw environmental input and the downstream AI models. It operates across three sequential phases:
 
+### 3.7.1 R&D Evolution: The Visual Vector RAG Prototype and Its Limitations
+During the early research and development phase of this project, we designed and built a standard **Multimodal Retrieval-Augmented Generation (RAG)** prototype. This early system was designed to bridge physical equipment with technical details by pre-indexing a massive visual and textual product catalog. 
+
+The implementation of this prototype involved a multi-stage data engineering pipeline:
+1. **Deep Web Scraping & Data Acquisition:** We built concurrent web crawlers (using BeautifulSoup and Python's `ThreadPoolExecutor`) to extract product pages from Tunisian electronics vendors (such as Tunisianet, Spacenet, MyTek, and Mega.tn). For each product, the scraper downloaded visual assets (high-resolution product photographs) and parsed spec tables (identities, manuals, specifications).
+2. **Heavy Storage & Hierarchical ETL:** The scraped assets were organized into a structured directory tree under `dataequipment/`. This local filesystem storage accumulated hundreds of raw images, JSON files, and text summaries, creating a heavy local storage footprint.
+3. **Multimodal Vector Indexing:** We preprocessed all catalog images and passed them through OpenAI's CLIP model (`openai/clip-vit-base-patch32`) to generate 512-dimensional dense float vectors. These embeddings, along with their specification metadata, were then indexed as active points inside a self-hosted Qdrant vector database.
+
+#### The High-Overhead vs. Low-Accuracy Paradox
+Despite the high engineering effort and significant storage footprint required to scrape, store, and embed this dataset, live testing highlighted critical limitations that made a visual-similarity RAG approach unsuitable for high-precision appliance forensic audits:
+- **Vector Similarity Collisions:** Standard home appliances are highly uniform. A white rectangular refrigerator manufactured by Gree and a visually similar double-door model by Samsung share almost identical visual properties (shape, color, aspect ratio). Because their global image vectors were virtually identical, the system suffered from vector collisions—frequently returning Samsung specification sheets for a physically present Gree appliance.
+- **Alphanumeric Blindness:** The visual embedding model (CLIP) is optimized for general semantic alignment rather than OCR. Consequently, it was completely blind to small alphanumeric text labels (e.g., model codes, serial plates) that uniquely identify the appliance.
+- **Stale Databases:** E-commerce catalogs in the Tunisian retail market are highly volatile. Relying on a static, pre-indexed vector database meant that specification updates, price drops, and model changes were not captured in real-time without expensive re-indexing cycles.
+
+Ultimately, the high overhead of maintaining a heavy, local image/vector database was offset by poor spec retrieval accuracy. To resolve these limitations, we evolved the architecture away from database-bound visual similarity matching to our proposed **Database-Free Forensic Reading and Live-Scraping pipeline**. The specific data preparation steps for this new approach—including keyframe filtering, crop enhancement for visual OCR, and HTML table parsing—are detailed in **Sections 3.8, 3.9, and 3.10** of this chapter. The final multi-model coordination layer that orchestrates the local VLM and live scraper is detailed in **Chapter 4 (System Architecture)**. Highlighting this evolution demonstrates our R&D journey while keeping the primary thesis focus on the current high-accuracy pipeline.
+
 `
   RAW INPUT
       │

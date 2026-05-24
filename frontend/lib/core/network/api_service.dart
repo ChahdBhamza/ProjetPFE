@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:equipment_detection_app/features/app/data/models/detection_result_model.dart';
+import 'api_exception.dart';
 
 class ApiService {
   final Dio _dio;
@@ -15,8 +17,8 @@ class ApiService {
     // Interceptor to automatically attach the JWT token to every request
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('jwt_token');
+        const storage = FlutterSecureStorage();
+        final token = await storage.read(key: 'jwt_token');
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -105,7 +107,7 @@ class ApiService {
       if (item == null) return false;
 
       Response response = await _dio.post(
-        "/api/auth/inventory/save",
+        "/api/inventory/save",
         data: {
           "brand": item.brand,
           "model": item.modelName,
@@ -123,7 +125,7 @@ class ApiService {
   /// Fetch user's inventory from MongoDB
   Future<List<dynamic>> fetchInventory() async {
     try {
-      Response response = await _dio.get("/api/auth/inventory/list");
+      Response response = await _dio.get("/api/inventory/list");
       if (response.data["success"] == true) {
         return response.data["inventory"] as List<dynamic>;
       }
@@ -147,10 +149,10 @@ class ApiService {
       );
       return response.data;
     } on DioException catch (e) {
-      final detail = e.response?.data?["detail"] ?? e.message;
-      return {"success": false, "detail": detail};
+      final detail = e.response?.data?["error"] ?? e.response?.data?["detail"] ?? e.message;
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
     } catch (e) {
-      return {"success": false, "detail": "Neural Link failed: $e"};
+      throw ApiException("Neural Link failed: $e");
     }
   }
 
@@ -166,11 +168,10 @@ class ApiService {
       );
       return response.data;
     } on DioException catch (e) {
-      // Extract the specific "detail" from FastAPI if available
-      final detail = e.response?.data?["detail"] ?? "Neural verification failed.";
-      return {"success": false, "detail": detail};
+      final detail = e.response?.data?["error"] ?? e.response?.data?["detail"] ?? "Neural verification failed.";
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
     } catch (e) {
-      return {"success": false, "detail": "Connection failed. Is the backend running?"};
+      throw ApiException("Connection failed. Is the backend running?");
     }
   }
 
@@ -186,14 +187,23 @@ class ApiService {
         },
       );
       return response.data;
+    } on DioException catch (e) {
+      final detail = e.response?.data?["error"] ?? e.response?.data?["detail"] ?? "Google synchronization failed.";
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
     } catch (e) {
       print("GOOGLE AUTH ERROR: $e");
-      return {"success": false, "detail": "Google synchronization failed."};
+      throw ApiException("Google synchronization failed: $e");
     }
   }
 
   static String _getBaseUrl() {
-    // Optional: flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8000
+    // Try to get from .env first
+    final envUrl = dotenv.env['API_BASE_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      return envUrl.endsWith('/') ? envUrl.substring(0, envUrl.length - 1) : envUrl;
+    }
+
+    // Optional fallback: flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8000
     const fromEnv = String.fromEnvironment('API_BASE_URL', defaultValue: '');
     if (fromEnv.isNotEmpty) {
       return fromEnv.endsWith('/')

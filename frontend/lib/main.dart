@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/design_system/cybersight_theme.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
@@ -12,7 +13,9 @@ import 'package:provider/provider.dart';
 import 'features/app/presentation/providers/detection_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(
     MultiProvider(
       providers: [
