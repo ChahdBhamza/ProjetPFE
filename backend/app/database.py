@@ -37,6 +37,10 @@ class MongoService:
             self.db = self.client.get_database("equipment_detection_db")
             self.detections = self.db.detections
             self.users = self.db.users
+            self.inventory = self.db.inventory
+            self.auth_sessions = self.db.auth_sessions
+            self.scan_sessions = self.db.scan_sessions
+            self.system_logs = self.db.system_logs
             print("[MongoDB] Neural Link Established: Atlas Cluster Verified.")
         except Exception as e:
             print(f"[MongoDB] Neural Link Failed (Check Atlas Whitelist): {e}")
@@ -50,8 +54,7 @@ class MongoService:
                 "email": email,
                 "password_hash": password_hash,
                 "full_name": full_name,
-                "created_at": datetime.datetime.now(),
-                "inventory": [] # Start with an empty inventory
+                "created_at": datetime.datetime.now()
             }
             return self.users.insert_one(user_data).inserted_id
         except Exception as e:
@@ -66,24 +69,50 @@ class MongoService:
     def get_user_inventory(self, email: str):
         """Fetch the inventory list for a specific user"""
         if not self.client: return []
-        user = self.users.find_one({"email": email}, {"inventory": 1, "_id": 0})
-        if user and "inventory" in user:
-            return user["inventory"]
-        return []
+        items = list(self.inventory.find({"user_email": email}, {"_id": 0}))
+        return items
 
     def add_to_inventory(self, email: str, item_data: dict):
         """Add a detected item to the user's inventory"""
         if not self.client: return False
         try:
+            item_data["user_email"] = email
             item_data["added_at"] = datetime.datetime.now()
-            result = self.users.update_one(
-                {"email": email},
-                {"$push": {"inventory": item_data}}
-            )
-            return result.modified_count > 0
+            result = self.inventory.insert_one(item_data)
+            return bool(result.inserted_id)
         except Exception as e:
             print(f"[MongoDB] Inventory Save Error: {e}")
             return False
+
+    def filter_user_inventory(self, email: str, filters: dict):
+        """Filter the user's inventory based on dynamic criteria"""
+        if not self.client: return []
+        query = {"user_email": email}
+        
+        # Dynamic query building based on provided filters
+        if filters.get("category"):
+            query["equipment_category"] = filters["category"]
+            
+        if filters.get("brand"):
+            query["brand"] = {"$regex": filters["brand"], "$options": "i"}
+            
+        # Price filtering
+        min_price = filters.get("min_price")
+        max_price = filters.get("max_price")
+        if min_price is not None or max_price is not None:
+            query["specs.price_tnd"] = {}
+            if min_price is not None:
+                query["specs.price_tnd"]["$gte"] = float(min_price)
+            if max_price is not None:
+                query["specs.price_tnd"]["$lte"] = float(max_price)
+                
+        # BTU filtering (for Air Conditioners)
+        min_btu = filters.get("min_btu")
+        if min_btu is not None:
+            query["specs.capacity_btu"] = {"$gte": int(min_btu)}
+            
+        items = list(self.inventory.find(query, {"_id": 0}))
+        return items
 
     def save_detection(self, brand: str, raw_text: str = None, btu: int = None, details: dict = None):
         """Save a new detection event to the cloud"""
@@ -105,6 +134,77 @@ class MongoService:
             return True
         except Exception as e:
             print(f"[MongoDB] Failed to save detection: {e}")
+            return False
+
+    def record_login(self, email: str, device_info: str = "Unknown"):
+        """Record an auth session"""
+        if not self.client: return False
+        try:
+            self.auth_sessions.insert_one({
+                "user_email": email,
+                "device_info": device_info,
+                "login_time": datetime.datetime.now()
+            })
+            return True
+        except Exception:
+            return False
+
+    def start_scan_session(self, email: str, session_id: str, device_info: str = "Unknown"):
+        """Start a new camera scan session"""
+        if not self.client: return False
+        try:
+            self.scan_sessions.insert_one({
+                "session_id": session_id,
+                "user_email": email,
+                "device_info": device_info,
+                "start_time": datetime.datetime.now(),
+                "status": "active"
+            })
+            return True
+        except Exception:
+            return False
+
+    def end_scan_session(self, session_id: str, status: str = "completed", hero_frame_base64: str = None):
+        """End an active camera scan session and attach the hero frame"""
+        if not self.client: return False
+        try:
+            update_data = {"end_time": datetime.datetime.now(), "status": status}
+            if hero_frame_base64:
+                update_data["hero_frame_base64"] = hero_frame_base64
+                
+            self.scan_sessions.update_one(
+                {"session_id": session_id},
+                {"$set": update_data}
+            )
+            return True
+        except Exception:
+            return False
+
+    def log_detection(self, session_id: str, data: dict):
+        """Log a raw detection event linked to a scan session"""
+        if not self.client: return False
+        try:
+            log_data = data.copy()
+            log_data["scan_session_id"] = session_id
+            log_data["timestamp"] = datetime.datetime.now()
+            self.detections.insert_one(log_data)
+            return True
+        except Exception:
+            return False
+
+    def add_system_log(self, level: str, module: str, message: str, email: str = None):
+        """Add a system log"""
+        if not self.client: return False
+        try:
+            self.system_logs.insert_one({
+                "timestamp": datetime.datetime.now(),
+                "level": level,
+                "module": module,
+                "message": message,
+                "user_email": email
+            })
+            return True
+        except Exception:
             return False
 
 # Global singleton

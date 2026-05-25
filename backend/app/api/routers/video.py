@@ -1,5 +1,7 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Depends
 from pydantic import BaseModel
+from app.api.dependencies import verify_token
+from app.database import mongo_db
 from typing import Optional
 from app.schemas import ExtractFramesResponse
 from io import BytesIO
@@ -138,7 +140,7 @@ class SelectedFramesRequest(BaseModel):
     filenames: list[str]
 
 @router.post("/process-selected-frames")
-async def process_selected_frames_endpoint(req: SelectedFramesRequest):
+async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_email: str = Depends(verify_token)):
     """Runs Roboflow + Brand ID in PARALLEL for all selected frames."""
     from app.services.workflow_service import WorkflowService
     from fastapi.concurrency import run_in_threadpool
@@ -165,10 +167,13 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest):
     results = await asyncio.gather(*tasks)
     final_results = [r for r in results if r is not None]
 
-    # Attach standardised equipment_result to each frame
+    # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:
         fd = frame.get("forensic_data") or {}
         frame["equipment_result"] = build_equipment_result(fd)
+        
+        # Log the raw AI detection to MongoDB
+        mongo_db.log_detection(req.session_id, fd)
 
     return {"success": True, "frames": final_results}
 
@@ -201,7 +206,8 @@ async def get_specs_endpoint(req: dict):
 @router.post("/script-process")
 async def video_script_process_endpoint(
     file: Optional[UploadFile] = File(None),
-    video: Optional[UploadFile] = File(None)
+    video: Optional[UploadFile] = File(None),
+    current_email: str = Depends(verify_token)
 ):
     import subprocess
     from fastapi.concurrency import run_in_threadpool
@@ -212,6 +218,10 @@ async def video_script_process_endpoint(
         return {"success": False, "error": "No file or video field provided."}
     
     session_id = f"lab_{uuid.uuid4().hex[:8]}"
+    
+    # Start the scan session in the database
+    mongo_db.start_scan_session(current_email, session_id, device_info="Video Upload")
+    
     base_dir = os.path.join("sessions", session_id)
     raw_dir = os.path.join(base_dir, "raw")
     os.makedirs(raw_dir, exist_ok=True)
@@ -247,6 +257,7 @@ async def video_script_process_endpoint(
 
     final_dir = os.path.join(base_dir, "final_shots")
     if not os.path.exists(final_dir):
+        mongo_db.end_scan_session(session_id, status="failed")
         return {"success": False, "error": "Final shots directory not created."}
         
     final_frames = []
@@ -259,5 +270,11 @@ async def video_script_process_endpoint(
                 "is_hero": True,
                 "detected_class": f.replace("hero_", "").replace(".jpg", "").replace("_", " ")
             })
+
+    hero_base64 = None
+    if final_frames:
+        hero_base64 = final_frames[0]["image"]
+        
+    mongo_db.end_scan_session(session_id, status="completed", hero_frame_base64=hero_base64)
 
     return {"success": True, "session_id": session_id, "frames": final_frames, "heros": final_frames}

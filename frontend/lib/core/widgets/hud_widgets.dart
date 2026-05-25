@@ -289,12 +289,12 @@ class _GlowingButtonState extends State<GlowingButton> with SingleTickerProvider
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              widget.label.toUpperCase(),
+                              widget.label,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: widget.textSize,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: FontWeight.w600,
                                 color: Colors.black,
-                                letterSpacing: 1.2,
+                                letterSpacing: 0.5,
                                 height: 1.0,
                               ),
                             ),

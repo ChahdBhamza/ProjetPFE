@@ -55,6 +55,7 @@ async def signup(data: dict = Body(...)):
         access_token = create_access_token(
             data={"sub": email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
+        mongo_db.record_login(email, device_info="Signup")
         return {
             "success": True, 
             "message": "Neural Profile Created", 
@@ -86,6 +87,7 @@ async def login(data: dict = Body(...)):
     access_token = create_access_token(
         data={"sub": user["email"]}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+    mongo_db.record_login(user["email"], device_info="Login")
 
     return {
         "success": True,
@@ -120,6 +122,7 @@ async def google_auth(data: dict = Body(...)):
     access_token = create_access_token(
         data={"sub": user["email"]}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+    mongo_db.record_login(user["email"], device_info="Google Auth")
 
     return {
         "success": True, 

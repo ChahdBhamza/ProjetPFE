@@ -258,6 +258,14 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 hit["_frame"] = base["frame"]
                 hit["_frame_id"] = frame_id
                 hit["_category"] = normalize_equipment_class(hit["class"])
+                
+                # [STRICT SAFEGUARD] Stop Roboflow from hallucinating ACs on laptops
+                yolo_cats_on_frame = [normalize_equipment_class(h["class"]) for h in base["hits"]]
+                if hit["_category"] == "air_conditioner" and "computer" in yolo_cats_on_frame:
+                    print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'computer' based on YOLO ground truth!")
+                    hit["_category"] = "computer"
+                    hit["class"] = "laptop"
+                
                 hit["_rf_annotated"] = ann_pil
                 global_pool.append(hit)
 

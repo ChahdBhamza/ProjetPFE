@@ -27,25 +27,6 @@ class ApiService {
     ));
   }
 
-  /// Send image for detection and RAG processing
-  Future<DetectionResult?> detectEquipment(XFile imageFile) async {
-    try {
-      FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(imageFile.path, filename: "upload.jpg"),
-      });
-
-      Response response = await _dio.post("/api/search", data: formData);
-
-      if (response.statusCode == 200) {
-        return DetectionResult.fromJson(response.data);
-      }
-      return null;
-    } catch (e) {
-      print("Detection API Error: $e");
-      return null;
-    }
-  }
-
   /// Send video for key frame extraction and search
   Future<DetectionResult?> detectFromVideo(XFile videoFile) async {
     try {
@@ -106,18 +87,45 @@ class ApiService {
       final item = result.vectorMatch?.item;
       if (item == null) return false;
 
+      final metadata = Map<String, dynamic>.from(result.verifiedDetails ?? {});
+      if (!metadata.containsKey('category') && metadata.containsKey('equipment_type')) {
+        metadata['category'] = metadata['equipment_type'];
+      }
+
       Response response = await _dio.post(
         "/api/inventory/save",
         data: {
           "brand": item.brand,
           "model": item.modelName,
           "btu": item.btu,
-          "metadata": result.verifiedDetails ?? {},
+          "metadata": metadata,
         },
       );
       return response.data["success"] == true;
     } catch (e) {
       print("Inventory Save Error: $e");
+      return false;
+    }
+  }
+
+  /// Save EquipmentResult directly to user's MongoDB inventory
+  Future<bool> saveEquipmentToInventory(EquipmentResult result) async {
+    try {
+      final metadata = Map<String, dynamic>.from(result.specs);
+      metadata['category'] = result.identity.equipmentCategory;
+
+      Response response = await _dio.post(
+        "/api/inventory/save",
+        data: {
+          "brand": result.identity.brand,
+          "model": result.identity.topModel,
+          "btu": result.specs['capacity_btu']?.toString() ?? result.specs['btu']?.toString(),
+          "metadata": metadata,
+        },
+      );
+      return response.data["success"] == true;
+    } catch (e) {
+      print("Equipment Inventory Save Error: $e");
       return false;
     }
   }

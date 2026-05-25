@@ -28,7 +28,7 @@ load_dotenv()
 # ── Pydantic Schemas for Structured Output ────────────────────────────────────
 
 class Pass1Result(BaseModel):
-    equipment_type: str = Field(description="Must be one of: 'airconditioner', 'refrigerator', 'microwave', 'laptop', 'unknown'")
+    equipment_type: str = Field(description="Must be one of: 'airconditioner', 'refrigerator', 'microwave', 'laptop', 'monitor', 'unknown'")
     brand_visible: bool = Field(description="True if a manufacturer logo or printed brand name is visible in the image")
     preliminary_brand: Optional[str] = Field(description="Best guess at the brand name, or null if not visible")
     confidence_type: int = Field(description="Confidence percentage for the type classification (0-100)")
@@ -40,7 +40,7 @@ class ModelCandidate(BaseModel):
 
 class Pass2Result(BaseModel):
     detected: bool = Field(description="True only if there is actually equipment visible and identifiable in the image")
-    equipment_category: str = Field(description="Canonical category: airconditioner, refrigerator, microwave, laptop, or unknown")
+    equipment_category: str = Field(description="Canonical category: airconditioner, refrigerator, microwave, laptop, monitor, or unknown")
     brand: str = Field(description="Detected brand name")
     model_candidates: List[ModelCandidate] = Field(description="List of matching model candidates")
     visual_cues: List[str] = Field(description="List of specific visible elements detected on the equipment")
@@ -163,7 +163,7 @@ def _run_pass1(client: Groq, full_frame_bytes: bytes) -> dict:
 
 Respond ONLY with a valid JSON object with exactly these keys:
 {
-  "equipment_type": "airconditioner" | "refrigerator" | "microwave" | "laptop" | "unknown",
+  "equipment_type": "airconditioner" | "refrigerator" | "microwave" | "laptop" | "monitor" | "unknown",
   "brand_visible": true | false,
   "preliminary_brand": "BrandName" | null,
   "confidence_type": 0-100
@@ -216,18 +216,18 @@ You are given TWO images:
 {brand_hint}
 
 STRICT CONFIDENCE RULES:
-- 90%+: You can CLEARLY READ the exact model code/number on the image
+- 90%+: You can CLEARLY READ the exact model code/number on the image (e.g. on a sticker or label)
 - 70-89%: You recognize the specific series by unique design features (port layout, badge shape, panel design)
-- 50-69%: You recognize the brand and likely product generation, but cannot read exact model code
-- Below 50%: Do NOT include this candidate — it is a guess
+- 50-69%: You recognize the brand and likely product generation, but cannot read the exact model code
+- Below 50%: Do NOT include this candidate.
 
 IMPORTANT:
 - The model candidates you suggest MUST be highly accurate.
-- Every model name in "model_candidates" MUST be a single, precise alphanumeric reference code. DO NOT use generic family names like "Samsung Inverter" or "LG DualCool". You MUST provide the exact reference code.
-  Example CORRECT: "Samsung AR12TXHQASINEU" or "LG P12EP"
-  Example INCORRECT: "Samsung WindFree" or "LG Air Conditioner"
+- If you cannot read the model text, you MAY use your expert visual recognition to deduce the model based on its design, BUT YOU MUST STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG. 
+- Example: If you detect the brand "SABA", you MUST ONLY suggest SABA models (like "P70H20L-DE"). Do NOT hallucinate a competitor's model (like Samsung "MS20F20") just because they share a similar shape or generic parts.
+- Every model name in "model_candidates" MUST be a single, precise alphanumeric reference code.
 - Confidence values across all candidates MUST sum to exactly 100
-- Reasoning MUST describe specific visible elements you actually see
+- Reasoning MUST explain exactly what physical features led you to this specific model candidate.
 """
 
     type_specific = {
@@ -268,6 +268,14 @@ FORENSIC PROTOCOL FOR LAPTOPS:
 5. PORT LAYOUT: Count and identify USB-A, USB-C, HDMI, SD card slots on the sides
 6. SCREEN BORDER: Thin bezels vs thick borders help identify generation
 7. CPU BADGE: Look for Intel/AMD sticker near touchpad area
+""",
+        "monitor": """
+FORENSIC PROTOCOL FOR COMPUTER MONITORS:
+1. READ THE BRAND: Usually front bezel center/bottom, or back panel center.
+2. MODEL CODE: Usually on a sticker label on the back panel, or next to ports (e.g., 'U2419H', 'U2419', 'S2421HN').
+3. SCREEN SIZE: Often part of the model number (e.g. U2419 has '24' for 24-inch).
+4. RESOLUTION & PANEL: Check visual hints: thin bezels, IPS panel, curved screen, aspect ratio.
+5. PORTS: HDMI, DisplayPort, VGA, USB-C, or Audio jack visible on the back or bottom ridge.
 """,
         "unknown": """
 FORENSIC PROTOCOL (UNKNOWN DEVICE):
@@ -351,10 +359,10 @@ Respond ONLY with a valid JSON object matching exactly:
 
 # ── Public entry point ────────────────────────────────────────────────────────
 
-def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray) -> dict:
+def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
     """
     Two-pass Groq Llama Vision identification:
-      Pass 1: Fast type detection (llama-4-scout-17b)
+      Pass 1: Fast type detection (llama-4-scout-17b) — SKIPPED if yolo_type_hint is provided
       Pass 2: Equipment-specific forensic prompt with both images
     Returns a merged result dict.
     """
@@ -363,27 +371,40 @@ def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray)
     full_bytes = _img_to_bytes(annotated_frame)
     crop_bytes = _img_to_bytes(enhanced_crop)
 
-    print("[Vision] Pass 1: Fast equipment type detection...")
-    pass1 = _run_pass1(client, full_bytes)
-    eq_type = pass1.get("equipment_type", "unknown")
-    brand_hint = pass1.get("preliminary_brand", None)
-    print(f"[Vision] Pass 1 result: type={eq_type}, brand={brand_hint}, confidence={pass1.get('confidence_type', 0)}%")
+    # If YOLO already gave us a high-confidence category, trust it and skip Pass 1
+    KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
+    if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
+        eq_type = yolo_type_hint
+        brand_hint = None
+        print(f"[Vision] YOLO hint supplied: type='{eq_type}' → skipping Pass 1")
+        pass1_conf = 95  # YOLO anchor treated as high confidence
+    else:
+        print("[Vision] Pass 1: Fast equipment type detection...")
+        pass1 = _run_pass1(client, full_bytes)
+        eq_type = pass1.get("equipment_type", "unknown")
+        brand_hint = pass1.get("preliminary_brand", None)
+        pass1_conf = pass1.get("confidence_type", 0)
+        print(f"[Vision] Pass 1 result: type={eq_type}, brand={brand_hint}, confidence={pass1_conf}%")
 
     print(f"[Vision] Pass 2: Forensic ID for type='{eq_type}'...")
     pass2 = _run_pass2(client, full_bytes, crop_bytes, eq_type, brand_hint)
 
-    # Merge: pass1 type detection + pass2 deep identification
-    pass2["equipment_category"] = pass2.get("equipment_category") or eq_type
-    pass2["pass1_type_confidence"] = pass1.get("confidence_type", 0)
+    # Merge: type detection + pass2 deep identification
+    # If YOLO hint was used, don't let Pass 2 override the category with a wrong guess
+    if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
+        pass2["equipment_category"] = yolo_type_hint
+    else:
+        pass2["equipment_category"] = pass2.get("equipment_category") or eq_type
+    pass2["pass1_type_confidence"] = pass1_conf
 
     return pass2
 
 
-def process_frame(image_path: str, api_key: str | None = None) -> dict:
+def process_frame(image_path: str, api_key: str | None = None, yolo_type_hint: str | None = None) -> dict:
     """
     Public entry point — accepts image path, returns full identification result.
-    The api_key parameter is kept for backward compatibility but the native
-    google-genai SDK is used (reads GOOGLE_API_KEY from environment).
+    yolo_type_hint: if provided (e.g. 'monitor', 'laptop'), Pass 1 is skipped and
+    the hint is used directly as the equipment type for the forensic Pass 2 prompt.
     """
     frame = cv2.imread(image_path)
     if frame is None:
@@ -398,7 +419,7 @@ def process_frame(image_path: str, api_key: str | None = None) -> dict:
     raw_crop = frame[y:y+h, x:x+w]
     enhanced_crop = enhance_crop_for_ocr(raw_crop)
 
-    llm_result = identify_with_gemini(annotated, enhanced_crop)
+    llm_result = identify_with_gemini(annotated, enhanced_crop, yolo_type_hint=yolo_type_hint)
 
     return {
         "bbox": {"x": x, "y": y, "w": w, "h": h},

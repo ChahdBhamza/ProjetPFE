@@ -159,12 +159,13 @@ class SpecService:
 Your ONLY job: extract verified technical specifications from the scraped web content below.
 
 STRICT RULES:
-1. You MUST NOT leave any fields empty or null. EVERY FIELD MUST BE POPULATED.
-2. First, extract data that is EXPLICITLY stated in the scraped content.
-3. If a field is missing from the scraped content, you MUST use your expert pre-trained knowledge about the specific model '{brand} {model}' to deduce and fill it in accurately. NO NULL VALUES ALLOWED.
-4. For boolean fields: use true or false (JSON booleans, not strings).
-5. For numeric fields: use numbers (not strings). e.g. 12000 not "12000 BTU".
-6. For "price_tnd": extract the numeric price in TND only (e.g. 1299.0). If unknown, estimate a typical Tunisian Dinars price.
+1. YOU MUST RETURN EVERY SINGLE FIELD DEFINED IN THE SCHEMA. NO EXCEPTIONS.
+2. IF A TECHNICAL SPEC FIELD IS MISSING FROM THE SCRAPED CONTENT, YOU MUST DEDUCE, ESTIMATE, OR USE YOUR PRE-TRAINED KNOWLEDGE TO FILL IT IN. NO NULL VALUES ARE ALLOWED FOR TECHNICAL SPECS.
+3. For boolean fields: use true or false (JSON booleans, not strings).
+4. For numeric fields: use numbers (not strings). e.g. 12000 not "12000 BTU".
+5. For "price_tnd": extract the numeric price in TND only (e.g. 1299.0). If unknown, estimate a typical Tunisian Dinars price based on the brand/model tier.
+6. For the "exact_model_reference" field: BE EXTREMELY SPECIFIC. Extract the base model and ANY specific part number, reference code, or SKU found after the name EXACTLY AS WRITTEN. Do NOT say "similar to". If the exact SKU is not in the text, DO NOT hallucinate one; just output the base model name.
+8. IMPORTANT: Output ONLY raw valid JSON format. Do NOT wrap the JSON in markdown code blocks like ```json.
 
 Equipment to identify:
 - Brand: {brand}
@@ -186,8 +187,17 @@ Scraped Web Content:
             
             # Since Groq strict JSON mode requires the schema in the prompt, let's append it
             schema_dict = extraction_schema.model_json_schema() if hasattr(extraction_schema, "model_json_schema") else extraction_schema.schema()
+            
+            # FORCE ALL PROPERTIES TO BE REQUIRED IN THE SCHEMA
+            def make_all_required(sch):
+                if sch.get("type") == "object" and "properties" in sch:
+                    sch["required"] = list(sch["properties"].keys())
+                    for prop in sch["properties"].values():
+                        make_all_required(prop)
+            make_all_required(schema_dict)
+
             schema_json = json.dumps(schema_dict, indent=2)
-            full_prompt = prompt + f"\n\nYou MUST return a JSON object matching exactly this schema:\n{schema_json}"
+            full_prompt = prompt + f"\n\nYou MUST return ONLY a raw JSON object matching exactly this schema, with NO MARKDOWN formatting. EVERY SINGLE FIELD IN THIS SCHEMA IS STRICTLY REQUIRED:\n{schema_json}"
             
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -205,9 +215,12 @@ Scraped Web Content:
                 raise je
 
             # Build outer envelope programmatically
+            extracted_ref = raw_json.get("exact_model_reference", "")
+            final_model = extracted_ref if extracted_ref and len(extracted_ref) > 3 else model
+            
             result = {
                 "brand": brand,
-                "model": model,
+                "model": final_model,
                 "equipment_category": category,
                 "verified": True,
                 "source_quality": "low",  # Calculated in normalization
@@ -257,8 +270,10 @@ Scraped Web Content:
         # Type coercions
         int_fields   = {"capacity_btu", "capacity_liters", "power_watts",
                         "noise_level_db", "ram_gb", "warranty_years",
-                        "turntable_diameter_cm", "power_consumption_w", "power_supply_w"}
-        float_fields = {"weight_kg", "display_inches", "battery_wh", "price_tnd", "annual_energy_consumption_kwh"}
+                        "turntable_diameter_cm", "power_consumption_w", "power_supply_w",
+                        "refresh_rate_hz", "brightness_cdm2"}
+        float_fields = {"weight_kg", "display_inches", "battery_wh", "price_tnd", "annual_energy_consumption_kwh",
+                        "screen_size_inches", "response_time_ms"}
         bool_fields  = {"smart_wifi", "no_frost", "inverter"}
 
         for key, val in specs.items():
@@ -279,8 +294,8 @@ Scraped Web Content:
                         specs[key] = val.lower() in ("true", "yes", "oui", "1")
                     else:
                         specs[key] = bool(val)
-                elif key == "functions" and isinstance(val, str):
-                    # Convert "Grill, Convection" string to list
+                elif key in ("functions", "ports") and isinstance(val, str):
+                    # Convert comma-separated string to list
                     specs[key] = [f.strip() for f in re.split(r"[,;/]", val) if f.strip()]
             except Exception:
                 pass  # leave as-is on parse failure

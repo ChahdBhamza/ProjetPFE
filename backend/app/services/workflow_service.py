@@ -20,6 +20,35 @@ class WorkflowService:
             api_key=self.api_key
         )
 
+    def _yolo_hint_from_path(self, image_path: str) -> str | None:
+        """
+        Extract the YOLO-detected equipment category from the hero filename.
+        Example: 'hero_1_tv_monitor.png' -> 'monitor'
+                 'hero_2_air_conditioner.png' -> 'airconditioner'
+                 'hero_1_computer.png' -> 'laptop'
+        """
+        import re
+        filename = os.path.basename(image_path).lower()
+        # Strip prefix like 'hero_1_' and extension
+        m = re.match(r'hero_\d+_(.+?)\.(png|jpg|jpeg)$', filename)
+        if not m:
+            return None
+        raw = m.group(1)  # e.g. 'tv_monitor', 'air_conditioner', 'computer'
+        # Map to Groq-compatible type strings
+        mapping = {
+            "tv_monitor": "monitor",
+            "monitor":    "monitor",
+            "computer":   "laptop",
+            "laptop":     "laptop",
+            "air_conditioner": "airconditioner",
+            "airconditioner":  "airconditioner",
+            "refrigerator":    "refrigerator",
+            "fridge":          "refrigerator",
+            "microwave":       "microwave",
+            "oven":            "microwave",
+        }
+        return mapping.get(raw)
+
     def run_specialized_workflow(self, image_path: str):
         try:
             print(f"📡 SDK Processing: {image_path}")
@@ -51,8 +80,11 @@ class WorkflowService:
                 
                 try:
                     from app.services.frame_detector import process_frame
-                    # 1. Identify Brand & Model using SFM process_frame (Fast-ish)
-                    sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"))
+                    # [STRICT SAFEGUARD] Force Groq to trust the filename category
+                    yolo_hint = self._yolo_hint_from_path(image_path)
+                    if yolo_hint:
+                        print(f"🎯 [SAFEGUARD] Anchoring Groq to type='{yolo_hint}' (from filename)")
+                    sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"), yolo_type_hint=yolo_hint)
                     llm_data = sfm_result.get("result", {})
                     
                     # Return identification immediately

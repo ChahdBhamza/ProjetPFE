@@ -21,30 +21,6 @@ class DetectionProvider extends ChangeNotifier {
 
   bool get isLoading => _status == DetectionStatus.loading;
 
-  /// Initiate equipment detection via API
-  Future<void> detectEquipment(File file) async {
-    _status = DetectionStatus.loading;
-    _capturedFile = file;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      final response = await _apiService.detectEquipment(XFile(file.path));
-      
-      if (response != null) {
-        _result = response;
-        _status = DetectionStatus.success;
-      } else {
-        _status = DetectionStatus.error;
-        _errorMessage = "Neural recognizer failed to extract signature.";
-      }
-    } catch (e) {
-      _status = DetectionStatus.error;
-      _errorMessage = "Connection to Cloud Cluster lost: $e";
-    }
-    notifyListeners();
-  }
-
   /// Initiate video-based equipment detection
   Future<void> detectFromVideo(File file) async {
     _status = DetectionStatus.loading;

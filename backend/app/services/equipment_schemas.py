@@ -72,6 +72,22 @@ class LaptopSpecs(BaseModel):
     color: Optional[str] = Field(None, description="Color of the laptop")
 
 
+class MonitorSpecs(BaseModel):
+    screen_size_inches: Optional[float] = Field(None, description="Screen size in inches, e.g. 23.8, 27, 32")
+    resolution: Optional[str] = Field(None, description="Display resolution, e.g. 1920x1080, 2560x1440, 3840x2160")
+    panel_type: Optional[str] = Field(None, description="Panel technology, e.g. IPS, VA, TN, OLED")
+    refresh_rate_hz: Optional[int] = Field(None, description="Refresh rate in Hz, e.g. 60, 75, 144, 240")
+    response_time_ms: Optional[float] = Field(None, description="Response time in milliseconds, e.g. 1, 4, 5")
+    aspect_ratio: Optional[str] = Field(None, description="Aspect ratio, e.g. 16:9, 21:9, 32:9")
+    brightness_cdm2: Optional[int] = Field(None, description="Brightness in cd/m², e.g. 250, 300, 350")
+    contrast_ratio: Optional[str] = Field(None, description="Contrast ratio, e.g. 1000:1, 3000:1")
+    ports: Optional[List[str]] = Field(None, description="Available input/output ports, e.g. ['HDMI', 'DisplayPort', 'USB-C']")
+    power_consumption_w: Optional[int] = Field(None, description="Power consumption in Watts")
+    warranty_years: Optional[int] = Field(None, description="Warranty in years")
+    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
+    color: Optional[str] = Field(None, description="Color of the monitor bezel/chassis")
+
+
 # ── Pydantic Envelopes ────────────────────────────────────────────────────────
 
 class AirConditionerEnvelope(BaseModel):
@@ -114,20 +130,41 @@ class LaptopEnvelope(BaseModel):
     fields_found: int
     summary: str
 
+
+class MonitorEnvelope(BaseModel):
+    brand: str
+    model: str
+    equipment_category: str = "monitor"
+    verified: bool
+    source_quality: str
+    specs: MonitorSpecs
+    fields_found: int
+    summary: str
+
 class AirConditionerExtraction(BaseModel):
+    exact_model_reference: str = Field(description="The exact model name and reference found (e.g. Lenovo Ideapad3 UK, or Samsung AR12TX)")
     specs: AirConditionerSpecs = Field(description="Technical specifications of the air conditioner")
     summary: str = Field(description="One factual sentence describing the product based only on verified data")
 
 class RefrigeratorExtraction(BaseModel):
+    exact_model_reference: str = Field(description="The exact model name and reference found (e.g. Lenovo Ideapad3 UK, or Samsung AR12TX)")
     specs: RefrigeratorSpecs = Field(description="Technical specifications of the refrigerator")
     summary: str = Field(description="One factual sentence describing the product based only on verified data")
 
 class MicrowaveExtraction(BaseModel):
+    exact_model_reference: str = Field(description="The exact model name and reference found (e.g. Lenovo Ideapad3 UK, or Samsung AR12TX)")
     specs: MicrowaveSpecs = Field(description="Technical specifications of the microwave")
     summary: str = Field(description="One factual sentence describing the product based only on verified data")
 
 class LaptopExtraction(BaseModel):
+    exact_model_reference: str = Field(description="The exact model name and reference found (e.g. Lenovo Ideapad3 UK, or Samsung AR12TX)")
     specs: LaptopSpecs = Field(description="Technical specifications of the laptop")
+    summary: str = Field(description="One factual sentence describing the product based only on verified data")
+
+
+class MonitorExtraction(BaseModel):
+    exact_model_reference: str = Field(description="The exact model name and reference found (e.g. Lenovo Ideapad3 UK, or Dell U2419H)")
+    specs: MonitorSpecs = Field(description="Technical specifications of the monitor")
     summary: str = Field(description="One factual sentence describing the product based only on verified data")
 
 # Schema classes lookup
@@ -136,6 +173,7 @@ SPECS_SCHEMAS = {
     "refrigerator": RefrigeratorSpecs,
     "microwave": MicrowaveSpecs,
     "laptop": LaptopSpecs,
+    "monitor": MonitorSpecs,
 }
 
 # Extraction classes lookup
@@ -144,6 +182,7 @@ SPECS_EXTRACTIONS = {
     "refrigerator": RefrigeratorExtraction,
     "microwave": MicrowaveExtraction,
     "laptop": LaptopExtraction,
+    "monitor": MonitorExtraction,
 }
 
 # Envelope classes lookup
@@ -152,6 +191,7 @@ SPECS_ENVELOPES = {
     "refrigerator": RefrigeratorEnvelope,
     "microwave": MicrowaveEnvelope,
     "laptop": LaptopEnvelope,
+    "monitor": MonitorEnvelope,
 }
 
 # ── Canonical schemas ─────────────────────────────────────────────────────────
@@ -221,6 +261,22 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "price_tnd":         None,   # float
         "color":             None,   # str
     },
+
+    "monitor": {
+        "screen_size_inches":  None,   # float e.g. 23.8
+        "resolution":          None,   # str   "1920x1080"
+        "panel_type":          None,   # str   "IPS" | "VA" | ...
+        "refresh_rate_hz":     None,   # int   e.g. 60
+        "response_time_ms":    None,   # float e.g. 4.0
+        "aspect_ratio":        None,   # str   "16:9"
+        "brightness_cdm2":     None,   # int   e.g. 250
+        "contrast_ratio":      None,   # str   "1000:1"
+        "ports":               None,   # list[str] ["HDMI", "DisplayPort"]
+        "power_consumption_w": None,   # int   e.g. 17
+        "warranty_years":      None,   # int
+        "price_tnd":           None,   # float
+        "color":               None,   # str
+    },
 }
 
 # ── Aliases for label normalisation (Roboflow / YOLOv5 class → schema key) ────
@@ -244,6 +300,11 @@ LABEL_TO_CATEGORY: dict[str, str] = {
     "ordinateur": "laptop",
     "computer": "laptop",
     "notebook": "laptop",
+    "monitor": "monitor",
+    "screen": "monitor",
+    "display": "monitor",
+    "ecran": "monitor",
+    "écran": "monitor",
 }
 
 # ── Human-readable labels for prompt injection ─────────────────────────────────
@@ -252,6 +313,7 @@ CATEGORY_LABELS: dict[str, str] = {
     "refrigerator":   "Refrigerator / Fridge",
     "microwave":      "Microwave Oven",
     "laptop":         "Laptop / Notebook Computer",
+    "monitor":        "Computer Monitor / Display Screen",
 }
 
 
@@ -333,6 +395,21 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "warranty_years":    "integer or null",
             "price_tnd":         "float TND or null",
             "color":             "color name string or null",
+        },
+        "monitor": {
+            "screen_size_inches":  "float screen size in inches, e.g. 23.8 or 27",
+            "resolution":          "string resolution, e.g. \"1920x1080\" or \"2560x1440\"",
+            "panel_type":          "\"IPS\" | \"VA\" | \"TN\" | \"OLED\" or null",
+            "refresh_rate_hz":     "integer refresh rate, e.g. 60 or 144",
+            "response_time_ms":    "float response time in ms, e.g. 4.0 or 1.0",
+            "aspect_ratio":        "string aspect ratio, e.g. \"16:9\" or \"21:9\"",
+            "brightness_cdm2":     "integer brightness in cd/m², e.g. 250 or 300",
+            "contrast_ratio":      "string contrast ratio, e.g. \"1000:1\" or \"3000:1\"",
+            "ports":               "array of strings, e.g. [\"HDMI\", \"DisplayPort\"] or null",
+            "power_consumption_w": "integer Watts",
+            "warranty_years":      "integer or null",
+            "price_tnd":           "float TND or null",
+            "color":               "color name string or null",
         },
     }
     category = normalize_category(equipment_type)
