@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:equipment_detection_app/core/network/api_service.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import '../widgets/model_selection_sheet.dart';
+import 'equipment_detail_page.dart';
+import '../../data/models/detection_result_model.dart';
 
 class ScriptLabPage extends StatefulWidget {
   const ScriptLabPage({super.key});
@@ -46,6 +49,13 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
               .toSet();
           _isExtracting = false;
         });
+        // Auto‑open hero preview if any hero frames exist
+        if (_selectedFilenames.isNotEmpty) {
+          // Delay to ensure UI is built, then show carousel
+          Future.microtask(() async {
+            await _showHeroFrames();
+          });
+        }
       } else {
         final err = res['error']?.toString() ?? 'Unknown error';
         final hint = res['hint']?.toString();
@@ -76,46 +86,178 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
     if (_selectedFilenames.isEmpty || _sessionId == null) return;
 
     setState(() => _isProcessingAI = true);
-
     try {
-      final result = await _apiService.processSelectedFrames(
-        _sessionId!, 
-        _selectedFilenames.toList()
-      );
+      // Process frames sequentially to provide incremental feedback
+      final total = _selectedFilenames.length;
+      int processedCount = 0;
+      Map<String, dynamic>? firstDetected;
 
-      if (result != null && result['success']) {
-        // Update local frames with AI results
-        final List<dynamic> processedFrames = result['frames'];
-        setState(() {
-          for (var pf in processedFrames) {
-            int idx = _frames.indexWhere((f) => f['filename'] == pf['filename']);
-            if (idx != -1) {
-              _frames[idx] = pf;
+      for (final filename in List<String>.from(_selectedFilenames)) {
+        // Show a progress snackbar for the current frame
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Processing $filename (${processedCount + 1}/$total)'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        // Show modal progress dialog for this frame
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(child: CircularProgressIndicator()),
+          );
+        }
+        final result = await _apiService.processSelectedFrames(
+          _sessionId!,
+          [filename],
+        );
+        // Dismiss progress dialog
+        if (mounted) Navigator.of(context, rootNavigator: true).pop();
+        if (result != null && result['success'] == true) {
+          final List<dynamic> processedFrames = result['frames'];
+          bool brandFound = false;
+          setState(() {
+            for (var pf in processedFrames) {
+              final idx = _frames.indexWhere((f) => f['filename'] == pf['filename']);
+              if (idx != -1) {
+                _frames[idx] = pf;
+                if (pf['has_ai'] == true && pf['forensic_data'] != null) {
+                  final brand = pf['forensic_data']['brand']?.toString();
+                  if (brand != null && brand.toLowerCase() != 'unknown') {
+                    brandFound = true;
+                    Future.microtask(() => _showModelSuggestions(pf));
+                  }
+                }
+              }
             }
+            // Remove the processed filename from the selection set
+            _selectedFilenames.remove(filename);
+            if (brandFound) {
+              _selectedFilenames.clear();
+            }
+          });
+          processedCount++;
+          if (brandFound) break;
+        } else {
+          // If a frame fails, stop further processing and inform the user
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to process a frame, stopping.')),
+            );
           }
-          _selectedFilenames.clear();
-        });
+          break;
+        }
+      }
+
+      // Notify completion of batch processing
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('AI analysis completed.')),
+        );
       }
     } finally {
       setState(() => _isProcessingAI = false);
     }
   }
 
-  void _showFrameDetails(Map<String, dynamic> frame) {
+  // Show a simple dialog with brand and model suggestions
+
+  Future<void> _showFrameDetails(Map<String, dynamic> frame) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Frame Details'),
+        content: Text("Details for frame: ${frame['filename'] ?? 'unknown'}"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close', style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionBar() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      color: const Color(0xFF161B22),
+      child: ElevatedButton(
+        onPressed: _isProcessingAI ? null : _runAIOnSelected,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF58A6FF),
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: _isProcessingAI
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text('Analyze ${_selectedFilenames.length} Selected Frames'),
+      ),
+    );
+  }
+  Future<void> _showModelSuggestions(Map<String, dynamic> frame) async {
     final initialForensic = frame['forensic_data'] ?? {};
     final brand = initialForensic['brand']?.toString() ?? 'Unknown';
     final candidates = initialForensic['model_candidates'] as List? ?? [];
-    final type = initialForensic['equipment_type'] ?? 'Equipment';
+    final type = initialForensic['equipment_category'] ?? initialForensic['equipment_type'] ?? 'Equipment';
 
-    showModalBottomSheet(
+    await showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF161B22),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => _SpecDetailsSheet(
-        brand: brand, 
-        modelCandidates: candidates, 
-        type: type
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0A0C10),
+        title: Text('Brand: $brand', style: const TextStyle(color: Colors.white)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: candidates.length,
+            itemBuilder: (cctx, idx) {
+              final cand = candidates[idx] as Map? ?? {};
+              final modelName = cand['model']?.toString() ?? 'Unknown';
+              final confidence = cand['confidence']?.toString() ?? '';
+              return ListTile(
+                title: Text(modelName, style: const TextStyle(color: Colors.white)),
+                subtitle: confidence.isNotEmpty ? Text('$confidence% match', style: const TextStyle(color: Colors.grey)) : null,
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  // Show loading then fetch specs similar to original flow
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (c) => const Center(child: CircularProgressIndicator(color: Colors.blue)),
+                  );
+                  try {
+                    final res = await _apiService.getSpecs(brand, modelName, type);
+                    Navigator.of(context).pop(); // close loading
+                    if (res != null && res['equipment_result'] != null) {
+                      final equipmentResult = EquipmentResult.fromJson(res['equipment_result']);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (c) => Scaffold(body: EquipmentDetailPage(result: equipmentResult))),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to extract specs')));
+                    }
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  }
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
       ),
     );
   }
@@ -191,6 +333,59 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
     );
   }
 
+  // Helper to preview hero frames in a fullscreen carousel
+  Future<void> _showHeroFrames() async {
+    final heroFrames = _frames.where((f) => _selectedFilenames.contains(f['filename'])).toList();
+    if (heroFrames.isEmpty) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.95,
+        child: Scaffold(
+          backgroundColor: const Color(0xFF0A0C10),
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF161B22),
+            title: const Text('Hero Frames'),
+            leading: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: PageView.builder(
+                  itemCount: heroFrames.length,
+                  itemBuilder: (context, index) {
+                    final frame = heroFrames[index];
+                    return Center(
+                      child: Image.memory(
+                        base64Decode(frame['image']),
+                        fit: BoxFit.contain,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF58A6FF)),
+                  child: const Text('PROCEED'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).whenComplete(() async {
+      // After the carousel is dismissed, automatically trigger AI analysis if still mounted
+      if (mounted) await _runAIOnSelected();
+    });
+  }
+
   Widget _buildFrameGrid() {
     return GridView.builder(
       padding: const EdgeInsets.all(12),
@@ -210,6 +405,8 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
 
         return GestureDetector(
           onTap: () {
+            // Prevent interactions while AI is processing
+            if (_isProcessingAI) return;
             if (hasAi && frame['forensic_data'] != null) {
               _showFrameDetails(frame);
             } else {
@@ -218,6 +415,12 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
                   _selectedFilenames.remove(filename);
                 } else {
                   _selectedFilenames.add(filename);
+                }
+              });
+              // Auto‑run AI analysis after any selection change
+              Future.microtask(() async {
+                if (mounted && _selectedFilenames.isNotEmpty) {
+                  await _runAIOnSelected();
                 }
               });
             }
@@ -253,9 +456,21 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
                   Positioned(
                     top: 8, right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(4)),
-                      child: const Text('DETECTED', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00F5A0),
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(color: const Color(0xFF00F5A0).withOpacity(0.4), blurRadius: 8),
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('DETECTED', style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                          Text('TAP → SELECT', style: TextStyle(color: Colors.black, fontSize: 7, fontWeight: FontWeight.w700, letterSpacing: 0.3)),
+                        ],
+                      ),
                     ),
                   ),
                 if (isSelected)
@@ -268,26 +483,8 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
     );
   }
 
-  Widget _buildActionBar() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Color(0xFF161B22),
-        border: Border(top: BorderSide(color: Color(0xFF30363D))),
-      ),
-      child: ElevatedButton(
-        onPressed: _isProcessingAI ? null : _runAIOnSelected,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF58A6FF),
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: _isProcessingAI 
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text('Analyze ${_selectedFilenames.length} Selected Frames'),
-      ),
-    );
-  }
+  
+
 }
 
 class _SpecDetailsSheet extends StatefulWidget {

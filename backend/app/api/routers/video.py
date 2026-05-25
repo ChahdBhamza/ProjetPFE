@@ -8,6 +8,47 @@ import uuid
 import base64
 
 
+# ── Shared helper: build standardised equipment_result block ─────────────────
+
+def build_equipment_result(forensic_data: dict, specs: dict | None = None) -> dict:
+    """
+    Converts raw forensic_data (from frame_detector) + optional specs (from
+    spec_service) into the standardised equipment_result dict expected by Flutter.
+    """
+    from app.services.equipment_schemas import normalize_category
+
+    candidates = forensic_data.get("model_candidates", [])
+    top = candidates[0] if candidates else {}
+    brand = (forensic_data.get("brand") or "Unknown").strip()
+    raw_category = (
+        forensic_data.get("equipment_category")
+        or forensic_data.get("equipment_type")
+        or "unknown"
+    )
+    category = normalize_category(raw_category)
+
+    return {
+        "identity": {
+            "equipment_category": category,
+            "brand": brand,
+            "top_model": (top.get("model") or "Unknown Model").strip(),
+            "confidence": top.get("confidence", 0),
+            "all_candidates": candidates,
+            "visual_cues": forensic_data.get("visual_cues", []),
+            "pass1_type_confidence": forensic_data.get("pass1_type_confidence"),
+        },
+        "specs": (specs or {}).get("specs") or {},
+        "meta": {
+            "source_quality": (specs or {}).get("source_quality"),
+            "fields_found": (specs or {}).get("fields_found"),
+            "source_urls": (specs or {}).get("source_urls", []),
+            "pipeline": (specs or {}).get("pipeline"),
+            "summary": (specs or {}).get("summary"),
+            "verified": (specs or {}).get("verified", False),
+        },
+    }
+
+
 router = APIRouter(prefix="/video", tags=["Video Processing"])
 
 _video_service = None
@@ -55,21 +96,22 @@ async def extract_frames_endpoint(
                 from app.services.workflow_service import WorkflowService
                 _wf_result = await run_in_threadpool(WorkflowService().run_specialized_workflow, _tmp_path)
                 _forensic = _wf_result.get("forensic_data", {})
-                _candidates = _forensic.get("model_candidates", [])
-                _top = _candidates[0] if _candidates else {}
+                _equipment_result = build_equipment_result(_forensic)
+                _top = _equipment_result["identity"]
                 search_result = {
                     "success": True,
+                    "equipment_result": _equipment_result,
+                    # Legacy fields kept for backward compatibility
                     "vector_match": {
                         "item": {
-                            "brand": _forensic.get("brand", "Unknown"),
-                            "model_name": _top.get("model", "Unknown Model"),
-                            "btu": None,
+                            "brand": _top["brand"],
+                            "model_name": _top["top_model"],
                         },
-                        "confidence": float(_top.get("confidence", 0)) / 100.0 if _top else 0.5,
+                        "confidence": float(_top["confidence"]) / 100.0,
                     },
                     "verified_details": {
-                        "equipment_type": _forensic.get("equipment_type"),
-                        "model_candidates": _candidates,
+                        "equipment_type": _top["equipment_category"],
+                        "model_candidates": _top["all_candidates"],
                         "annotated_image": _wf_result.get("ai_image"),
                     },
                 }
@@ -103,7 +145,7 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest):
     import asyncio
     
     workflow_service = WorkflowService()
-    base_dir_actual = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "processed_frames", req.session_id, "final_shots")
+    base_dir_actual = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "sessions", req.session_id, "final_shots")
     
     async def process_single_frame(f):
         img_path = os.path.join(base_dir_actual, f)
@@ -122,24 +164,39 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest):
     tasks = [process_single_frame(f) for f in req.filenames]
     results = await asyncio.gather(*tasks)
     final_results = [r for r in results if r is not None]
+
+    # Attach standardised equipment_result to each frame
+    for frame in final_results:
+        fd = frame.get("forensic_data") or {}
+        frame["equipment_result"] = build_equipment_result(fd)
+
     return {"success": True, "frames": final_results}
 
 @router.post("/get-specs")
 async def get_specs_endpoint(req: dict):
-    brand = req.get("brand")
-    model = req.get("model", "standard")
-    eq_type = req.get("equipment_type", "equipment")
-    
-    if (not brand or brand.lower() == "unknown") and model != "standard":
+    brand = req.get("brand", "").strip()
+    model = req.get("model", "").strip()
+    eq_type = req.get("equipment_type", "unknown").strip()
+    forensic_data = req.get("forensic_data", {})   # optional: pass full forensic dict
+
+    # Fallback: derive brand from model string if not supplied
+    if (not brand or brand.lower() == "unknown") and model:
         brand = model.split()[0]
 
     try:
         from app.services.spec_service import SpecService
+        from fastapi.concurrency import run_in_threadpool
+
         spec_service = SpecService()
-        specs = spec_service.get_full_identity(brand=brand, model=model, equipment_type=eq_type)
-        return specs
+        specs = await run_in_threadpool(
+            spec_service.get_full_identity,
+            brand=brand, model=model, equipment_type=eq_type
+        )
+        equipment_result = build_equipment_result(forensic_data or {"brand": brand}, specs)
+        return {"success": True, "equipment_result": equipment_result, **specs}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        import traceback; traceback.print_exc()
+        return {"success": False, "status": "error", "message": str(e)}
 
 @router.post("/script-process")
 async def video_script_process_endpoint(

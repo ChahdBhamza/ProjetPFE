@@ -14,7 +14,13 @@ load_dotenv()
 async def lifespan(app: FastAPI):
     print("="*60)
     print("CYBERSIGHT FORENSIC API ONLINE")
-    print("[STATUS] API Layer Activated | Waiting for first mobile request...")
+    print("[STATUS] API Layer Activated | Initializing AI Models...")
+    from app.api.routers.video import _yolov5_service
+    from app.services.yolov5_service import YOLOv5Service
+    import app.api.routers.video as video_router
+    video_router._yolov5_service = YOLOv5Service()
+    print("[STATUS] YOLOv5 Model Loaded into memory.")
+    print("[STATUS] Waiting for first mobile request...")
     print("="*60)
     yield
     print("="*60)

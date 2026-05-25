@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
+import '../../data/models/detection_result_model.dart';
 
 class EquipmentDetailPage extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final EquipmentResult result;
 
-  const EquipmentDetailPage({super.key, required this.item});
+  const EquipmentDetailPage({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
-    final String brand = (item['brand'] ?? 'UNKNOWN').toString().toUpperCase();
-    final String model = (item['model'] ?? 'N/A').toString();
-    final String btu = (item['btu'] ?? 'N/A').toString();
-    final Map<String, dynamic> metadata = item['metadata'] ?? {};
-    final String category = (metadata['category'] ?? 'CLIMATISEUR').toString().toUpperCase();
-    final String timestamp = item['added_at'] != null 
-        ? item['added_at'].toString().split('T')[0] 
-        : 'NEURAL LINK ACTIVE';
+    final String brand = result.identity.brand.toUpperCase();
+    final String model = result.identity.topModel;
+    final String category = result.identity.equipmentCategory.toUpperCase();
+    
+    // Attempt to extract some common high-level fields for the top info row
+    final String capacityOrBtu = result.specs['capacity_btu']?.toString() ?? 
+                                 result.specs['capacity_liters']?.toString() ?? 
+                                 'N/A';
+
+    final String timestamp = 'NEURAL LINK ACTIVE';
 
     return Container(
       decoration: const BoxDecoration(
@@ -86,7 +90,7 @@ class EquipmentDetailPage extends StatelessWidget {
                               ],
                             ),
                           ),
-                          _StatusBadge(label: 'VERIFIED'),
+                          _StatusBadge(label: result.meta.verified ? 'VERIFIED' : 'UNVERIFIED'),
                         ],
                       ),
                       
@@ -101,7 +105,7 @@ class EquipmentDetailPage extends StatelessWidget {
                         blur: 20,
                         child: Center(
                           child: Icon(
-                            Icons.ac_unit_rounded,
+                            _getCategoryIcon(category),
                             size: 80,
                             color: CybersightTheme.accent.withOpacity(0.1),
                           ),
@@ -114,29 +118,87 @@ class EquipmentDetailPage extends StatelessWidget {
                       const SizedBox(height: 16),
                       
                       _InfoRow(label: 'MODEL REFERENCE', value: model),
-                      _InfoRow(label: 'COOLING CAPACITY', value: '$btu BTU'),
-                      _InfoRow(label: 'DETECTION DATE', value: timestamp),
+                      if (capacityOrBtu != 'N/A')
+                        _InfoRow(label: 'MAIN CAPACITY', value: capacityOrBtu),
+                      _InfoRow(label: 'SOURCE QUALITY', value: (result.meta.sourceQuality ?? 'UNKNOWN').toUpperCase()),
                       
                       const SizedBox(height: 32),
                       
                       _SectionLabel(text: 'Technical Specifications'),
                       const SizedBox(height: 16),
                       
-                      // Technical Grid
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 2.2,
-                        children: [
-                          _SpecCard(label: 'ENERGY CLASS', value: metadata['energy_class'] ?? 'A++', icon: Icons.bolt_rounded),
-                          _SpecCard(label: 'REFRIGERANT', value: metadata['gas'] ?? 'R32', icon: Icons.opacity_rounded),
-                          _SpecCard(label: 'INVERTER', value: metadata['inverter'] == true ? 'YES' : 'NO', icon: Icons.settings_input_component_rounded),
-                          _SpecCard(label: 'WIFI LINK', value: 'ESTABLISHED', icon: Icons.wifi_rounded),
-                        ],
+                      if (result.specs.isEmpty)
+                        Text(
+                          'No structured technical data found.',
+                          style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 13),
+                        )
+                      else
+                        // Technical Grid dynamic builder
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 2.2,
+                          children: result.specs.entries
+                              .where((e) => e.value != null && e.value.toString().isNotEmpty)
+                              .map((entry) {
+                                final label = entry.key.replaceAll('_', ' ').toUpperCase();
+                                return _SpecCard(
+                                  label: label, 
+                                  value: entry.value.toString().toUpperCase(), 
+                                  icon: _getIconForSpec(entry.key)
+                                );
+                              }).toList(),
+                        ),
+                      
+                      const SizedBox(height: 32),
+                      
+                      _SectionLabel(text: 'Neural Summary'),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        child: Text(
+                          result.meta.summary ?? 'Spec extraction complete based on visual matches.',
+                          style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 13, height: 1.6),
+                        ),
                       ),
+
+                      if (result.meta.sourceUrls.isNotEmpty) ...[
+                        const SizedBox(height: 24),
+                        _SectionLabel(text: 'Sources'),
+                        const SizedBox(height: 8),
+                        ...result.meta.sourceUrls.map((url) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: InkWell(
+                            onTap: () => launchUrlString(url),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.link, color: CybersightTheme.accent, size: 14),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    url,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: CybersightTheme.accent.withOpacity(0.8),
+                                      fontSize: 11,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )),
+                      ],
                       
                       const SizedBox(height: 40),
                       
@@ -170,6 +232,28 @@ class EquipmentDetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    if (category.contains('AIR')) return Icons.ac_unit_rounded;
+    if (category.contains('REF')) return Icons.kitchen_rounded;
+    if (category.contains('MICRO')) return Icons.microwave_rounded;
+    if (category.contains('LAP')) return Icons.laptop_rounded;
+    return Icons.memory_rounded;
+  }
+
+  IconData _getIconForSpec(String key) {
+    key = key.toLowerCase();
+    if (key.contains('power') || key.contains('energy') || key.contains('watt')) return Icons.bolt_rounded;
+    if (key.contains('wifi') || key.contains('smart')) return Icons.wifi_rounded;
+    if (key.contains('price')) return Icons.payments_rounded;
+    if (key.contains('warranty')) return Icons.verified_user_rounded;
+    if (key.contains('noise')) return Icons.volume_up_rounded;
+    if (key.contains('dimension') || key.contains('weight')) return Icons.straighten_rounded;
+    if (key.contains('refrigerant') || key.contains('gas')) return Icons.opacity_rounded;
+    if (key.contains('color')) return Icons.palette_rounded;
+    if (key.contains('cpu') || key.contains('gpu') || key.contains('ram')) return Icons.memory_rounded;
+    return Icons.info_outline_rounded;
   }
 }
 

@@ -9,14 +9,13 @@ router = APIRouter(tags=["Search"])
 @router.post("/search")
 async def search_endpoint(file: UploadFile = File(...)):
     """
-    Detect equipment from a single image using the Roboflow + LLM pipeline.
-    Replaces the old CLIP/Qdrant vector search with WorkflowService.
+    Detect equipment from a single image using the Roboflow + Two-Pass Gemini pipeline.
+    Returns a standardised equipment_result block alongside legacy fields.
     """
     contents = await file.read()
 
     tmp_path = None
     try:
-        # WorkflowService needs a real file path on disk
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
             tmp.write(contents)
             tmp_path = tmp.name
@@ -31,31 +30,37 @@ async def search_endpoint(file: UploadFile = File(...)):
         candidates = forensic.get("model_candidates", [])
         top = candidates[0] if candidates else {}
 
-        brand = (forensic.get("brand") or "Unknown").strip()
-        model_name = (top.get("model") or "Unknown Model").strip()
+        # Build standardised equipment_result
+        from app.api.routers.video import build_equipment_result
+        equipment_result = build_equipment_result(forensic)
+
+        brand = equipment_result["identity"]["brand"]
+        model_name = equipment_result["identity"]["top_model"]
         confidence = float(top.get("confidence", 0)) / 100.0 if top else 0.5
 
         if brand == "Unknown" and not result.get("has_ai", False):
             return {
                 "success": False,
-                "error": "Could not identify any equipment. Try a clearer image or use Script Lab for video."
+                "error": "Could not identify any equipment. Try a clearer image or use Script Lab for video.",
             }
 
         return {
             "success": True,
+            # Primary standardised output
+            "equipment_result": equipment_result,
+            # Legacy fields for backward compatibility
             "vector_match": {
                 "item": {
                     "brand": brand,
                     "model_name": model_name,
-                    "btu": None,
                 },
                 "confidence": round(confidence, 3),
             },
             "verified_details": {
-                "equipment_type": forensic.get("equipment_type"),
+                "equipment_type": equipment_result["identity"]["equipment_category"],
                 "model_candidates": candidates,
                 "visual_cues": forensic.get("visual_cues", []),
-                "annotated_image": result.get("ai_image"),      # Roboflow annotated frame
+                "annotated_image": result.get("ai_image"),
                 "is_match_verified": result.get("has_ai", False),
             },
             "ocr_text": None,

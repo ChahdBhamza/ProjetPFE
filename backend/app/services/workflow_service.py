@@ -47,7 +47,7 @@ class WorkflowService:
             # 2. Forensic Step: Using original SFM Project scripts (IDENTIFICATION ONLY)
             forensic_data = {}
             if len(predictions) > 0:
-                print("🧠 Identifying Brand (SFM logic)...")
+                print("🧠 [DEBUG] Identifying Brand (Gemini Vision logic)...")
                 
                 try:
                     from app.services.frame_detector import process_frame
@@ -58,10 +58,14 @@ class WorkflowService:
                     # Return identification immediately
                     forensic_data = llm_data
                     
-                    # We will handle spec fetching in a background flow elsewhere if needed
-                    # For now, we return the identity so the user sees the brand immediately
+                    brand = forensic_data.get("brand", "Unknown")
+                    if brand.lower() == "unknown":
+                        print(f"⚠️ [DEBUG] Could NOT detect a clear brand in this frame.")
+                    else:
+                        print(f"🎯 [DEBUG] Brand DETECTED: {brand.upper()}")
+                        
                 except Exception as e:
-                    print(f"❌ SFM ID Error: {e}")
+                    print(f"❌ [DEBUG] SFM ID Error (Quota limit or API issue): {e}")
                     forensic_data = {"brand": "Unknown", "error": str(e)}
 
             # 3. Read raw image for UI display

@@ -1,0 +1,45 @@
+name: equipment_detection_app
+description: An AI-powered equipment detection and specification extraction app.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # State management
+  provider: ^6.1.2
+
+  # Networking
+  dio: ^5.7.0
+
+  # Auth
+  google_sign_in: ^6.2.1
+  flutter_secure_storage: ^10.0.0
+
+  # Media
+  image_picker: ^1.1.2
+
+  # Utilities
+  url_launcher: ^6.3.1
+  flutter_dotenv: ^5.2.1
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env

@@ -7,6 +7,7 @@ import '../../../../core/widgets/hud_widgets.dart';
 import '../../../auth/presentation/widgets/auth_widgets.dart';
 
 import '../../../../core/network/api_service.dart';
+import '../../data/models/detection_result_model.dart';
 import 'equipment_detail_page.dart';
 
 class InventoryPage extends StatefulWidget {
@@ -259,13 +260,38 @@ class _InventoryPageState extends State<InventoryPage> {
                   statusColor: CybersightTheme.ok,
                   btu: (item['btu'] ?? 'N/A').toString(),
                   onTap: () {
+                    // Adapt the raw inventory map to an EquipmentResult
+                    final metadata = item['metadata'] as Map<String, dynamic>? ?? {};
+                    final specs = Map<String, dynamic>.from(metadata);
+                    // also hoist top-level fields into specs
+                    if (item['btu'] != null) specs['capacity_btu'] = item['btu'];
+                    if (item['price'] != null) specs['price'] = item['price'];
+
+                    final equipmentResult = EquipmentResult(
+                      identity: EquipmentIdentity(
+                        equipmentCategory: metadata['category']?.toString() ?? 'Equipment',
+                        brand: item['brand']?.toString() ?? 'Unknown',
+                        topModel: item['model']?.toString() ?? 'N/A',
+                        confidence: 100,
+                        allCandidates: [],
+                        visualCues: [],
+                      ),
+                      specs: specs,
+                      meta: EquipmentMeta(
+                        sourceQuality: 'inventory',
+                        sourceUrls: [],
+                        verified: true,
+                        summary: 'Retrieved from local inventory database.',
+                      ),
+                    );
+
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (context) => FractionallySizedBox(
                         heightFactor: 0.85,
-                        child: EquipmentDetailPage(item: item),
+                        child: EquipmentDetailPage(result: equipmentResult),
                       ),
                     );
                   },
