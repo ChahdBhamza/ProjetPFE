@@ -71,6 +71,9 @@ class WorkflowService:
             elif isinstance(preds_data, list):
                 predictions = preds_data
 
+            # Filter out low-confidence predictions
+            predictions = [p for p in predictions if p.get("confidence", 0) >= 0.60]
+
             print(f"✅ AI Result: Found {len(predictions)} items")
 
             # 2. Forensic Step: Using original SFM Project scripts (IDENTIFICATION ONLY)

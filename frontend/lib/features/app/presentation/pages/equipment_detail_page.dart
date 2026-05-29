@@ -134,21 +134,21 @@ class EquipmentDetailPage extends StatelessWidget {
                         )
                       else
                         // Technical Grid dynamic builder
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 2.2,
+                        Column(
                           children: result.specs.entries
                               .where((e) => e.value != null && e.value.toString().isNotEmpty)
-                              .map((entry) {
+                              .toList()
+                              .asMap()
+                              .entries
+                              .map((mapEntry) {
+                                final index = mapEntry.key;
+                                final entry = mapEntry.value;
                                 final label = entry.key.replaceAll('_', ' ').toUpperCase();
-                                return _SpecCard(
+                                return _PremiumSpecTile(
                                   label: label, 
                                   value: entry.value.toString().toUpperCase(), 
-                                  icon: _getIconForSpec(entry.key)
+                                  icon: _getIconForSpec(entry.key),
+                                  delayIndex: index,
                                 );
                               }).toList(),
                         ),
@@ -320,34 +320,138 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _SpecCard extends StatelessWidget {
+class _PremiumSpecTile extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
-  const _SpecCard({required this.label, required this.value, required this.icon});
+  final int delayIndex;
+
+  const _PremiumSpecTile({required this.label, required this.value, required this.icon, required this.delayIndex});
+
+  double _calculateIntensity() {
+    final RegExp regex = RegExp(r'(\d+(\.\d+)?)');
+    final match = regex.firstMatch(value);
+    if (match != null) {
+      double num = double.tryParse(match.group(0) ?? '0') ?? 0;
+      // create a pseudo-random bar length between 0.3 and 1.0 based on the number
+      return 0.3 + (num % 70) / 100.0;
+    }
+    return 0.0;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      opacity: 0.04,
-      borderRadius: 16,
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Icon(icon, color: CybersightTheme.accent, size: 18),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 7, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(value, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500)),
-              ],
-            ),
+    final intensity = _calculateIntensity();
+    final hasBar = intensity > 0.0;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeOutCubic,
+      builder: (context, val, child) {
+        final double adjustedVal = (val - (delayIndex * 0.05)).clamp(0.0, 1.0);
+        return Opacity(
+          opacity: adjustedVal,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - adjustedVal)),
+            child: child,
           ),
-        ],
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.02),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: CybersightTheme.accent.withOpacity(0.1)),
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withOpacity(0.03),
+              Colors.transparent,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: CybersightTheme.accent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: CybersightTheme.accent, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label, 
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white38, 
+                      fontSize: 9, 
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value, 
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white, 
+                      fontSize: 14, 
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (hasBar) ...[
+                    const SizedBox(height: 8),
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: intensity),
+                      duration: const Duration(milliseconds: 1200),
+                      curve: Curves.easeOutQuint,
+                      builder: (context, val, child) {
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
+                            return Container(
+                              height: 3,
+                              width: constraints.maxWidth,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: constraints.maxWidth * val,
+                                    decoration: BoxDecoration(
+                                      color: CybersightTheme.accent,
+                                      borderRadius: BorderRadius.circular(2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: CybersightTheme.accent.withOpacity(0.5),
+                                          blurRadius: 6,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        );
+                      }
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

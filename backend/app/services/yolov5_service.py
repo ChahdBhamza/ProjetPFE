@@ -37,8 +37,8 @@ class YOLOv5Service:
         self.model.eval()
         
         self.confidence_threshold = 0.25
-        self.appliance_classes = {"microwave", "refrigerator", "laptop", "oven"}
-        self.allowed_classes = ["laptop", "refrigerator", "microwave", "oven"]
+        self.appliance_classes = {"microwave", "refrigerator", "laptop", "oven", "tvmonitor", "tv"}
+        self.allowed_classes = ["laptop", "refrigerator", "microwave", "oven", "tvmonitor", "tv"]
 
     def detect(self, image: Image.Image):
         """
@@ -69,6 +69,8 @@ class YOLOv5Service:
                 # Map 'oven' to 'microwave' to improve recall without exposing 'oven' to the user
                 if class_name == "oven":
                     class_name = "microwave"
+                if class_name == "tvmonitor":
+                    class_name = "tv"
                 
                 # Get coordinates
                 x1, y1, x2, y2 = map(float, box)

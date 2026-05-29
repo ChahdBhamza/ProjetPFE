@@ -40,9 +40,9 @@ class _InventoryPageState extends State<InventoryPage> {
     if (mounted) {
       setState(() {
         _allInventoryItems = items;
-        _filteredItems = items;
         _isLoading = false;
       });
+      _filterInventory(_searchController.text);
     }
   }
 
@@ -72,8 +72,13 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      child: RefreshIndicator(
+        onRefresh: _loadInventory,
+        color: CybersightTheme.accent,
+        backgroundColor: CybersightTheme.navy2,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -314,6 +319,7 @@ class _InventoryPageState extends State<InventoryPage> {
               }),
           ],
         ),
+      ),
       ),
     );
   }

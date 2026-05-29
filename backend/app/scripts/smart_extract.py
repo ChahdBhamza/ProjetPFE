@@ -174,6 +174,8 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         fh, fw = data["frame"].shape[:2]
         fs = data["sharp"]
         for hit in res.get("detections", []):
+            if hit.get("confidence", 0) < 0.60:
+                continue
             if not strict or is_allowed(hit["class"]):
                 hit["_source"] = "roboflow"
                 # bbox already in full-res coordinates from Roboflow
@@ -259,14 +261,25 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 hit["_frame_id"] = frame_id
                 hit["_category"] = normalize_equipment_class(hit["class"])
                 
-                # [STRICT SAFEGUARD] Stop Roboflow from hallucinating ACs on laptops
+                # [STRICT SAFEGUARD] Stop Roboflow from hallucinating ACs on laptops and monitors
                 yolo_cats_on_frame = [normalize_equipment_class(h["class"]) for h in base["hits"]]
-                if hit["_category"] == "air_conditioner" and "computer" in yolo_cats_on_frame:
-                    print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'computer' based on YOLO ground truth!")
-                    hit["_category"] = "computer"
-                    hit["class"] = "laptop"
+                if hit["_category"] == "air_conditioner":
+                    if "computer" in yolo_cats_on_frame:
+                        print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'computer' based on YOLO ground truth!")
+                        hit["_category"] = "computer"
+                        hit["class"] = "laptop"
+                        hit["_force_local_draw"] = True
+                    elif "tv_monitor" in yolo_cats_on_frame:
+                        print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'tv_monitor' based on YOLO ground truth!")
+                        hit["_category"] = "tv_monitor"
+                        hit["class"] = "tv"
+                        hit["_force_local_draw"] = True
                 
-                hit["_rf_annotated"] = ann_pil
+                # If safeguard triggered, discard the bad Roboflow annotated image
+                if hit.get("_force_local_draw"):
+                    hit["_rf_annotated"] = None
+                else:
+                    hit["_rf_annotated"] = ann_pil
                 global_pool.append(hit)
 
     print(f"[Pass 2] Done in {time.time() - t2:.1f}s | total pool={len(global_pool)}")
@@ -288,6 +301,9 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
 
         if ann_pil is None and fid in id_to_data:
             _, _, ann_pil = roboflow_probe(id_to_data[fid])
+
+        if hero.get("_force_local_draw"):
+            ann_pil = None
 
         if ann_pil is not None:
             out_img = ann_pil

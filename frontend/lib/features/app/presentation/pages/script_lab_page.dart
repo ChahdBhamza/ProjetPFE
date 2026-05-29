@@ -92,14 +92,16 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
     try {
       final total = _selectedFilenames.length;
       int processedCount = 0;
-      Map<String, dynamic>? firstDetected;
+      // Collect ALL detections from ALL hero frames
+      final List<Map<String, dynamic>> allDetections = [];
 
       for (final filename in List<String>.from(_selectedFilenames)) {
+        processedCount++;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'PROCESSING $filename (${processedCount + 1}/$total)',
+                'PROCESSING $filename ($processedCount/$total)',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
@@ -126,8 +128,6 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
           [filename],
         );
 
-        bool brandFound = false;
-
         if (result != null && result['success'] == true) {
           final List<dynamic> processedFrames = result['frames'];
           for (var pf in processedFrames) {
@@ -137,62 +137,39 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
               if (pf['has_ai'] == true && pf['forensic_data'] != null) {
                 final brand = pf['forensic_data']['brand']?.toString();
                 if (brand != null && brand.toLowerCase() != 'unknown') {
-                  brandFound = true;
-                  firstDetected = pf;
+                  allDetections.add(pf);
                 }
               }
             }
           }
         }
 
-        if (brandFound && firstDetected != null) {
-          final initialForensic = firstDetected['forensic_data'] ?? {};
-          final brand = initialForensic['brand']?.toString() ?? 'Unknown';
-          final candidates = initialForensic['model_candidates'] as List? ?? [];
-          final topCand = candidates.isNotEmpty ? candidates.first as Map? ?? {} : {};
-          final topModelName = topCand['model']?.toString() ?? 'Unknown';
-          final type = initialForensic['equipment_category'] ?? initialForensic['equipment_type'] ?? 'Equipment';
+        // Dismiss the loading dialog for this frame
+        if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      }
 
-          try {
-            final specRes = await _apiService.getSpecs(brand, topModelName, type);
-            if (mounted) Navigator.of(context, rootNavigator: true).pop();
+      setState(() {
+        _selectedFilenames.clear();
+      });
 
-            setState(() {
-              _selectedFilenames.clear();
-            });
-
-            if (specRes['equipment_result'] != null) {
-              final equipmentResult = EquipmentResult.fromJson(specRes['equipment_result']);
-              if (mounted) {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => FractionallySizedBox(
-                    heightFactor: 0.85,
-                    child: EquipmentDetailPage(result: equipmentResult),
-                  ),
-                );
-              }
-            }
-          } catch (e) {
-            if (mounted) Navigator.of(context, rootNavigator: true).pop();
-          }
-          break;
-        } else {
-          if (mounted) Navigator.of(context, rootNavigator: true).pop();
-          setState(() {
-            _selectedFilenames.remove(filename);
-          });
-          processedCount++;
-        }
+      // Show the selection sheet with ALL detected equipment
+      if (allDetections.isNotEmpty && mounted) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) => FractionallySizedBox(
+            heightFactor: 0.8,
+            child: _ModelSelectionSheet(detections: allDetections),
+          ),
+        );
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'AI ANALYSIS COMPLETED.',
+              'AI ANALYSIS COMPLETED — ${allDetections.length} equipment detected.',
               style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
             ),
             backgroundColor: CybersightTheme.ok.withValues(alpha: 0.9),
@@ -631,6 +608,314 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _ModelSelectionSheet extends StatefulWidget {
+  final List<Map<String, dynamic>> detections;
+
+  const _ModelSelectionSheet({required this.detections});
+
+  @override
+  State<_ModelSelectionSheet> createState() => _ModelSelectionSheetState();
+}
+
+class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
+  final ApiService _apiService = ApiService();
+  bool _isFetchingSpecs = false;
+  String _fetchingLabel = '';
+
+  Future<void> _fetchSpecs(String brand, String modelName, String type) async {
+    setState(() {
+      _isFetchingSpecs = true;
+      _fetchingLabel = '$brand $modelName';
+    });
+
+    try {
+      final specRes = await _apiService.getSpecs(brand, modelName, type);
+      if (mounted) {
+        Navigator.of(context).pop();
+        if (specRes['equipment_result'] != null) {
+          final equipmentResult = EquipmentResult.fromJson(specRes['equipment_result']);
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => FractionallySizedBox(
+              heightFactor: 0.85,
+              child: EquipmentDetailPage(result: equipmentResult),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isFetchingSpecs = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error fetching specs: $e'), backgroundColor: CybersightTheme.warning),
+        );
+      }
+    }
+  }
+
+  IconData _getEquipmentIcon(String type) {
+    final t = type.toLowerCase();
+    if (t.contains('air') || t.contains('climat')) return Icons.ac_unit_rounded;
+    if (t.contains('ref') || t.contains('fridge')) return Icons.kitchen_rounded;
+    if (t.contains('micro')) return Icons.microwave_rounded;
+    if (t.contains('laptop') || t.contains('computer')) return Icons.laptop_rounded;
+    if (t.contains('monitor') || t.contains('tv') || t.contains('screen')) return Icons.monitor_rounded;
+    return Icons.memory_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isFetchingSpecs) {
+      return Container(
+        decoration: BoxDecoration(
+          color: CybersightTheme.navy2,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(top: BorderSide(color: CybersightTheme.accent.withValues(alpha: 0.2))),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(color: CybersightTheme.accent),
+              const SizedBox(height: 24),
+              Text(
+                'EXTRACTING TELEMETRY',
+                style: GoogleFonts.plusJakartaSans(
+                  color: CybersightTheme.accent,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2.0,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _fetchingLabel,
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Querying global technical databases...',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white54,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: CybersightTheme.navy2,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border(top: BorderSide(color: CybersightTheme.accent.withValues(alpha: 0.2))),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: CybersightTheme.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.psychology_rounded, color: CybersightTheme.accent, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DETECTED EQUIPMENT',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: CybersightTheme.accent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  Text(
+                    '${widget.detections.length} device${widget.detections.length > 1 ? "s" : ""} found',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.detections.length,
+              itemBuilder: (context, detIdx) {
+                final detection = widget.detections[detIdx];
+                final forensic = detection['forensic_data'] ?? {};
+                final brand = forensic['brand']?.toString() ?? 'Unknown';
+                final type = forensic['equipment_category']?.toString() ?? forensic['equipment_type']?.toString() ?? 'Equipment';
+                final candidates = forensic['model_candidates'] as List? ?? [];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Equipment group header
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CybersightTheme.accent.withValues(alpha: 0.08),
+                            Colors.transparent,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: CybersightTheme.accent.withValues(alpha: 0.15)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(_getEquipmentIcon(type), color: CybersightTheme.accent, size: 20),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                type.toUpperCase(),
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: CybersightTheme.accent,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              Text(
+                                brand,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Candidates for this equipment
+                    ...candidates.map((cand) {
+                      final modelName = cand['model']?.toString() ?? 'Unknown';
+                      final confidence = (cand['confidence'] as num?)?.toDouble() ?? 0.0;
+                      final reasoning = cand['reasoning']?.toString() ?? 'No reasoning provided.';
+
+                      return GestureDetector(
+                        onTap: () => _fetchSpecs(brand, modelName, type),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.03),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      modelName,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: CybersightTheme.ok.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '${confidence.toInt()}%',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: CybersightTheme.ok,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: LinearProgressIndicator(
+                                  value: confidence / 100.0,
+                                  backgroundColor: Colors.white.withValues(alpha: 0.05),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(CybersightTheme.ok),
+                                  minHeight: 4,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                reasoning,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white54,
+                                  fontSize: 11,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                    if (detIdx < widget.detections.length - 1)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(color: Colors.white.withValues(alpha: 0.06)),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

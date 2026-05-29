@@ -35,7 +35,7 @@ class SpecService:
         if not self.api_key:
             raise RuntimeError("GROQ_API_KEY not set in .env")
         self.client = Groq(api_key=self.api_key)
-        self.model = "llama-3.3-70b-versatile"
+        self.model = "llama-3.1-8b-instant"
         self.headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -203,7 +203,7 @@ Scraped Web Content:
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
                 temperature=0.05,
-                max_tokens=3000,
+                max_tokens=1000,
                 response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
@@ -369,9 +369,9 @@ Scraped Web Content:
                 for r in search_results[:5]
             ])
 
-        # Step 3: Gemini extraction (12 000 char context cap)
+        # Step 3: Gemini extraction (Reduced to 7,000 char context to avoid Groq 6K TPM limit)
         extraction = self.extract_and_verify_specs(
-            combined_text[:12_000], brand, model, equipment_type
+            combined_text[:7_000], brand, model, equipment_type
         )
         extraction["source_urls"] = scraped_urls if scraped_urls else ["DDG snippets"]
         extraction["pipeline"] = (
