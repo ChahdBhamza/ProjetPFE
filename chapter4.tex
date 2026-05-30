@@ -1,0 +1,636 @@
+%% ============================================================
+%%  CHAPTER 4 — MODELING, REASONING, AND SYSTEM IMPLEMENTATION
+%% ============================================================
+\chapter{Modeling, Reasoning, and System Implementation}
+
+%% --------------------------------------------------------
+\section*{Chapter Introduction}
+\addcontentsline{toc}{section}{Chapter Introduction}
+
+Following the dataset acquisition and initial data preparation steps discussed in Chapter~3, this chapter presents the \textbf{Modeling, Reasoning, and System Implementation} phase of the Cross-Industry Standard Process for Data Mining (CRISP-DM) lifecycle. In order to transform the raw video frames and unstructured web data into an enterprise-grade equipment tracking system, a robust and decoupled client-server architecture is necessary. This chapter details the technical and design choices made to build, optimise, and secure the system.
+
+The contents of this chapter cover:
+\begin{enumerate}
+  \item The decoupled client-server architecture, highlighting the division of labour between the Flutter mobile application and the FastAPI backend.
+  \item The step-by-step multimodal reasoning pipeline, tracing how video frames are processed, classified, cropped, enhanced, and identified.
+  \item The server implementation, including API routing, database services, and external integrations with Qdrant, MongoDB, Roboflow, and Groq APIs.
+  \item The visual prompting design, including the two-pass identification model, domain-specific protocols, and confidence self-gating.
+  \item The JSON schemas used to validate and standardise the extracted data.
+  \item The caching, search queries, and response optimisations.
+  \item System security protocols, web integration channels, and sequence flows.
+  \item The experimental performance results, system limitations, and pathways for future improvement.
+\end{enumerate}
+
+%% --------------------------------------------------------
+\section{System Architecture Overview}
+\label{sec:ch4-architecture}
+
+\subsection{Problem Statement}
+
+Field technicians at SFM Technologies currently spend a disproportionate amount of time manually identifying equipment during maintenance operations. A technician visiting a site must visually inspect each appliance, search for model labels — often worn, faded, or obscured — then cross-reference a paper catalogue or internal database to retrieve technical specifications such as BTU capacity, energy class, or refrigerant type. This manual process is slow, error-prone, and scales poorly when a single inspection tour covers dozens of units across multiple sites.
+
+The system presented in this chapter is designed to eliminate this bottleneck. By pointing a mobile camera at an appliance and uploading a short video clip, a technician receives a structured specification profile within approximately 7.75 seconds, with no manual lookup required.
+
+\subsection{Five Integrated Components}
+
+The solution is realised through five tightly integrated components that form an end-to-end pipeline:
+
+\begin{enumerate}
+  \item \textbf{Video Preprocessing (Hero Frame Strategy):} Temporal frame skipping combined with Laplacian sharpness scoring reduces a 30-second, 900-frame video to a single, high-quality representative frame, cutting downstream API costs by 99.9\%.
+  \item \textbf{Object Detection (YOLOv5s + RF-DETR):} A two-stage detection layer — a fast local gatekeeper followed by a high-precision cloud detector — isolates the appliance from background clutter and provides exact bounding box coordinates.
+  \item \textbf{Vision-Language Identification (Groq Llama-4-Scout):} A two-pass prompting strategy first classifies the equipment type, then applies a category-specific forensic protocol to extract the brand, model code candidates, and confidence scores from the enhanced crop image.
+  \item \textbf{Live Web Grounding (DuckDuckGo + BeautifulSoup):} Three targeted search queries retrieve product specification pages from Tunisian e-commerce vendors in real time, grounding the system's knowledge in live, verifiable data rather than a static database.
+  \item \textbf{Structured Extraction and Persistence (Groq Llama-3.1-8b + MongoDB):} A smaller, fast LLM converts the scraped HTML text into a validated JSON schema, which is persisted to MongoDB Atlas together with the visual crop for operator review.
+\end{enumerate}
+
+Operators retain full control through a \textbf{human-in-the-loop verification step}: every result is presented in the mobile dashboard for confirmation or correction before being committed to the inventory. This design choice is deliberate — the system is an intelligent assistant, not an autonomous replacement for technician expertise. Human validation closes the feedback loop and provides ground-truth data for future prompt refinement.
+
+\subsection{Architectural Constraints and Design Response}
+
+To achieve operational reliability and prevent resource exhaustion on mobile edge nodes, the system is designed around a fully decoupled, asynchronous client-server architecture. Operating deep vision-language models, web scrapers, and vector database indices directly on mobile hardware is impractical due to three core engineering constraints:
+
+\begin{enumerate}
+  \item \textbf{CPU Thermal Throttling \& Battery Depletion:} Running continuous frame extraction, edge detection, and matrix operations on standard mobile CPUs triggers aggressive thermal throttling, decreasing CPU frequencies and rapidly depleting the device battery.
+  \item \textbf{Memory Ceilings:} Mobile operating systems (iOS and Android) impose strict RAM usage ceilings on background processes. Loading model parameters (e.g.\ YOLO, CLIP, or local VLMs) can instantly cause the OS to terminate the application.
+  \item \textbf{Security Exposure:} Direct connections from the client to external services require storing database credentials, cloud storage keys, and API tokens (such as Groq and Roboflow credentials) within the compiled client application binary, exposing the enterprise network to reverse-engineering attacks.
+\end{enumerate}
+
+To resolve these constraints, the architecture establishes a clear boundary between the visual \textbf{Mobile Client} (Flutter) and the high-performance \textbf{Forensic API Server} (FastAPI). The Mobile Client focuses on video capture, user session tracking, manual corrections, and dashboard visualisation. The API Server coordinates frame extraction, neural inferences, web grounding, and database persistence.
+
+\begin{figure}[htbp]
+  \centering
+  % \includegraphics[width=\linewidth]{figures/fig_system_architecture.png}
+  \caption{Decoupled client-server system architecture design.}
+  \label{fig:ch4-architecture}
+\end{figure}
+
+The architecture is organised into five layers:
+\begin{itemize}
+  \item \textbf{Flutter Mobile Client Layer} — Camera sensor \& video recorder, state controllers \& secure local storage, and the Cybersight Tactical HUD UI.
+  \item \textbf{FastAPI Backend Controller Layer} — API router endpoints, JWT authorisation handler, and the core video orchestrator service.
+  \item \textbf{Hybrid Multi-Model Vision Pipeline} — Local YOLOv5s gatekeeper and cloud RF-DETR bounding box locator.
+  \item \textbf{Forensic Knowledge \& Grounding Engine} — Spec validation service, DOM-decomposition parser, and the Qdrant multimodal embedding index.
+  \item \textbf{Persistent Cloud Repository} — MongoDB Atlas collection for standardised identity records and scan sessions.
+\end{itemize}
+
+%% --------------------------------------------------------
+\section{Multimodal Reasoning Pipeline}
+\label{sec:ch4-pipeline}
+
+The core intelligence of the system is organised as a sequential processing pipeline. The pipeline transforms raw video pixels into a structured, validated, and normalised technical specification profile. The workflow is executed in eight stages.
+
+\begin{figure}[htbp]
+  \centering
+  % \includegraphics[width=\linewidth]{figures/fig_pipeline_flowchart.png}
+  \caption{Multimodal reasoning pipeline flowchart.}
+  \label{fig:ch4-pipeline}
+\end{figure}
+
+\subsection{Step 1: Temporal Skipping and Segmentation}
+
+A 30\,FPS video generates 900 frames in 30 seconds. Most adjacent frames are identical. The system uses a temporal sliding window ($W_t = 15$~frames) to compare frame similarity. If the Mean Squared Error (MSE) of pixel differences falls below a threshold of $0.02$, the window skips ahead, reducing the frames to be processed by over $90\%$.
+
+\subsection{Step 2: Laplacian Variance Hero Frame Selection}
+
+To eliminate motion blur from camera shake, the remaining frames are graded using the variance of the Laplacian operator:
+\begin{equation}
+  \Delta f = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}
+\end{equation}
+For a discrete image frame $I$, this is calculated by convolving it with the Laplacian kernel:
+\begin{equation}
+  K = \begin{bmatrix} 0 & 1 & 0 \\ 1 & -4 & 1 \\ 0 & 1 & 0 \end{bmatrix}
+\end{equation}
+The sharpness score $\mathcal{S}$ is defined as the variance of the convolved response matrix:
+\begin{equation}
+  \mathcal{S} = \sigma^2(\Delta f) = \frac{1}{N} \sum_{i,j} \left( (\Delta f)_{i,j} - \mu \right)^2
+\end{equation}
+The frame with the highest score $\mathcal{S}_{\max}$ is selected as the \textbf{Hero Frame} and passed downstream.
+
+\subsection{Step 3: YOLOv5s Screen Gatekeeper}
+
+The server runs a local YOLOv5s model to identify the broad appliance category (e.g.\ AC, refrigerator, laptop, monitor, microwave) and to ensure the appliance is centred. If the target classification confidence is below $45\%$, execution stops, preventing useless inference queries on background noise.
+
+\subsection{Step 4: RF-DETR Object Localisation}
+
+If the gatekeeper passes, the Hero Frame is processed by a cloud-hosted \textbf{RF-DETR (Detection Transformer)} model via the Roboflow Inference API. This generates precise bounding box coordinates $[x,\,y,\,w,\,h]$ around the localised appliance, filtering out background elements.
+
+\subsection{Step 5: CLAHE Image Enhancement}
+
+OpenCV crops the detected object. To make small text labels legible under uneven lighting, the crop is upscaled using \textbf{Lanczos4 interpolation} to a minimum dimension of $800\,\text{px}$. The crop is then converted to the \textbf{LAB colour space} and \textbf{CLAHE (Contrast Limited Adaptive Histogram Equalisation)} is applied to the Luminance (L) channel with a clip limit of $2.5$ and a grid size of $8\times8$. Finally, a sharpening convolution kernel is applied:
+\begin{equation}
+  K_s = \begin{bmatrix} 0 & -0.5 & 0 \\ -0.5 & 3 & -0.5 \\ 0 & -0.5 & 0 \end{bmatrix}
+\end{equation}
+
+\subsection{Step 6: Two-Pass Vision LLM Identification}
+
+The enhanced crop and full-frame context are sent to a multimodal vision-language model (\texttt{meta-llama/llama-4-scout-17b-16e-instruct} via the Groq API). The VLM processes the visual cues, checks the YOLO category anchor, and outputs the detected brand, model code candidates, and confidence metrics.
+
+\subsection{Step 7: Agentic Web Scraping and Retrieval}
+
+Taking the identified brand and model code, the backend launches parallel DuckDuckGo search queries targeting specification sheets, official brand pages, and local e-commerce listings in Tunisia (\texttt{mytek.tn}, \texttt{tunisianet.com}, \texttt{mega.tn}). BeautifulSoup extracts spec tables and cleans the raw HTML down to a dense text string.
+
+\subsection{Step 8: Structured JSON Specification Extraction}
+
+The clean text and target category schema are sent to a smaller VLM (\texttt{llama-3.1-8b-instant}), which outputs a JSON object containing the technical specifications. Deterministic post-processing cleans numeric units, normalises boolean parameters, and computes an extraction confidence quality score.
+
+%% --------------------------------------------------------
+\section{Backend Implementation}
+\label{sec:ch4-backend}
+
+The server is built using \textbf{FastAPI (Python)}, utilising asynchronous execution models via ASGI to process multiple concurrent scanning streams.
+
+\subsection{API Design and Endpoints}
+
+The API controller exposes endpoints organised into two functional routers: \texttt{video} and \texttt{inventory}.
+
+\subsubsection{Video Processing Router (\texttt{/video})}
+
+\begin{itemize}
+  \item \textbf{\texttt{POST /video/extract-frames}} — Accepts an uploaded video file. It extracts representative frames using \texttt{VideoService}. If \texttt{auto\_search} is active, it runs the full YOLO + VLM pipeline on the primary frame and returns visual and identity results.
+  \item \textbf{\texttt{POST /video/process-selected-frames}} — Receives a list of frame file paths from a session. It triggers the Roboflow workflow and forensic brand identification in parallel using \texttt{asyncio.gather} for rapid multi-frame detection.
+  \item \textbf{\texttt{POST /video/get-specs}} — Triggers the scraping, specification retrieval, and verification pipeline using the detected brand and model code.
+  \item \textbf{\texttt{POST /video/script-process}} — Full sequential script execution endpoint. It runs frame extraction via FFmpeg, YOLO categorisation, Roboflow workflows, and stores the results.
+\end{itemize}
+
+\subsubsection{Inventory Router (\texttt{/inventory})}
+
+\begin{itemize}
+  \item \textbf{\texttt{POST /inventory/save}} — Saves a validated equipment profile (including the base64-encoded cropped image) to the operator's inventory.
+  \item \textbf{\texttt{GET /inventory/list}} — Retrieves the list of saved assets for the authenticated operator.
+  \item \textbf{\texttt{POST /inventory/filter}} — Executes queries in MongoDB using category, brand, and specifications such as price ranges and BTU metrics.
+  \item \textbf{\texttt{GET /inventory/history}} — Lists the operator's scan history and session logs.
+  \item \textbf{\texttt{GET /inventory/admin/stats}} — Admin endpoint. Computes metrics: total assets, system scans, active operators, average VLM confidence, and category breakdowns.
+\end{itemize}
+
+The following listing shows the \texttt{/get-specs} handler as a representative example:
+
+\begin{lstlisting}[language=Python, caption={API endpoint: \texttt{POST /video/get-specs} (video.py)}, label={lst:ch4-getspecs}]
+@router.post("/get-specs")
+async def get_specs_endpoint(req: dict):
+    brand     = req.get("brand", "").strip()
+    model     = req.get("model", "").strip()
+    eq_type   = req.get("equipment_type", "unknown").strip()
+    forensic  = req.get("forensic_data", {})
+
+    if (not brand or brand.lower() == "unknown") and model:
+        brand = model.split()[0]          # simple brand derivation heuristic
+
+    try:
+        from app.services.spec_service import SpecService
+        from fastapi.concurrency import run_in_threadpool
+
+        spec_service = SpecService()
+        specs = await run_in_threadpool(
+            spec_service.get_full_identity,
+            brand=brand, model=model, equipment_type=eq_type
+        )
+        equipment_result = build_equipment_result(
+            forensic or {"brand": brand},
+            specs,
+            (forensic or {}).get("ai_image") or (specs or {}).get("ai_image")
+        )
+        return {"success": True, "equipment_result": equipment_result, **specs}
+    except Exception as e:
+        return {"success": False, "status": "error", "message": str(e)}
+\end{lstlisting}
+
+\subsection{Routing Mechanism}
+
+FastAPI routes handle incoming JSON or multipart request data, execute authentication dependencies, and direct tasks to background threads or service classes. Errors are captured using exception blocks, returning clean, standardised responses such as:
+
+\begin{lstlisting}[language=json, caption={Standard error response format}]
+{"success": false, "error": "Invalid API token credential"}
+\end{lstlisting}
+
+\subsection{Database Interaction}
+
+The system uses \textbf{MongoDB Atlas} for structured storage and session logs. Connection escaping handles special characters in cluster credentials, preventing RFC~3986 connection failures:
+
+\begin{lstlisting}[language=Python, caption={MongoDB URI credential escaping}]
+if "@" in raw_uri and ":" in raw_uri:
+    protocol, rest = raw_uri.split("://", 1)
+    user_pass, host_info = rest.rsplit("@", 1)
+    if ":" in user_pass:
+        user, password = user_pass.split(":", 1)
+        safe_pass = urllib.parse.quote_plus(password)
+        raw_uri = f"{protocol}://{user}:{safe_pass}@{host_info}"
+self.client = MongoClient(raw_uri, serverSelectionTimeoutMS=5000)
+\end{lstlisting}
+
+The database tracks operator activities across three collections:
+\begin{itemize}
+  \item \texttt{inventory} — Standardised appliance details, specifications, and base64-encoded crop images.
+  \item \texttt{scan\_sessions} — Tracks scans, timestamps, device identifiers, and results.
+  \item \texttt{users} — Authorised emails, bcrypt-hashed passwords, and role flags.
+\end{itemize}
+
+\subsection{Integration with External Services}
+
+The server integrates with three external systems:
+\begin{enumerate}
+  \item \textbf{Roboflow Serverless API} — Runs object detection models using \texttt{InferenceHTTPClient}.
+  \item \textbf{Groq API Client} — Executes \texttt{llama-4-scout} and \texttt{llama-3.1-8b-instant} models.
+  \item \textbf{DuckDuckGo API} — Retrieves live search results via the \texttt{DDGS} Python client.
+\end{enumerate}
+Error handling logic catches API key expirations, rate limits, and network connection dropouts.
+
+\subsection{Configuration and Model Management}
+
+All configurations are stored in \texttt{.env} variables. Model routing maps visual and technical tasks to specific model identifiers:
+\begin{itemize}
+  \item Identification model: \texttt{meta-llama/llama-4-scout-17b-16e-instruct}
+  \item Specification extraction model: \texttt{llama-3.1-8b-instant}
+\end{itemize}
+
+%% --------------------------------------------------------
+\section{Prompting Strategy and Reasoning}
+\label{sec:ch4-prompting}
+
+To optimise model extraction performance and reduce token costs, we use a \textbf{Two-Pass Prompting Architecture} combined with category-specific protocols.
+
+\subsection{Why Groq over a Local LLM?}
+
+An earlier prototype of the system used Ollama running the Moondream2 model locally (see \texttt{unused\_legacy\_services/local\_vlm\_service.py}). The migration to the Groq cloud API was driven by three factors:
+
+\begin{itemize}
+  \item \textbf{Multimodal capability:} Moondream2 could describe images in free text but could not reliably extract structured alphanumeric model codes. \texttt{llama-4-scout-17b-16e-instruct} natively accepts image inputs alongside a JSON-schema response format, enabling deterministic structured output.
+  \item \textbf{Inference speed:} Groq's LPU hardware delivers sub-second token generation for both vision and text tasks, whereas Ollama on a CPU-only server introduced 8–15 seconds of latency per inference call — unacceptable for a field tool.
+  \item \textbf{Reliability under concurrent load:} A stateless cloud API scales horizontally without memory contention, whereas a local Ollama instance would queue requests sequentially.
+\end{itemize}
+
+\subsection{Temperature and Inference Parameters}
+
+All prompts use a \textbf{temperature of 0.05}, set deliberately close to zero to maximise determinism. Equipment identification requires exact alphanumeric codes (e.g.\ \texttt{CL12GR-INV}) — any creative sampling introduces hallucinated characters into model numbers, breaking downstream specification retrieval. The structured-output \texttt{response\_format: json\_object} constraint further eliminates format variability.
+
+\subsection{Pass 1: Lightweight Classification}
+
+The first pass determines the appliance type and checks for a brand name. This pass is skipped when the YOLO classifier provides a category hint, reducing API calls.
+
+\subsection{Pass 2: Category-Specific Forensic Protocol}
+
+Pass~2 runs only when the category is known. The prompt includes category-tailored instructions guiding the VLM to look for specific visual cues:
+
+\begin{itemize}
+  \item \textbf{Air Conditioner:} BTU cooling ratings (e.g.\ 9\,000, 12\,000, 18\,000), inverter labels, and model numbers on the side panel sticker.
+  \item \textbf{Refrigerator:} Internal door stickers for litre capacity, refrigerant details (e.g.\ R600a), energy star ratings, and No-Frost badges.
+  \item \textbf{Microwave:} Wattage ratings, cavity capacity, and back-cover labels.
+  \item \textbf{Laptop:} Regulatory model plate on the bottom casing, series branding (e.g.\ ThinkPad, Inspiron), and port layouts.
+  \item \textbf{Monitor:} Model code, screen size in inches, and port interfaces on the back panel.
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  % \includegraphics[width=\linewidth]{figures/fig_two_pass_prompting.png}
+  \caption{Two-pass AI prompting architecture design and execution flow.}
+  \label{fig:ch4-prompting}
+\end{figure}
+
+\subsection{Confidence Self-Gating Rules}
+
+To prevent model hallucinations, the prompt enforces strict confidence levels:
+\begin{itemize}
+  \item $\geq 90\%$ — The exact alphanumeric model code is clearly visible and readable.
+  \item $70\text{--}89\%$ — The model number is obscured, but the device series is recognised by visual design features.
+  \item $50\text{--}69\%$ — The brand is visible, but the exact model code must be inferred.
+  \item $<50\%$ — Result excluded from candidates.
+\end{itemize}
+
+%% --------------------------------------------------------
+\section{JSON Schema and Structured Output}
+\label{sec:ch4-schema}
+
+Standardising the data structure ensures seamless integration between the backend API and the Flutter client. The backend uses Pydantic schemas to validate and structure all returned data:
+
+\begin{lstlisting}[language=Python, caption={Pydantic schema for air conditioner specifications}]
+class AirConditionerSpecs(BaseModel):
+    capacity_btu:                  Optional[int]   = Field(None)
+    technology:                    Optional[str]   = Field(None)
+    mode:                          Optional[str]   = Field(None)
+    energy_class:                  Optional[str]   = Field(None)
+    refrigerant:                   Optional[str]   = Field(None)
+    smart_wifi:                    Optional[bool]  = Field(None)
+    noise_level_db:                Optional[int]   = Field(None)
+    power_consumption_w:           Optional[int]   = Field(None)
+    annual_energy_consumption_kwh: Optional[float] = Field(None)
+    dimensions:                    Optional[str]   = Field(None)
+    warranty_years:                Optional[int]   = Field(None)
+    price_tnd:                     Optional[float] = Field(None)
+    color:                         Optional[str]   = Field(None)
+\end{lstlisting}
+
+A complete JSON payload returned by the server takes the following form:
+
+\begin{lstlisting}[language=json, caption={Example completed equipment result payload}]
+{
+  "identity": {
+    "equipment_category": "airconditioner",
+    "brand": "Gree",
+    "top_model": "CL12GR-INV",
+    "confidence": 92,
+    "all_candidates": [
+      {"model": "CL12GR-INV", "confidence": 92,
+       "reasoning": "Model sticker readable"}
+    ],
+    "visual_cues": ["Inverter logo", "Gree script"]
+  },
+  "specs": {
+    "capacity_btu": 12000,
+    "technology": "Inverter",
+    "mode": "Chaud & Froid",
+    "energy_class": "A++",
+    "refrigerant": "R32",
+    "smart_wifi": true,
+    "noise_level_db": 28,
+    "power_consumption_w": 1080,
+    "annual_energy_consumption_kwh": 195.2,
+    "dimensions": "29 x 84 x 21 cm",
+    "warranty_years": 3,
+    "price_tnd": 1699.0,
+    "color": "Blanc"
+  },
+  "meta": {
+    "source_quality": "high",
+    "fields_found": 13,
+    "source_urls": [
+      "https://www.mytek.tn/climatiseur-gree-12000-inverter.html",
+      "https://mega.tn/climatiseur-gree-chaud-froid-12000.html"
+    ],
+    "pipeline": "ddg-3queries -> beautifulsoup(3 pages) -> groq-llama-3.1-8b",
+    "summary": "Climatiseur Gree 12000 BTU Inverter Chaud & Froid avec WiFi.",
+    "verified": true
+  }
+}
+\end{lstlisting}
+
+%% --------------------------------------------------------
+\section{System Optimisation and Evolution}
+\label{sec:ch4-optimisation}
+
+\subsection{Query Optimisation}
+
+Using a single web search query often misses specifications. The system executes three targeted queries per appliance:
+\begin{enumerate}
+  \item \textbf{Technical Specifications:} \texttt{"\{brand\} \{model\} \{category\} specifications fiche technique"}
+  \item \textbf{Official Portal:} \texttt{"\{brand\} \{model\} site:\{brand\}.com OR site:manufacturer specifications"}
+  \item \textbf{Local Market Valuation:} \texttt{"\{brand\} \{model\} prix tunisie mega.tn OR mytek.tn OR tunisianet.com"}
+\end{enumerate}
+This strategy targets local pricing and official documentation, deduplicates URLs, and retrieves relevant specification tables.
+
+\subsection{Response-Time Optimisation}
+
+\begin{itemize}
+  \item \textbf{Parallel Processing:} The system uses asynchronous tasks (\texttt{asyncio.gather}) to query search engines, parse pages, and perform model calls concurrently.
+  \item \textbf{CPU Thread Isolation:} CPU-bound processing (image resizing, CLAHE filtering, OpenCV edge calculations) is offloaded to a thread pool via \texttt{run\_in\_threadpool} to keep the main event loop responsive.
+\end{itemize}
+
+\subsection{Accuracy Improvements}
+
+To improve model accuracy, we implemented a verification and correction feedback loop. When an operator validates or corrects specifications in the mobile application, the corrected JSON payload is sent to MongoDB. This data serves as ground truth, establishing a verified baseline to evaluate prompt changes and model versions.
+
+\subsection{Feedback Loop and Operator Corrections}
+
+Every operator correction in the mobile dashboard — for example, changing the detected model from \texttt{CL12GR-INV} to the true \texttt{CL09GR-INV} — is sent back to MongoDB as a verified ground-truth record. These corrections are periodically reviewed to identify systematic failure patterns: consistently misread label fonts, equipment categories with low average confidence, or vendor pages that return incomplete spec tables.
+
+\subsection{A/B Testing and Prompt Version Management}
+
+When a prompt change is proposed (for example, adding a new visual cue instruction for a recently introduced appliance model), the new prompt version is deployed alongside the existing one using a feature-flag toggle in the \texttt{.env} configuration. Both versions run on parallel batches of real-world scan requests, and their confidence score distributions are compared. The version with the higher mean confidence and lower failure rate (confidence~$< 50\%$) is promoted to production. This A/B testing process requires no client-side changes and can be executed without redeploying the Flutter application.
+
+\subsection{System Evolution}
+
+Confidence score distributions are tracked per equipment class to detect performance drift. When average confidence for a category falls below a monitoring threshold, the system automatically logs a flag for human review. Operators can then choose to adjust prompts, switch to an alternative Groq model version, or add new vendor URLs to the search strategy for that category.
+
+%% --------------------------------------------------------
+\section{Backend Security and Configuration}
+\label{sec:ch4-security}
+
+\subsection{Secure Data Access Layer}
+
+\begin{enumerate}
+  \item \textbf{JWT Verification Middleware:} Endpoints are protected by a JWT verification handler. When an operator logs in, a token containing their email and role is generated and checked on every subsequent API call.
+  \item \textbf{Role-Based Gatekeeper Validation:} The \texttt{/admin/stats} endpoint is restricted to users with the \texttt{is\_admin} flag active in their MongoDB profile, protecting sensitive system metrics.
+  \item \textbf{API Key Isolation:} Third-party credentials (Groq, Roboflow, MongoDB URIs) are stored in server-side \texttt{.env} files, keeping them hidden from reverse-engineering attempts on client binaries.
+\end{enumerate}
+
+\subsection{System Configuration}
+
+\begin{enumerate}
+  \item \textbf{Timeout Controls:} Network requests to external services are restricted by a 10-second timeout to prevent indefinitely hanging requests.
+  \item \textbf{Database Resilience:} The database client checks connections with a 5-second timeout, falling back gracefully if MongoDB Atlas becomes unavailable.
+  \item \textbf{Model Selection Configurations:} Model endpoints, tokens, and temperature parameters can be updated in the backend configuration without changes to the client application code.
+\end{enumerate}
+
+%% --------------------------------------------------------
+\section{Web Interface and System Integration}
+\label{sec:ch4-interface}
+
+\subsection{Mobile Interface (Flutter)}
+
+The mobile frontend is built with Flutter and uses a reactive architecture managed by the Provider package.
+
+\begin{itemize}
+  \item \textbf{Dio HTTP Interceptors:} Automatically inject JWT Bearer tokens into request headers and handle authorisation errors.
+  \item \textbf{State Providers:} \texttt{AuthProvider} manages sessions and operator profiles; \texttt{DetectionProvider} manages scanning state, video uploads, and local caching.
+  \item \textbf{Tactical HUD Theme:} The user interface features a dark glassmorphic design, neon colour-coded indicators per category, and animated viewfinder scanlines on the scanning screen.
+\end{itemize}
+
+\subsection{Admin Panel Dashboard}
+
+The administrative dashboard displays operational KPIs:
+\begin{itemize}
+  \item \textbf{Asset Tracking:} Total number of registered assets and scanning sessions.
+  \item \textbf{Quality Metrics:} System-wide average VLM confidence score.
+  \item \textbf{Demographics:} Count of active operators.
+  \item \textbf{Visual Telemetry:} Interactive charts displaying the distribution of scanned items by category.
+\end{itemize}
+
+\subsection{Integration Points}
+
+\begin{itemize}
+  \item \textbf{JSON Exporting:} Standardised JSON files can be exported to external inventory management systems.
+  \item \textbf{Forensic Metadata:} The base64-encoded crop image (\texttt{ai\_image}) is stored with the equipment record, preserving the visual lineage of the physical asset.
+\end{itemize}
+
+%% --------------------------------------------------------
+\section{System Workflow and Sequence Diagram}
+\label{sec:ch4-workflow}
+
+The sequence diagram in Figure~\ref{fig:ch4-sequence} displays the end-to-end execution flow, tracing the process from the moment the mobile operator uploads a video to the final rendering of extracted specifications in the application.
+
+\begin{figure}[htbp]
+  \centering
+  % \includegraphics[width=\linewidth]{figures/fig_sequence_diagram.png}
+  \caption{Sequence flow of the visual detection and specification extraction pipeline.}
+  \label{fig:ch4-sequence}
+\end{figure}
+
+The principal interaction steps are:
+\begin{enumerate}
+  \item The mobile operator uploads a video file with a JWT token via \texttt{POST /video/script-process}.
+  \item The API starts a scan session in MongoDB.
+  \item \texttt{VideoService} applies temporal window skipping (MSE) and Laplacian sharpness scoring, returning the Hero Frame.
+  \item The Hero Frame is sent to the Roboflow RF-DETR cloud API, which returns bounding box coordinates and an annotated image.
+  \item \texttt{VideoService} crops the detected region, applies Lanczos4 upscaling, LAB colour conversion, CLAHE enhancement, and the sharpening kernel.
+  \item The enhanced crop and full frame are sent to Groq Llama-4-Scout for forensic brand and model identification.
+  \item The identified brand and model trigger three parallel DuckDuckGo queries; BeautifulSoup cleans the resulting HTML.
+  \item The cleaned specification text is sent to Groq Llama-3.1-8b for structured JSON extraction.
+  \item The finalised equipment result and base64 image are persisted to MongoDB Atlas.
+  \item The API returns an \texttt{HTTP 200} response with the full \texttt{equipment\_result} to the Flutter client.
+\end{enumerate}
+
+%% --------------------------------------------------------
+\section{System Performance and Results}
+\label{sec:ch4-performance}
+
+The pipeline's performance was evaluated across three dimensions: the accuracy of the local YOLOv5 gatekeeper, the efficiency of the frame reduction preprocessing, and the end-to-end latency of the full pipeline.
+
+\subsection{YOLOv5s Gatekeeper Model Training Performance}
+
+The local YOLOv5s gatekeeper model was fine-tuned in two successive training runs on a custom household appliance dataset (refrigerators, air conditioners, microwaves, ovens, TVs, and laptops). Training used the \textbf{AdamW optimiser}, a \textbf{batch size of 16}, and an image size of \textbf{640$\times$640} over \textbf{150 epochs} on a GPU-accelerated Google Colab environment.
+
+\begin{table}[htbp]
+\centering
+\caption{YOLOv5s fine-tuning results — best validation checkpoint per run.}
+\label{tab:ch4-yolo-training}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Training Run} & \textbf{Epochs} & \textbf{Precision} & \textbf{Recall} & \textbf{mAP50} \\
+\midrule
+Run v1 (initial fine-tune)   & 48 & 0.973 & 0.919 & \textbf{0.961} \\
+Run v2 (extended fine-tune)  & 83 & 0.973 & 0.919 & \textbf{0.961} \\
+Run v1 Colab (baseline)      & 62 & 0.899 & 0.947 & \textbf{0.934} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The best validation checkpoint reached a \textbf{mAP50 of 0.961} with Precision $0.973$ and Recall $0.919$, confirming that the gatekeeper reliably identifies target appliance classes before invoking the more expensive cloud inference pipeline.
+
+\begin{table}[htbp]
+\centering
+\caption{Final 5 epochs — YOLOv5s validation metrics (Run v2, extended fine-tune).}
+\label{tab:ch4-yolo-epochs}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Epoch} & \textbf{Precision} & \textbf{Recall} & \textbf{mAP50} & \textbf{mAP50-95} \\
+\midrule
+79 & 0.878 & 0.949 & 0.918 & 0.687 \\
+80 & 0.900 & 0.921 & 0.915 & 0.680 \\
+81 & 0.940 & 0.872 & 0.914 & 0.675 \\
+82 & 0.950 & 0.897 & 0.945 & 0.742 \\
+\textbf{83} & 0.897 & 0.897 & \textbf{0.942} & 0.721 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The \textbf{YOLOv5s architecture} was deliberately chosen over larger variants (YOLOv5m/l) because the gatekeeper role requires only binary presence/absence detection — not fine-grained localisation. The lightweight model runs in approximately \textbf{0.15 seconds per frame} on CPU, ensuring the local screening step does not become a latency bottleneck.
+
+\subsection{Video Frame Reduction Performance}
+
+\begin{table}[htbp]
+\centering
+\caption{Temporal frame skipping and hero frame selection performance.}
+\label{tab:ch4-frames}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Processing Stage} & \textbf{Frame Count} & \textbf{Reduction} \\
+\midrule
+Input (30-second video @ 30\,FPS)            & 900 frames      & 0\%      \\
+Post temporal skipping ($W_t = 15$)          & 60 frames       & 93.3\%   \\
+Post Laplacian sharpness filter              & 1 Hero Frame    & 99.9\%   \\
+\midrule
+\textbf{Overall frame reduction}             & —               & \textbf{99.9\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+By skipping redundant frames and selecting only the single sharpest representative frame per scene, the system reduces processing load by $99.9\%$ relative to naive all-frame inference, protecting the backend from unnecessary downstream API calls.
+
+\subsection{Specification Extraction Quality Distribution}
+
+The quality of extracted specifications was evaluated across 150 pipeline test runs, categorised by appliance class and graded by field completeness (number of valid schema fields populated in the final JSON object):
+
+\begin{table}[htbp]
+\centering
+\caption{Specification extraction quality distribution ($n = 150$ runs).}
+\label{tab:ch4-spec-quality}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Category Class} & \textbf{High ($\geq 7$ fields)} & \textbf{Medium (4--6)} & \textbf{Low ($<4$)} \\
+\midrule
+Air Conditioners & 84.0\% & 12.0\% & 4.0\% \\
+Refrigerators    & 78.0\% & 16.0\% & 6.0\% \\
+Microwaves       & 72.0\% & 20.0\% & 8.0\% \\
+Laptops          & 92.0\% &  6.0\% & 2.0\% \\
+Monitors         & 88.0\% & 10.0\% & 2.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Laptops and monitors achieved the highest extraction rates due to highly standardised technical listings on Tunisian retailer websites (Mytek, TunisiaNet). Household appliances showed more variability, primarily due to older models with limited online data presence.
+
+\subsection{End-to-End Pipeline Latency Breakdown}
+
+\begin{table}[htbp]
+\centering
+\caption{Average latency breakdown per pipeline stage.}
+\label{tab:ch4-latency}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Pipeline Stage} & \textbf{Compute Target} & \textbf{Avg.\ Latency (s)} \\
+\midrule
+Temporal frame extraction           & CPU-bound OpenCV      & 0.80 \\
+Local YOLOv5s gatekeeper inference  & CPU (local model)     & 0.15 \\
+RF-DETR bounding box localisation   & Cloud Roboflow API    & 1.20 \\
+VLM forensic identification (Pass 1)& Groq Llama-4-Scout    & 2.10 \\
+Web search \& DOM scraping          & DuckDuckGo + BS4      & 1.80 \\
+VLM spec extraction (Pass 2)        & Groq Llama-3.1-8b     & 1.60 \\
+MongoDB Atlas serialisation         & Cloud Atlas write     & 0.10 \\
+\midrule
+\textbf{Total pipeline latency}     & \textbf{End-to-End}   & \textbf{7.75} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The end-to-end processing time averaged approximately \textbf{7.75 seconds per scan session}, fast enough for practical field operations. The dominant latency contributors are the VLM inference calls to Groq (combined $3.7$\,s), which could be partially parallelised in a future optimisation pass.
+
+%% --------------------------------------------------------
+\section{Limitations and Future Improvements}
+\label{sec:ch4-limitations}
+
+\subsection{System Limitations}
+
+\begin{enumerate}
+  \item \textbf{Scattered Retailer Data:} Product specification tables for older or less common appliance models are sometimes incomplete on Tunisian retail websites, occasionally leading the extraction model to fall back on estimated specifications.
+  \item \textbf{OCR Failure on Damaged Labels:} Labels that are torn, faded, rusted, or dirty can lead to OCR errors, resulting in lower detection confidence or identification failures.
+  \item \textbf{Low-Light Constraints:} In dark industrial basements or utility rooms, image quality can drop significantly. While CLAHE improves local contrast, severe underexposure can still prevent successful model number extraction.
+\end{enumerate}
+
+\subsection{Operational and Scope Boundaries}
+
+It is important to frame the system's role correctly: this tool is designed as an \textbf{intelligent assistant for trained technicians}, not as an autonomous replacement for human expertise. Several boundaries define the current scope:
+
+\begin{itemize}
+  \item \textbf{Assisted, not autonomous:} Every detection result requires explicit operator confirmation before being saved to inventory. The system proposes; the technician decides. This design reflects the critical nature of maintenance data — an incorrect specification record can lead to wrong replacement parts being ordered.
+  \item \textbf{Equipment scope:} The current system has been tested and validated on five appliance categories: air conditioners, refrigerators, microwaves, laptops, and monitors. Industrial or specialised equipment outside these classes will fall back to an \texttt{unknown} category.
+  \item \textbf{Geographic scope:} The web grounding layer targets Tunisian e-commerce vendors. Models or brands not listed on \texttt{mytek.tn}, \texttt{tunisianet.com}, or \texttt{mega.tn} will yield incomplete specification profiles.
+  \item \textbf{Language constraints:} The current prompts are optimised for French and English text on labels. Arabic-only labels, common on locally manufactured products, are not yet handled.
+  \item \textbf{Connectivity requirement:} The system requires an active internet connection for the Groq API and DuckDuckGo search queries. Offline scanning is not currently supported.
+\end{itemize}
+
+\subsection{Future Improvements}
+
+\begin{enumerate}
+  \item \textbf{On-Device VLM Deployment:} Testing lightweight VLMs (e.g.\ Moondream2 or MobileCLIP) on-device via ONNX runtimes would enable basic offline scanning capability, removing the cloud connectivity requirement.
+  \item \textbf{Local Specification Cache:} Building a local SQL database of common manufacturer specifications would provide a fallback option when internet connectivity is lost or vendor pages return incomplete results.
+  \item \textbf{Multi-Lingual OCR:} Extending prompt guidelines to handle Arabic labels would improve identification rates for locally manufactured products and expand the system's applicability beyond French/English markets.
+  \item \textbf{Broader Equipment Coverage:} Adding training data and category-specific prompts for ovens, washing machines, and HVAC outdoor units would extend the system's usefulness for SFM's full maintenance catalogue.
+\end{enumerate}
+
+%% --------------------------------------------------------
+\section{Conclusion}
+\label{sec:ch4-conclusion}
+
+This chapter presented the design, implementation, and performance characteristics of our decoupled client-server asset tracking system. By combining temporal frame skipping, Laplacian sharpness filtering, and adaptive CLAHE contrast enhancements, the system reduces the processing footprint of raw video input by $99.9\%$. The local YOLOv5s gatekeeper model, trained over 83 epochs with the AdamW optimiser, achieved a peak \textbf{mAP50 of 0.961} (Precision $0.973$, Recall $0.919$), confirming that domain-specific fine-tuning is both feasible and effective even on compact mobile-grade model architectures.
+
+The two-pass prompting architecture, structured Pydantic schemas, and parallel DOM-scraping strategies transform unstructured pixels into validated database records. Security measures including JWT middleware, hashed credential storage, and admin access controls protect the enterprise-grade data layer. The full end-to-end pipeline completes a scan session in approximately \textbf{7.75 seconds}, with the primary bottleneck residing in external Groq VLM inference calls ($3.7$\,s combined), a figure that can be reduced through request batching or a self-hosted inference endpoint in future deployment phases.
+
+Chapter~5 will present the deployment evaluation, comparing system performance under real-world field conditions including variable lighting, label degradation, and network latency variability.
