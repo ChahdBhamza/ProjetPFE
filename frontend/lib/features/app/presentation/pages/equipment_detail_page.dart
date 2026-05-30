@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -96,21 +97,50 @@ class EquipmentDetailPage extends StatelessWidget {
                       
                       const SizedBox(height: 24),
                       
-                      // Hero Image Placeholder (Futuristic Icon)
-                      GlassContainer(
-                        height: 180,
-                        width: double.infinity,
-                        borderRadius: 24,
-                        opacity: 0.03,
-                        blur: 20,
-                        child: Center(
-                          child: Icon(
-                            _getCategoryIcon(category),
-                            size: 80,
-                            color: CybersightTheme.accent.withOpacity(0.1),
-                          ),
-                        ),
-                      ),
+                      // Scanned Hero Frame or Fallback Icon
+                      result.meta.aiImage != null && result.meta.aiImage!.isNotEmpty
+                          ? Container(
+                              height: 180,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: CybersightTheme.accent.withOpacity(0.15)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Image.memory(
+                                  base64Decode(result.meta.aiImage!),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return GlassContainer(
+                                      opacity: 0.03,
+                                      blur: 20,
+                                      child: Center(
+                                        child: Icon(
+                                          _getCategoryIcon(category),
+                                          size: 80,
+                                          color: CybersightTheme.accent.withOpacity(0.1),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                          : GlassContainer(
+                              height: 180,
+                              width: double.infinity,
+                              borderRadius: 24,
+                              opacity: 0.03,
+                              blur: 20,
+                              child: Center(
+                                child: Icon(
+                                  _getCategoryIcon(category),
+                                  size: 80,
+                                  color: CybersightTheme.accent.withOpacity(0.1),
+                                ),
+                              ),
+                            ),
                       
                       const SizedBox(height: 32),
                       

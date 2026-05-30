@@ -113,6 +113,9 @@ class ApiService {
     try {
       final metadata = Map<String, dynamic>.from(result.specs);
       metadata['category'] = result.identity.equipmentCategory;
+      if (result.meta.aiImage != null) {
+        metadata['ai_image'] = result.meta.aiImage;
+      }
 
       Response response = await _dio.post(
         "/api/inventory/save",

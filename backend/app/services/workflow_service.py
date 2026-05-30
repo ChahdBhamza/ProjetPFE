@@ -38,6 +38,7 @@ class WorkflowService:
         mapping = {
             "tv_monitor": "monitor",
             "monitor":    "monitor",
+            "tv":         "monitor",
             "computer":   "laptop",
             "laptop":     "laptop",
             "air_conditioner": "airconditioner",
@@ -53,7 +54,23 @@ class WorkflowService:
         try:
             print(f"📡 SDK Processing: {image_path}")
             
-            # 1. Run workflow via SDK (Detection + Annotation)
+            # Extract yolo_hint from the original hero image path before we potentially update it
+            yolo_hint = self._yolo_hint_from_path(image_path)
+            
+            # Locate the clean, unannotated raw frame if this is a hero image
+            import re
+            m = re.search(r"hero_\d+_.+?_f(\d+)\.(png|jpg|jpeg)$", os.path.basename(image_path))
+            original_hero_path = image_path
+            
+            if m:
+                fid_str = m.group(1)
+                base_session_dir = os.path.dirname(os.path.dirname(image_path))
+                clean_path = os.path.join(base_session_dir, "raw", f"frame_{fid_str}.jpg")
+                if os.path.exists(clean_path):
+                    print(f"🎯 FOUND CLEAN FRAME: Using clean {clean_path} instead of annotated hero image!")
+                    image_path = clean_path
+
+            # 1. Run workflow via SDK (Detection + Annotation) on the clean frame
             result = self.client.run_workflow(
                 workspace_name=self.workspace,
                 workflow_id=self.workflow_id,
@@ -83,10 +100,9 @@ class WorkflowService:
                 
                 try:
                     from app.services.frame_detector import process_frame
-                    # [STRICT SAFEGUARD] Force Groq to trust the filename category
-                    yolo_hint = self._yolo_hint_from_path(image_path)
                     if yolo_hint:
                         print(f"🎯 [SAFEGUARD] Anchoring Groq to type='{yolo_hint}' (from filename)")
+                    # Run forensic identification on the clean frame as well for maximum OCR accuracy
                     sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"), yolo_type_hint=yolo_hint)
                     llm_data = sfm_result.get("result", {})
                     

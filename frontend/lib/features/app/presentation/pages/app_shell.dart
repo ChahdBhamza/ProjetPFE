@@ -25,11 +25,13 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
   // Set to 15 minutes for standard operation
   static const int _inactivityTimeoutMinutes = 15;
 
-  static const _pages = <Widget>[
-    EquipmentPage(),
-    InventoryPage(),
-    ProfilePage(),
-  ];
+  List<Widget> _buildPages() {
+    return [
+      const EquipmentPage(),
+      InventoryPage(isActive: _index == 1),
+      const ProfilePage(),
+    ];
+  }
 
   @override
   void initState() {
@@ -104,7 +106,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
                 ),
               ),
               Positioned.fill(
-                child: IndexedStack(index: _index, children: _pages),
+                child: IndexedStack(index: _index, children: _buildPages()),
               ),
             ],
           ),

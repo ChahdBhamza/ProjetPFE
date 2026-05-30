@@ -362,7 +362,7 @@ Respond ONLY with a valid JSON object matching exactly:
 def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
     """
     Two-pass Groq Llama Vision identification:
-      Pass 1: Fast type detection (llama-4-scout-17b) — SKIPPED if yolo_type_hint is provided
+      Pass 1: Fast type detection (llama-4-scout-17b) — always runs for brand hint
       Pass 2: Equipment-specific forensic prompt with both images
     Returns a merged result dict.
     """
@@ -371,30 +371,38 @@ def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray,
     full_bytes = _img_to_bytes(annotated_frame)
     crop_bytes = _img_to_bytes(enhanced_crop)
 
-    # If YOLO already gave us a high-confidence category, trust it and skip Pass 1
     KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
+
+    # Always run Pass 1 to get a preliminary brand (it's fast and cheap)
+    print("[Vision] Pass 1: Fast equipment type detection...")
+    pass1 = _run_pass1(client, full_bytes)
+    pass1_type = pass1.get("equipment_type", "unknown")
+    brand_hint = pass1.get("preliminary_brand", None)
+    pass1_conf = pass1.get("confidence_type", 0)
+    print(f"[Vision] Pass 1 result: type={pass1_type}, brand={brand_hint}, confidence={pass1_conf}%")
+
+    # Decide which type to use for the forensic prompt
     if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
-        eq_type = yolo_type_hint
-        brand_hint = None
-        print(f"[Vision] YOLO hint supplied: type='{eq_type}' → skipping Pass 1")
-        pass1_conf = 95  # YOLO anchor treated as high confidence
+        # If Pass 1 agrees with YOLO, use YOLO (strong signal)
+        # If Pass 1 disagrees with high confidence, trust Pass 1 (YOLO may have been wrong)
+        if pass1_type == yolo_type_hint or pass1_conf < 70:
+            eq_type = yolo_type_hint
+            print(f"[Vision] Using YOLO hint: type='{eq_type}'")
+        else:
+            eq_type = pass1_type
+            print(f"[Vision] ⚠️ Pass 1 disagrees with YOLO! YOLO='{yolo_type_hint}', Pass1='{pass1_type}' (conf={pass1_conf}%) → trusting Pass 1")
     else:
-        print("[Vision] Pass 1: Fast equipment type detection...")
-        pass1 = _run_pass1(client, full_bytes)
-        eq_type = pass1.get("equipment_type", "unknown")
-        brand_hint = pass1.get("preliminary_brand", None)
-        pass1_conf = pass1.get("confidence_type", 0)
-        print(f"[Vision] Pass 1 result: type={eq_type}, brand={brand_hint}, confidence={pass1_conf}%")
+        eq_type = pass1_type
 
     print(f"[Vision] Pass 2: Forensic ID for type='{eq_type}'...")
     pass2 = _run_pass2(client, full_bytes, crop_bytes, eq_type, brand_hint)
 
-    # Merge: type detection + pass2 deep identification
-    # If YOLO hint was used, don't let Pass 2 override the category with a wrong guess
-    if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
-        pass2["equipment_category"] = yolo_type_hint
+    # Final category: trust Pass 2 if it returns a valid known type, otherwise use our pre-computed eq_type
+    pass2_cat = pass2.get("equipment_category", "")
+    if pass2_cat in KNOWN_TYPES:
+        pass2["equipment_category"] = pass2_cat
     else:
-        pass2["equipment_category"] = pass2.get("equipment_category") or eq_type
+        pass2["equipment_category"] = eq_type
     pass2["pass1_type_confidence"] = pass1_conf
 
     return pass2

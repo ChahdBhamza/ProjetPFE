@@ -12,7 +12,7 @@ import base64
 
 # ── Shared helper: build standardised equipment_result block ─────────────────
 
-def build_equipment_result(forensic_data: dict, specs: dict | None = None) -> dict:
+def build_equipment_result(forensic_data: dict, specs: dict | None = None, ai_image: str | None = None) -> dict:
     """
     Converts raw forensic_data (from frame_detector) + optional specs (from
     spec_service) into the standardised equipment_result dict expected by Flutter.
@@ -47,6 +47,7 @@ def build_equipment_result(forensic_data: dict, specs: dict | None = None) -> di
             "pipeline": (specs or {}).get("pipeline"),
             "summary": (specs or {}).get("summary"),
             "verified": (specs or {}).get("verified", False),
+            "ai_image": ai_image or (specs or {}).get("ai_image") or forensic_data.get("ai_image"),
         },
     }
 
@@ -98,7 +99,7 @@ async def extract_frames_endpoint(
                 from app.services.workflow_service import WorkflowService
                 _wf_result = await run_in_threadpool(WorkflowService().run_specialized_workflow, _tmp_path)
                 _forensic = _wf_result.get("forensic_data", {})
-                _equipment_result = build_equipment_result(_forensic)
+                _equipment_result = build_equipment_result(_forensic, None, _wf_result.get("ai_image"))
                 _top = _equipment_result["identity"]
                 search_result = {
                     "success": True,
@@ -170,7 +171,7 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
     # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:
         fd = frame.get("forensic_data") or {}
-        frame["equipment_result"] = build_equipment_result(fd)
+        frame["equipment_result"] = build_equipment_result(fd, None, frame.get("ai_image"))
         
         # Log the raw AI detection to MongoDB
         mongo_db.log_detection(req.session_id, fd)
@@ -197,7 +198,11 @@ async def get_specs_endpoint(req: dict):
             spec_service.get_full_identity,
             brand=brand, model=model, equipment_type=eq_type
         )
-        equipment_result = build_equipment_result(forensic_data or {"brand": brand}, specs)
+        equipment_result = build_equipment_result(
+            forensic_data or {"brand": brand}, 
+            specs, 
+            (forensic_data or {}).get("ai_image") or (specs or {}).get("ai_image")
+        )
         return {"success": True, "equipment_result": equipment_result, **specs}
     except Exception as e:
         import traceback; traceback.print_exc()
@@ -248,7 +253,7 @@ async def video_script_process_endpoint(
         _roboflow_service = RoboflowService()
     
     def _run_smart_extract():
-        smart_extract(video_path=video_path, output_dir=base_dir, interval=1, strict=True, max_frames=28, yolo=_yolov5_service, roboflow=_roboflow_service)
+        smart_extract(video_path=video_path, output_dir=base_dir, interval=1, strict=True, max_frames=15, yolo=_yolov5_service, roboflow=_roboflow_service)
     
     try:
         await run_in_threadpool(_run_smart_extract)
@@ -263,12 +268,19 @@ async def video_script_process_endpoint(
     final_frames = []
     for f in sorted([f for f in os.listdir(final_dir) if f.endswith((".jpg", ".png"))]):
         with open(os.path.join(final_dir, f), "rb") as img_file:
+            import re
+            m = re.match(r"hero_\d+_(.+?)_f\d+\.(png|jpg)", f)
+            if m:
+                detected_class = m.group(1).replace("_", " ").title()
+            else:
+                detected_class = f.replace("hero_", "").replace(".png", "").replace(".jpg", "").replace("_", " ").title()
+
             final_frames.append({
                 "filename": f,
                 "image": base64.b64encode(img_file.read()).decode('utf-8'),
                 "has_ai": True,
                 "is_hero": True,
-                "detected_class": f.replace("hero_", "").replace(".jpg", "").replace("_", " ")
+                "detected_class": detected_class
             })
 
     hero_base64 = None

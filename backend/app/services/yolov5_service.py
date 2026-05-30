@@ -43,6 +43,10 @@ class YOLOv5Service:
     def detect(self, image: Image.Image):
         """
         Run inference on a PIL image and return detections.
+        Includes per-frame IoU deduplication: if two boxes overlap > 50%,
+        only the higher-confidence one is kept. This prevents the same
+        physical object (e.g. a laptop screen) from appearing as both
+        'laptop' and 'tv' in the same frame.
         """
         # Convert PIL to RGB numpy array (YOLOv5 hub model expects this)
         img_rgb = np.array(image.convert("RGB"))
@@ -80,8 +84,36 @@ class YOLOv5Service:
                     'confidence': confidence,
                     'bbox': [x1, y1, x2, y2]
                 })
-                
-        return detections
+
+        # ── Per-frame IoU deduplication ───────────────────────────────────────
+        # If two boxes on the same frame overlap > 50%, keep only the
+        # higher-confidence one. This prevents duplicate heroes for the same
+        # physical object (e.g. laptop detected as both 'laptop' and 'tv').
+        def _iou(a, b):
+            ax1, ay1, ax2, ay2 = a
+            bx1, by1, bx2, by2 = b
+            ix1, iy1 = max(ax1, bx1), max(ay1, by1)
+            ix2, iy2 = min(ax2, bx2), min(ay2, by2)
+            inter = max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
+            area_a = max(0.0, ax2 - ax1) * max(0.0, ay2 - ay1)
+            area_b = max(0.0, bx2 - bx1) * max(0.0, by2 - by1)
+            union = area_a + area_b - inter
+            return inter / max(union, 1e-6)
+
+        # Sort by confidence descending so we always keep the more confident box
+        detections.sort(key=lambda d: -d['confidence'])
+        kept = []
+        for det in detections:
+            dominated = any(
+                _iou(det['bbox'], k['bbox']) > 0.50
+                for k in kept
+            )
+            if not dominated:
+                kept.append(det)
+            else:
+                print(f"[YOLO dedup] Dropped '{det['class']}' (conf={det['confidence']:.2f}) — overlaps with a higher-confidence box")
+
+        return kept
 
     def draw_detections(self, image: Image.Image, detections: list):
         """

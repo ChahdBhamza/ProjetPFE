@@ -23,9 +23,9 @@ except ImportError as e:
     sys.exit(1)
 
 WORKFLOW_ID = "custom-workflow-3"
-MAX_FRAMES_TO_PROCESS = 28
-ROBOFLOW_PROBE_FRAMES = 6  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave)
-MAX_ROBOFLOW_CALLS = 10
+MAX_FRAMES_TO_PROCESS = 15
+ROBOFLOW_PROBE_FRAMES = 3  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave)
+MAX_ROBOFLOW_CALLS = 4
 
 def is_allowed(cls_name):
     name = cls_name.lower()
@@ -39,7 +39,7 @@ def is_allowed(cls_name):
 
 def normalize_equipment_class(cls_name):
     name = cls_name.lower().replace("_", " ")
-    if "microwave" in name:
+    if "microwave" in name or "oven" in name:
         return "microwave"
     if "fridge" in name or "refrigerator" in name:
         return "refrigerator"
@@ -261,19 +261,18 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 hit["_frame_id"] = frame_id
                 hit["_category"] = normalize_equipment_class(hit["class"])
                 
-                # [STRICT SAFEGUARD] Stop Roboflow from hallucinating ACs on laptops and monitors
+                # [STRICT SAFEGUARD] Stop Roboflow from mislabelling objects based on YOLO ground truth
                 yolo_cats_on_frame = [normalize_equipment_class(h["class"]) for h in base["hits"]]
                 if hit["_category"] == "air_conditioner":
-                    if "computer" in yolo_cats_on_frame:
-                        print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'computer' based on YOLO ground truth!")
-                        hit["_category"] = "computer"
-                        hit["class"] = "laptop"
-                        hit["_force_local_draw"] = True
-                    elif "tv_monitor" in yolo_cats_on_frame:
-                        print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' hallucination to 'tv_monitor' based on YOLO ground truth!")
-                        hit["_category"] = "tv_monitor"
-                        hit["class"] = "tv"
-                        hit["_force_local_draw"] = True
+                    # If YOLO detected a different target category on the exact same frame, override Roboflow to trust YOLO.
+                    # Roboflow has a high tendency to misclassify large/boxy white objects or screens as 'air_conditioner'.
+                    for yolo_cat in ("refrigerator", "computer", "tv_monitor", "microwave"):
+                        if yolo_cat in yolo_cats_on_frame:
+                            print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' → '{yolo_cat}' (YOLO saw {yolo_cat} on this frame)")
+                            hit["_category"] = yolo_cat
+                            hit["class"] = "laptop" if yolo_cat == "computer" else ("tv" if yolo_cat == "tv_monitor" else yolo_cat)
+                            hit["_force_local_draw"] = True
+                            break
                 
                 # If safeguard triggered, discard the bad Roboflow annotated image
                 if hit.get("_force_local_draw"):
@@ -284,36 +283,85 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
 
     print(f"[Pass 2] Done in {time.time() - t2:.1f}s | total pool={len(global_pool)}")
 
-    # Best hero per equipment type; prefer Roboflow detections over YOLO
+    # ── Hero Selection ────────────────────────────────────────────────────────
+    # Duplicates across categories are already suppressed by YOLO's per-frame
+    # IoU dedup (yolov5_service.py). Here we simply pick the best hero per
+    # category, then do a final IoU cross-check to drop any stragglers that
+    # slipped through on the same frame.
+
+    def _iou(bbox_a, bbox_b):
+        """Intersection-over-Union for two [x1,y1,x2,y2] boxes."""
+        try:
+            xa1, ya1, xa2, ya2 = bbox_a
+            xb1, yb1, xb2, yb2 = bbox_b
+            xi1, yi1 = max(xa1, xb1), max(ya1, yb1)
+            xi2, yi2 = min(xa2, xb2), min(ya2, yb2)
+            inter = max(0, xi2 - xi1) * max(0, yi2 - yi1)
+            area_a = (xa2 - xa1) * (ya2 - ya1)
+            area_b = (xb2 - xb1) * (yb2 - yb1)
+            union = area_a + area_b - inter
+            return inter / max(union, 1e-6)
+        except Exception:
+            return 0.0
+
+    # Best hero per raw category (no merging — each category keeps its own slot)
     by_cat = {}
     for candidate in sorted(global_pool, key=lambda x: (x.get("_source") != "roboflow", -x["_quality"])):
         cat = candidate.get("_category") or normalize_equipment_class(candidate["class"])
+        
+        # Filter out extremely low quality / blurry candidates to prevent false positive heroes
+        if candidate["_quality"] < 0.28:
+            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f})")
+            continue
+            
         if cat not in by_cat:
             by_cat[cat] = candidate
-    final_heros = sorted(by_cat.values(), key=lambda h: -h["_quality"])
 
-    print(f"Saving {len(final_heros)} heroes using Roboflow annotated images when available...")
+    # Cross-frame screen dedup: if both 'computer' and 'tv_monitor' survived
+    # (same physical laptop detected across different frames), drop tv_monitor.
+    # 'computer'/'laptop' is the more specific COCO class for a laptop screen.
+    if "computer" in by_cat and "tv_monitor" in by_cat:
+        print("🚫 CROSS-FRAME DEDUP: Both 'computer' and 'tv_monitor' detected — dropping 'tv_monitor' (same physical screen device)")
+        del by_cat["tv_monitor"]
+
+    # Final IoU pass: drop heroes that still overlap > 50% on the same frame
+    heroes_list = sorted(by_cat.values(), key=lambda h: -h["_quality"])
+    final_heros = []
+    for hero in heroes_list:
+        dominated = False
+        for kept in final_heros:
+            if hero["_frame_id"] == kept["_frame_id"]:
+                iou = _iou(hero.get("bbox", [0, 0, 0, 0]), kept.get("bbox", [0, 0, 0, 0]))
+                if iou > 0.50:
+                    print(f"🚫 DEDUP: Dropping '{hero.get('_category')}' hero (IoU={iou:.2f} with '{kept.get('_category')}' on frame {hero['_frame_id']})")
+                    dominated = True
+                    break
+        if not dominated:
+            final_heros.append(hero)
+
+    print(f"Saving {len(final_heros)} heroes with clean local annotations for UI consistency...")
     t3 = time.time()
     for idx, hero in enumerate(final_heros):
         fid = hero["_frame_id"]
         cat = hero.get("_category") or normalize_equipment_class(hero["class"])
-        ann_pil = hero.get("_rf_annotated") or rf_annotated_by_id.get(fid)
 
-        if ann_pil is None and fid in id_to_data:
-            _, _, ann_pil = roboflow_probe(id_to_data[fid])
+        # Always draw locally to ensure exactly ONE bounding box with a clean, consistent style.
+        # This completely avoids double/overlapping bounding boxes of different colors from the cloud.
+        pil_hero = Image.fromarray(cv2.cvtColor(hero["_frame"], cv2.COLOR_BGR2RGB))
+        
+        # Format a premium capitalized label (e.g., "Air Conditioner", "Microwave")
+        clean_label = cat.replace('_', ' ').title()
+        
+        # Create a draw-copy so we don't modify the source candidate data
+        hero_to_draw = hero.copy()
+        hero_to_draw['class'] = clean_label
 
-        if hero.get("_force_local_draw"):
-            ann_pil = None
+        out_img = yolo.draw_detections(pil_hero, [hero_to_draw])
 
-        if ann_pil is not None:
-            out_img = ann_pil
-        else:
-            pil_hero = Image.fromarray(cv2.cvtColor(hero["_frame"], cv2.COLOR_BGR2RGB))
-            out_img = yolo.draw_detections(pil_hero, [hero])
-
-        filename = f"hero_{idx + 1}_{cat}.png"
+        # Encode the frame ID inside the filename (e.g., hero_1_microwave_f0042.png)
+        filename = f"hero_{idx + 1}_{cat}_f{fid:04d}.png"
         cv2.imwrite(os.path.join(final_dir, filename), cv2.cvtColor(np.array(out_img), cv2.COLOR_RGB2BGR))
-        print(f"SAVED: {filename} (Quality: {hero['_quality']:.2f}, source: {hero.get('_source', '?')})")
+        print(f"SAVED: {filename} (Quality: {hero['_quality']:.2f}, label: {clean_label})")
 
     t_end = time.time()
     print(f"[TIMER] Save took {t_end - t3:.1f}s | Total: {t_end - total_start:.1f}s")

@@ -152,15 +152,15 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
         _selectedFilenames.clear();
       });
 
-      // Show the selection sheet with ALL detected equipment
+      // Show the verification carousel sheet with ALL detected equipment
       if (allDetections.isNotEmpty && mounted) {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (ctx) => FractionallySizedBox(
-            heightFactor: 0.8,
-            child: _ModelSelectionSheet(detections: allDetections),
+            heightFactor: 0.85,
+            child: _VerificationCarouselSheet(detections: allDetections),
           ),
         );
       }
@@ -612,17 +612,20 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
   }
 }
 
-class _ModelSelectionSheet extends StatefulWidget {
+class _VerificationCarouselSheet extends StatefulWidget {
   final List<Map<String, dynamic>> detections;
 
-  const _ModelSelectionSheet({required this.detections});
+  const _VerificationCarouselSheet({required this.detections});
 
   @override
-  State<_ModelSelectionSheet> createState() => _ModelSelectionSheetState();
+  State<_VerificationCarouselSheet> createState() => _VerificationCarouselSheetState();
 }
 
-class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
+class _VerificationCarouselSheetState extends State<_VerificationCarouselSheet> {
   final ApiService _apiService = ApiService();
+  final PageController _pageController = PageController(viewportFraction: 0.9);
+  int _currentIndex = 0;
+
   bool _isFetchingSpecs = false;
   String _fetchingLabel = '';
 
@@ -669,6 +672,12 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
     if (t.contains('laptop') || t.contains('computer')) return Icons.laptop_rounded;
     if (t.contains('monitor') || t.contains('tv') || t.contains('screen')) return Icons.monitor_rounded;
     return Icons.memory_rounded;
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -724,7 +733,7 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         border: Border(top: BorderSide(color: CybersightTheme.accent.withValues(alpha: 0.2))),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      padding: const EdgeInsets.only(top: 12, bottom: 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -739,183 +748,259 @@ class _ModelSelectionSheetState extends State<_ModelSelectionSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: CybersightTheme.accent.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: CybersightTheme.accent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.verified_user_rounded, color: CybersightTheme.accent, size: 24),
                 ),
-                child: const Icon(Icons.psychology_rounded, color: CybersightTheme.accent, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'DETECTED EQUIPMENT',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: CybersightTheme.accent,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'VERIFICATION REQUIRED',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: CybersightTheme.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '${widget.detections.length} device${widget.detections.length > 1 ? "s" : ""} found',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    Text(
+                      '${widget.detections.length} Device${widget.detections.length > 1 ? "s" : ""} Pending',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: ListView.builder(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (idx) => setState(() => _currentIndex = idx),
               itemCount: widget.detections.length,
-              itemBuilder: (context, detIdx) {
-                final detection = widget.detections[detIdx];
-                final forensic = detection['forensic_data'] ?? {};
-                final brand = forensic['brand']?.toString() ?? 'Unknown';
-                final type = forensic['equipment_category']?.toString() ?? forensic['equipment_type']?.toString() ?? 'Equipment';
-                final candidates = forensic['model_candidates'] as List? ?? [];
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Equipment group header
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            CybersightTheme.accent.withValues(alpha: 0.08),
-                            Colors.transparent,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: CybersightTheme.accent.withValues(alpha: 0.15)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(_getEquipmentIcon(type), color: CybersightTheme.accent, size: 20),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                type.toUpperCase(),
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: CybersightTheme.accent,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                              Text(
-                                brand,
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Candidates for this equipment
-                    ...candidates.map((cand) {
-                      final modelName = cand['model']?.toString() ?? 'Unknown';
-                      final confidence = (cand['confidence'] as num?)?.toDouble() ?? 0.0;
-                      final reasoning = cand['reasoning']?.toString() ?? 'No reasoning provided.';
-
-                      return GestureDetector(
-                        onTap: () => _fetchSpecs(brand, modelName, type),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.03),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      modelName,
-                                      style: GoogleFonts.plusJakartaSans(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: CybersightTheme.ok.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      '${confidence.toInt()}%',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        color: CybersightTheme.ok,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(2),
-                                child: LinearProgressIndicator(
-                                  value: confidence / 100.0,
-                                  backgroundColor: Colors.white.withValues(alpha: 0.05),
-                                  valueColor: const AlwaysStoppedAnimation<Color>(CybersightTheme.ok),
-                                  minHeight: 4,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                reasoning,
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white54,
-                                  fontSize: 11,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-                    if (detIdx < widget.detections.length - 1)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Divider(color: Colors.white.withValues(alpha: 0.06)),
-                      ),
-                  ],
+              itemBuilder: (context, index) {
+                return _VerificationCard(
+                  detection: widget.detections[index],
+                  icon: _getEquipmentIcon(widget.detections[index]['forensic_data']?['equipment_category']?.toString() ?? ''),
+                  onVerify: (brand, model, type) => _fetchSpecs(brand, model, type),
                 );
               },
             ),
           ),
+          const SizedBox(height: 16),
+          // Page Indicators
+          if (widget.detections.length > 1)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(widget.detections.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentIndex == index ? 24 : 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index ? CybersightTheme.accent : Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                );
+              }),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _VerificationCard extends StatefulWidget {
+  final Map<String, dynamic> detection;
+  final IconData icon;
+  final Function(String brand, String model, String type) onVerify;
+
+  const _VerificationCard({required this.detection, required this.icon, required this.onVerify});
+
+  @override
+  State<_VerificationCard> createState() => _VerificationCardState();
+}
+
+class _VerificationCardState extends State<_VerificationCard> {
+  late TextEditingController _brandController;
+  late TextEditingController _modelController;
+  late String _type;
+
+  @override
+  void initState() {
+    super.initState();
+    final forensic = widget.detection['forensic_data'] ?? {};
+    final candidates = forensic['model_candidates'] as List? ?? [];
+    final topCandidate = candidates.isNotEmpty ? candidates.first : {};
+    
+    _type = forensic['equipment_category']?.toString() ?? forensic['equipment_type']?.toString() ?? 'Equipment';
+    
+    _brandController = TextEditingController(text: forensic['brand']?.toString() ?? 'Unknown');
+    _modelController = TextEditingController(text: topCandidate['model']?.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _brandController.dispose();
+    _modelController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final aiImage = widget.detection['ai_image'] ?? widget.detection['image'];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Visual Context (Hero Crop)
+              Container(
+                height: 180,
+                color: Colors.black,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (aiImage != null)
+                      Image.memory(base64Decode(aiImage as String), fit: BoxFit.cover)
+                    else
+                      const Center(child: Icon(Icons.image_not_supported_rounded, color: Colors.white24, size: 48)),
+                    
+                    // Gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.transparent, CybersightTheme.navy2.withValues(alpha: 0.9)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      child: Row(
+                        children: [
+                          Icon(widget.icon, color: CybersightTheme.accent, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            _type.toUpperCase(),
+                            style: GoogleFonts.plusJakartaSans(
+                              color: CybersightTheme.accent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'AI Extracted Data',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white54,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Editable Brand Field
+                    _buildInputField('BRAND', _brandController),
+                    const SizedBox(height: 16),
+                    
+                    // Editable Model Field
+                    _buildInputField('MODEL REFERENCE', _modelController),
+                    const SizedBox(height: 24),
+                    
+                    GlowingButton(
+                      label: 'Verify & Fetch Specs',
+                      isFullWidth: true,
+                      onTap: () {
+                        widget.onVerify(_brandController.text.trim(), _modelController.text.trim(), _type);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            color: CybersightTheme.accent,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black.withValues(alpha: 0.3),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: CybersightTheme.accent),
+            ),
+            suffixIcon: const Icon(Icons.edit_rounded, color: Colors.white38, size: 16),
+          ),
+        ),
+      ],
     );
   }
 }

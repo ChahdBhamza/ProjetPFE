@@ -196,14 +196,14 @@ Scraped Web Content:
                         make_all_required(prop)
             make_all_required(schema_dict)
 
-            schema_json = json.dumps(schema_dict, indent=2)
+            schema_json = json.dumps(schema_dict, separators=(',', ':'))  # compact = fewer tokens
             full_prompt = prompt + f"\n\nYou MUST return ONLY a raw JSON object matching exactly this schema, with NO MARKDOWN formatting. EVERY SINGLE FIELD IN THIS SCHEMA IS STRICTLY REQUIRED:\n{schema_json}"
             
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
                 temperature=0.05,
-                max_tokens=1000,
+                max_tokens=1500,   # Capped: 1500 output + ~1800 prompt = ~3300 total, safely under 6K TPM
                 response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
@@ -369,9 +369,9 @@ Scraped Web Content:
                 for r in search_results[:5]
             ])
 
-        # Step 3: Gemini extraction (Reduced to 7,000 char context to avoid Groq 6K TPM limit)
+        # Step 3: Extraction — cap at 4,000 chars so total prompt stays within TPM limits
         extraction = self.extract_and_verify_specs(
-            combined_text[:7_000], brand, model, equipment_type
+            combined_text[:4_000], brand, model, equipment_type
         )
         extraction["source_urls"] = scraped_urls if scraped_urls else ["DDG snippets"]
         extraction["pipeline"] = (

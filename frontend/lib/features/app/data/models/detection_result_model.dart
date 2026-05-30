@@ -135,6 +135,7 @@ class EquipmentMeta {
   final String? pipeline;
   final String? summary;
   final bool verified;
+  String? aiImage;
 
   EquipmentMeta({
     this.sourceQuality,
@@ -143,6 +144,7 @@ class EquipmentMeta {
     this.pipeline,
     this.summary,
     required this.verified,
+    this.aiImage,
   });
 
   factory EquipmentMeta.fromJson(Map<String, dynamic> json) {
@@ -153,6 +155,7 @@ class EquipmentMeta {
       pipeline: json['pipeline'],
       summary: json['summary'],
       verified: json['verified'] ?? false,
+      aiImage: json['ai_image'] ?? json['annotated_image'],
     );
   }
 }
