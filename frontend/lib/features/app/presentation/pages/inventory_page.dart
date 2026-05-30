@@ -23,6 +23,7 @@ class _InventoryPageState extends State<InventoryPage> {
   List<dynamic>? _allInventoryItems;
   List<dynamic>? _filteredItems;
   bool _isLoading = true;
+  String _selectedCategory = 'ALL';
 
   @override
   void initState() {
@@ -59,23 +60,125 @@ class _InventoryPageState extends State<InventoryPage> {
     if (_allInventoryItems == null) return;
     
     setState(() {
-      if (query.isEmpty) {
-        _filteredItems = _allInventoryItems;
-      } else {
-        final lowercaseQuery = query.toLowerCase();
-        _filteredItems = _allInventoryItems!.where((item) {
+      List<dynamic> temp = _allInventoryItems!;
+      
+      // Category tag filtering
+      if (_selectedCategory != 'ALL') {
+        temp = temp.where((item) {
+          final metadata = item['metadata'] as Map<String, dynamic>? ?? {};
+          final category = (metadata['category'] ?? item['category'] ?? '').toString().toLowerCase();
+          final eqType = (metadata['equipment_type'] ?? item['equipment_type'] ?? '').toString().toLowerCase();
+          final fullCategoryMatch = '$category $eqType';
+          
+          switch (_selectedCategory) {
+            case 'CLIMATISEURS':
+              return fullCategoryMatch.contains('air') || fullCategoryMatch.contains('clim');
+            case 'REFRIGERATEURS':
+              return fullCategoryMatch.contains('ref') || fullCategoryMatch.contains('kitchen');
+            case 'LAPTOPS':
+              return fullCategoryMatch.contains('lap') || fullCategoryMatch.contains('pc') || fullCategoryMatch.contains('computer');
+            case 'MONITORS':
+              return fullCategoryMatch.contains('mon') || fullCategoryMatch.contains('screen') || fullCategoryMatch.contains('disp') || fullCategoryMatch.contains('tv');
+            case 'MICROWAVES':
+              return fullCategoryMatch.contains('micro') || fullCategoryMatch.contains('oven');
+            default:
+              return true;
+          }
+        }).toList();
+      }
+      
+      // Text search filtering
+      if (query.isNotEmpty) {
+        final lowercaseQuery = query.toLowerCase().trim();
+        temp = temp.where((item) {
           final brand = (item['brand'] ?? '').toString().toLowerCase();
           final model = (item['model'] ?? '').toString().toLowerCase();
-          final category = (item['metadata']?['category'] ?? '').toString().toLowerCase();
           final btu = (item['btu'] ?? '').toString().toLowerCase();
+          
+          final metadata = item['metadata'] as Map<String, dynamic>? ?? {};
+          final category = (metadata['category'] ?? item['category'] ?? '').toString().toLowerCase();
+          final eqType = (metadata['equipment_type'] ?? item['equipment_type'] ?? '').toString().toLowerCase();
+          
+          final specsStr = (metadata['specs'] ?? {}).toString().toLowerCase();
+          final summary = (metadata['summary'] ?? '').toString().toLowerCase();
           
           return brand.contains(lowercaseQuery) || 
                  model.contains(lowercaseQuery) || 
                  category.contains(lowercaseQuery) ||
-                 btu.contains(lowercaseQuery);
+                 eqType.contains(lowercaseQuery) ||
+                 btu.contains(lowercaseQuery) ||
+                 specsStr.contains(lowercaseQuery) ||
+                 summary.contains(lowercaseQuery);
         }).toList();
       }
+      
+      _filteredItems = temp;
     });
+  }
+
+  Widget _buildFilterChips() {
+    final List<String> categories = ['ALL', 'CLIMATISEURS', 'REFRIGERATEURS', 'LAPTOPS', 'MONITORS', 'MICROWAVES'];
+    return Container(
+      height: 38,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final cat = categories[index];
+          final isSelected = _selectedCategory == cat;
+          Color activeColor = CybersightTheme.accent;
+          if (cat == 'REFRIGERATEURS') activeColor = CybersightTheme.ok;
+          if (cat == 'LAPTOPS') activeColor = Colors.purpleAccent;
+          if (cat == 'MONITORS') activeColor = Colors.greenAccent;
+          if (cat == 'MICROWAVES') activeColor = Colors.pinkAccent;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedCategory = cat;
+                });
+                _filterInventory(_searchController.text);
+              },
+              child: GlassContainer(
+                opacity: isSelected ? 0.12 : 0.04,
+                blur: 15,
+                borderRadius: 12,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isSelected) ...[
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: activeColor,
+                          boxShadow: [BoxShadow(color: activeColor, blurRadius: 4)],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      cat,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: isSelected ? Colors.white : Colors.white30,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   String _getCategorySubtitle() {
@@ -197,7 +300,9 @@ class _InventoryPageState extends State<InventoryPage> {
                 ],
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+              _buildFilterChips(),
+              const SizedBox(height: 16),
 
               // 3. DATABASE LIST
               if (_isLoading)
@@ -517,6 +622,13 @@ class _InventoryCardState extends State<_InventoryCard> {
     final spec = _getSpecLabelAndValue();
     final formattedDate = _getFormattedDate();
 
+    // Map distinct neon colors for left indicator bar
+    Color activeColor = CybersightTheme.accent;
+    if (category.contains('REF')) activeColor = CybersightTheme.ok;
+    if (category.contains('LAP')) activeColor = Colors.purpleAccent;
+    if (category.contains('MONITOR') || category.contains('SCREEN') || category.contains('DISP')) activeColor = Colors.greenAccent;
+    if (category.contains('MICRO')) activeColor = Colors.pinkAccent;
+
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (_) => setState(() => _isHovered = true),
@@ -531,66 +643,95 @@ class _InventoryCardState extends State<_InventoryCard> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: _isHovered ? [
               BoxShadow(
-                color: CybersightTheme.ok.withOpacity(0.15),
+                color: activeColor.withOpacity(0.12),
                 blurRadius: 20,
                 spreadRadius: 2,
               )
             ] : [],
           ),
-          child: CybersightCard(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        color: _isHovered ? CybersightTheme.ok.withOpacity(0.1) : Colors.white.withOpacity(0.03),
-                        border: Border.all(color: _isHovered ? CybersightTheme.ok.withOpacity(0.3) : Colors.white.withOpacity(0.05)),
-                      ),
-                      child: Center(
-                        child: Icon(_getIcon(category), color: CybersightTheme.ok.withOpacity(_isHovered ? 0.9 : 0.5), size: 24),
+          child: GlassContainer(
+            opacity: _isHovered ? 0.07 : 0.04,
+            blur: 18,
+            borderRadius: 24,
+            padding: EdgeInsets.zero,
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // Flush left neon side indicator bar
+                  Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [activeColor.withOpacity(0.2), activeColor],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
+                  ),
+                  
+                  // Card body
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            brand,
-                            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 16),
+                          Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  color: _isHovered ? activeColor.withOpacity(0.15) : Colors.white.withOpacity(0.02),
+                                  border: Border.all(color: _isHovered ? activeColor.withOpacity(0.3) : Colors.white.withOpacity(0.05)),
+                                ),
+                                child: Center(
+                                  child: Icon(_getIcon(category), color: _isHovered ? activeColor : Colors.white60, size: 20),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      brand,
+                                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: Colors.white, fontSize: 15),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${category.replaceAll('_', ' ')} • $model',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              _StatusIndicator(label: 'VERIFIED', color: CybersightTheme.ok, isHovered: _isHovered),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '$category • $model',
-                            style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w500, letterSpacing: 0.5),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              _MetaTag(label: spec['label']!, value: spec['value']!, color: activeColor),
+                              const SizedBox(width: 24),
+                              _MetaTag(label: 'LAST SCAN', value: formattedDate, color: Colors.white30),
+                              const Spacer(),
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 200),
+                                opacity: _isHovered ? 1.0 : 0.3,
+                                child: Icon(Icons.arrow_forward_ios_rounded, color: activeColor, size: 13),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    _StatusIndicator(label: 'VERIFIED', color: CybersightTheme.ok),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    _MetaTag(label: spec['label']!, value: spec['value']!),
-                    const SizedBox(width: 24),
-                    _MetaTag(label: 'LAST SCAN', value: formattedDate),
-                    const Spacer(),
-                    AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: _isHovered ? 1.0 : 0.3,
-                      child: const Icon(Icons.arrow_forward_ios_rounded, color: CybersightTheme.ok, size: 14),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -602,26 +743,46 @@ class _InventoryCardState extends State<_InventoryCard> {
 class _StatusIndicator extends StatelessWidget {
   final String label;
   final Color color;
-  const _StatusIndicator({required this.label, required this.color});
+  final bool isHovered;
+  const _StatusIndicator({required this.label, required this.color, this.isHovered = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withOpacity(0.04),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Blinking custom indicator icon
           Container(
             width: 5, height: 5,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: color, boxShadow: [BoxShadow(color: color, blurRadius: 4)]),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, 
+              color: color, 
+              boxShadow: [
+                BoxShadow(
+                  color: color, 
+                  blurRadius: isHovered ? 6 : 3,
+                  spreadRadius: isHovered ? 1 : 0,
+                )
+              ]
+            ),
           ),
           const SizedBox(width: 8),
-          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w600, color: color, letterSpacing: 0.5)),
+          Text(
+            label, 
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 8, 
+              fontWeight: FontWeight.w800, 
+              color: color, 
+              letterSpacing: 0.5
+            )
+          ),
         ],
       ),
     );
@@ -631,16 +792,24 @@ class _StatusIndicator extends StatelessWidget {
 class _MetaTag extends StatelessWidget {
   final String label;
   final String value;
-  const _MetaTag({required this.label, required this.value});
+  final Color color;
+  const _MetaTag({required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w600, color: Colors.white24, letterSpacing: 1.0)),
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white24, letterSpacing: 1.0)),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70)),
+        Text(
+          value, 
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12, 
+            fontWeight: FontWeight.bold, 
+            color: color == Colors.white30 ? Colors.white70 : color
+          )
+        ),
       ],
     );
   }

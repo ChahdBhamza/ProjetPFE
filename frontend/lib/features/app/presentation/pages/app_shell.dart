@@ -9,6 +9,7 @@ import '../../../../core/design_system/cybersight_theme.dart';
 import 'equipment_page.dart';
 import 'inventory_page.dart';
 import 'profile_page.dart';
+import 'admin_dashboard_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -25,10 +26,11 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
   // Set to 15 minutes for standard operation
   static const int _inactivityTimeoutMinutes = 15;
 
-  List<Widget> _buildPages() {
+  List<Widget> _buildPages(bool isAdmin) {
     return [
       const EquipmentPage(),
       InventoryPage(isActive: _index == 1),
+      if (isAdmin) const AdminDashboardPage(),
       const ProfilePage(),
     ];
   }
@@ -88,6 +90,13 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final bool isAdmin = authProvider.isAdmin;
+    final pages = _buildPages(isAdmin);
+    
+    // Safety clamp to prevent index out of bounds when switching roles
+    final activeIndex = _index.clamp(0, pages.length - 1);
+
     return Listener(
       onPointerDown: (_) => _resetInactivityTimer(),
       onPointerMove: (_) => _resetInactivityTimer(),
@@ -106,7 +115,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
                 ),
               ),
               Positioned.fill(
-                child: IndexedStack(index: _index, children: _buildPages()),
+                child: IndexedStack(index: activeIndex, children: pages),
               ),
             ],
           ),
@@ -118,7 +127,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
               borderRadius: 18,
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: BottomNavigationBar(
-                currentIndex: _index,
+                currentIndex: activeIndex,
                 onTap: (v) => setState(() => _index = v),
                 type: BottomNavigationBarType.fixed,
                 elevation: 0,
@@ -128,16 +137,21 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
                 showUnselectedLabels: true,
                 selectedFontSize: 11,
                 unselectedFontSize: 11,
-                items: const [
-                  BottomNavigationBarItem(
+                items: [
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.upload_rounded),
                     label: 'Detect',
                   ),
-                  BottomNavigationBarItem(
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.inventory_2_outlined),
                     label: 'Inventory',
                   ),
-                  BottomNavigationBarItem(
+                  if (isAdmin)
+                    const BottomNavigationBarItem(
+                      icon: Icon(Icons.dashboard_rounded),
+                      label: 'Admin',
+                    ),
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.person_outline_rounded),
                     label: 'Profile',
                   ),

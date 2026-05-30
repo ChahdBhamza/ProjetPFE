@@ -529,6 +529,14 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
                     ),
                   ),
                 ),
+                // Camera viewfinder corner brackets
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _ViewfinderCornersPainter(
+                      color: isSelected ? CybersightTheme.accent : Colors.white.withValues(alpha: 0.15),
+                    ),
+                  ),
+                ),
                 if (frame['is_hero'] == true)
                   Positioned(
                     top: 10,
@@ -536,17 +544,34 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: CybersightTheme.warning,
+                        color: CybersightTheme.warning.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: CybersightTheme.warning, width: 1.2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CybersightTheme.warning.withValues(alpha: 0.3),
+                            blurRadius: 6,
+                          )
+                        ],
                       ),
-                      child: Text(
-                        'HERO',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: Colors.black,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.5,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 4, height: 4,
+                            decoration: const BoxDecoration(shape: BoxShape.circle, color: CybersightTheme.warning),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'HERO',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -555,38 +580,51 @@ class _ScriptLabPageState extends State<ScriptLabPage> {
                     bottom: 10,
                     right: 10,
                     left: 10,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: CybersightTheme.ok.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(color: CybersightTheme.ok.withValues(alpha: 0.4), blurRadius: 10),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'DETECTED',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: Colors.black,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
-                            ),
+                    child: GlassContainer(
+                      opacity: 0.15,
+                      blur: 15,
+                      borderRadius: 12,
+                      padding: const EdgeInsets.all(6),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: CybersightTheme.ok.withValues(alpha: 0.3), width: 1.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Flashing green active indicator
+                                  _BlinkingDot(color: CybersightTheme.ok),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'DECRYPTED',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: CybersightTheme.ok,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'TAP FOR INFO',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white38,
+                                  fontSize: 7,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'TAP FOR DETAILS',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: Colors.black54,
-                              fontSize: 7,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -839,7 +877,7 @@ class _VerificationCard extends StatefulWidget {
 class _VerificationCardState extends State<_VerificationCard> {
   late TextEditingController _brandController;
   late TextEditingController _modelController;
-  late String _type;
+  late TextEditingController _typeController;
 
   @override
   void initState() {
@@ -848,14 +886,16 @@ class _VerificationCardState extends State<_VerificationCard> {
     final candidates = forensic['model_candidates'] as List? ?? [];
     final topCandidate = candidates.isNotEmpty ? candidates.first : {};
     
-    _type = forensic['equipment_category']?.toString() ?? forensic['equipment_type']?.toString() ?? 'Equipment';
+    final detectedType = forensic['equipment_category']?.toString() ?? forensic['equipment_type']?.toString() ?? '';
     
+    _typeController = TextEditingController(text: detectedType);
     _brandController = TextEditingController(text: forensic['brand']?.toString() ?? 'Unknown');
     _modelController = TextEditingController(text: topCandidate['model']?.toString() ?? '');
   }
 
   @override
   void dispose() {
+    _typeController.dispose();
     _brandController.dispose();
     _modelController.dispose();
     super.dispose();
@@ -864,6 +904,9 @@ class _VerificationCardState extends State<_VerificationCard> {
   @override
   Widget build(BuildContext context) {
     final aiImage = widget.detection['ai_image'] ?? widget.detection['image'];
+    final displayType = _typeController.text.trim().isNotEmpty
+        ? _typeController.text.trim().toUpperCase()
+        : 'EQUIPMENT';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -908,7 +951,7 @@ class _VerificationCardState extends State<_VerificationCard> {
                           Icon(widget.icon, color: CybersightTheme.accent, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            _type.toUpperCase(),
+                            displayType,
                             style: GoogleFonts.plusJakartaSans(
                               color: CybersightTheme.accent,
                               fontSize: 12,
@@ -939,6 +982,15 @@ class _VerificationCardState extends State<_VerificationCard> {
                     ),
                     const SizedBox(height: 16),
                     
+                    // Editable Equipment Type Field
+                    _buildInputField(
+                      'EQUIPMENT TYPE',
+                      _typeController,
+                      hint: 'e.g. Laptop, Microwave, Refrigerator…',
+                      onChanged: (_) => setState(() {}),
+                    ),
+                    const SizedBox(height: 16),
+
                     // Editable Brand Field
                     _buildInputField('BRAND', _brandController),
                     const SizedBox(height: 16),
@@ -951,7 +1003,11 @@ class _VerificationCardState extends State<_VerificationCard> {
                       label: 'Verify & Fetch Specs',
                       isFullWidth: true,
                       onTap: () {
-                        widget.onVerify(_brandController.text.trim(), _modelController.text.trim(), _type);
+                        widget.onVerify(
+                          _brandController.text.trim(),
+                          _modelController.text.trim(),
+                          _typeController.text.trim(),
+                        );
                       },
                     ),
                   ],
@@ -964,7 +1020,12 @@ class _VerificationCardState extends State<_VerificationCard> {
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
+  Widget _buildInputField(
+    String label,
+    TextEditingController controller, {
+    String? hint,
+    void Function(String)? onChanged,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -980,11 +1041,19 @@ class _VerificationCardState extends State<_VerificationCard> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
+          onChanged: onChanged,
           style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.black.withValues(alpha: 0.3),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            hintText: hint,
+            hintStyle: GoogleFonts.plusJakartaSans(
+              color: Colors.white24,
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              fontStyle: FontStyle.italic,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
@@ -1001,6 +1070,111 @@ class _VerificationCardState extends State<_VerificationCard> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ViewfinderCornersPainter extends CustomPainter {
+  final Color color;
+  _ViewfinderCornersPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final double len = 10.0; // corner line length
+    final double pad = 8.0; // corner padding
+
+    // Top Left Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(pad + len, pad)
+          ..lineTo(pad, pad)
+          ..lineTo(pad, pad + len),
+        paint);
+
+    // Top Right Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(size.width - pad - len, pad)
+          ..lineTo(size.width - pad, pad)
+          ..lineTo(size.width - pad, pad + len),
+        paint);
+
+    // Bottom Left Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(pad + len, size.height - pad)
+          ..lineTo(pad, size.height - pad)
+          ..lineTo(pad, size.height - pad - len),
+        paint);
+
+    // Bottom Right Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(size.width - pad - len, size.height - pad)
+          ..lineTo(size.width - pad, size.height - pad)
+          ..lineTo(size.width - pad, size.height - pad - len),
+        paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _BlinkingDot extends StatefulWidget {
+  final Color color;
+  const _BlinkingDot({required this.color});
+
+  @override
+  State<_BlinkingDot> createState() => _BlinkingDotState();
+}
+
+class _BlinkingDotState extends State<_BlinkingDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _controller.value,
+          child: Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.color,
+              boxShadow: [
+                BoxShadow(
+                  color: widget.color,
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

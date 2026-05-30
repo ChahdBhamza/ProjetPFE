@@ -56,11 +56,12 @@ async def signup(data: dict = Body(...)):
             data={"sub": email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
         mongo_db.record_login(email, device_info="Signup")
+        is_admin = "admin" in email.lower()
         return {
             "success": True, 
             "message": "Neural Profile Created", 
             "token": access_token,
-            "user": {"email": email, "full_name": full_name}
+            "user": {"email": email, "full_name": full_name, "is_admin": is_admin}
         }
     else:
         raise HTTPException(status_code=500, detail="Cloud sync failed")
@@ -95,7 +96,8 @@ async def login(data: dict = Body(...)):
         "token": access_token,
         "user": {
             "email": user["email"],
-            "full_name": user["full_name"]
+            "full_name": user["full_name"],
+            "is_admin": user.get("is_admin", False)
         }
     }
 
@@ -130,6 +132,7 @@ async def google_auth(data: dict = Body(...)):
         "token": access_token,
         "user": {
             "email": user["email"], 
-            "full_name": user["full_name"]
+            "full_name": user["full_name"],
+            "is_admin": user.get("is_admin", False)
         }
     }

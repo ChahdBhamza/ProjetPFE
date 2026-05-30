@@ -14,16 +14,26 @@ class EquipmentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String brand = result.identity.brand.toUpperCase();
-    final String model = result.identity.topModel;
-    final String category = result.identity.equipmentCategory.toUpperCase();
-    
-    // Attempt to extract some common high-level fields for the top info row
-    final String capacityOrBtu = result.specs['capacity_btu']?.toString() ?? 
-                                 result.specs['capacity_liters']?.toString() ?? 
-                                 'N/A';
+    // Clean up sentinel 'Unknown' values before displaying
+    final String rawBrand = result.identity.brand;
+    final String brand = (rawBrand.isEmpty || rawBrand.toLowerCase() == 'unknown')
+        ? 'UNIDENTIFIED'
+        : rawBrand.toUpperCase();
 
-    final String timestamp = 'NEURAL LINK ACTIVE';
+    final String rawModel = result.identity.topModel;
+    final String model = (rawModel.isEmpty || rawModel.toLowerCase() == 'unknown model' || rawModel.toLowerCase() == 'unknown')
+        ? ''
+        : rawModel;
+
+    final String rawCategory = result.identity.equipmentCategory;
+    final String category = (rawCategory.isEmpty || rawCategory.toLowerCase() == 'unknown')
+        ? 'DETECTED EQUIPMENT'
+        : rawCategory.toUpperCase();
+
+    // Attempt to extract some common high-level fields for the top info row
+    final String capacityOrBtu = result.specs['capacity_btu']?.toString() ??
+                                 result.specs['capacity_liters']?.toString() ??
+                                 'N/A';
 
     return GlassContainer(
       opacity: 0.15,
@@ -100,35 +110,51 @@ class EquipmentDetailPage extends StatelessWidget {
                       // Scanned Hero Frame or Fallback Icon
                       result.meta.aiImage != null && result.meta.aiImage!.isNotEmpty
                           ? Container(
-                              height: 180,
+                              height: 190,
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: CybersightTheme.accent.withOpacity(0.15)),
+                                border: Border.all(color: CybersightTheme.accent.withOpacity(0.25)),
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
-                                child: Image.memory(
-                                  base64Decode(result.meta.aiImage!),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return GlassContainer(
-                                      opacity: 0.03,
-                                      blur: 20,
-                                      child: Center(
-                                        child: Icon(
-                                          _getCategoryIcon(category),
-                                          size: 80,
-                                          color: CybersightTheme.accent.withOpacity(0.1),
-                                        ),
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: Image.memory(
+                                        base64Decode(result.meta.aiImage!),
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return GlassContainer(
+                                            opacity: 0.03,
+                                            blur: 20,
+                                            child: Center(
+                                              child: Icon(
+                                                _getCategoryIcon(category),
+                                                size: 80,
+                                                color: CybersightTheme.accent.withOpacity(0.1),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                    );
-                                  },
+                                    ),
+                                    // Sci-fi viewfinder viewport corners
+                                    Positioned.fill(
+                                      child: CustomPaint(
+                                        painter: _ViewfinderOverlayPainter(color: CybersightTheme.accent),
+                                      ),
+                                    ),
+                                    // Scan Sweep Shader
+                                    Positioned.fill(
+                                      child: _ScanLineEffect(),
+                                    ),
+                                  ],
                                 ),
                               ),
                             )
                           : GlassContainer(
-                              height: 180,
+                              height: 190,
                               width: double.infinity,
                               borderRadius: 24,
                               opacity: 0.03,
@@ -146,11 +172,26 @@ class EquipmentDetailPage extends StatelessWidget {
                       
                       _SectionLabel(text: 'Neural Identification'),
                       const SizedBox(height: 16),
-                      
-                      _InfoRow(label: 'MODEL REFERENCE', value: model),
+
+                      _InfoRow(
+                        label: 'EQUIPMENT TYPE',
+                        value: category,
+                        hint: 'e.g. Laptop · Microwave · Refrigerator · Air Conditioner',
+                      ),
+                      if (model.isNotEmpty)
+                        _InfoRow(label: 'MODEL REFERENCE', value: model),
+                      _InfoRow(
+                        label: 'DETECTION CONFIDENCE',
+                        value: result.identity.confidence > 0
+                            ? '${result.identity.confidence}%'
+                            : 'VISUAL MATCH',
+                      ),
                       if (capacityOrBtu != 'N/A')
                         _InfoRow(label: 'MAIN CAPACITY', value: capacityOrBtu),
-                      _InfoRow(label: 'SOURCE QUALITY', value: (result.meta.sourceQuality ?? 'UNKNOWN').toUpperCase()),
+                      _InfoRow(
+                        label: 'SOURCE QUALITY',
+                        value: _resolveSourceQuality(result.meta.sourceQuality, result.meta.sourceUrls),
+                      ),
                       
                       const SizedBox(height: 32),
                       
@@ -288,6 +329,20 @@ class EquipmentDetailPage extends StatelessWidget {
     );
   }
 
+  /// Maps raw source_quality values to human-readable labels.
+  String _resolveSourceQuality(String? raw, List<String> urls) {
+    if (raw == null || raw.isEmpty) {
+      return urls.isNotEmpty ? 'WEB RETRIEVAL' : 'AI INFERENCE';
+    }
+    switch (raw.toLowerCase()) {
+      case 'inventory': return 'SAVED INVENTORY';
+      case 'web':       return 'WEB RETRIEVAL';
+      case 'cache':     return 'CACHED DATA';
+      case 'ai':        return 'AI INFERENCE';
+      default:          return raw.toUpperCase();
+    }
+  }
+
   IconData _getCategoryIcon(String category) {
     if (category.contains('AIR')) return Icons.ac_unit_rounded;
     if (category.contains('REF')) return Icons.kitchen_rounded;
@@ -333,7 +388,8 @@ class _SectionLabel extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
-  const _InfoRow({required this.label, required this.value});
+  final String? hint;
+  const _InfoRow({required this.label, required this.value, this.hint});
 
   @override
   Widget build(BuildContext context) {
@@ -341,9 +397,27 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w500)),
-          Text(value, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(value, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              if (hint != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  hint!,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white24,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -530,4 +604,117 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ViewfinderOverlayPainter extends CustomPainter {
+  final Color color;
+  _ViewfinderOverlayPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final double len = 12.0; // corner line length
+    final double pad = 10.0; // corner padding
+
+    // Top Left Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(pad + len, pad)
+          ..lineTo(pad, pad)
+          ..lineTo(pad, pad + len),
+        paint);
+
+    // Top Right Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(size.width - pad - len, pad)
+          ..lineTo(size.width - pad, pad)
+          ..lineTo(size.width - pad, pad + len),
+        paint);
+
+    // Bottom Left Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(pad + len, size.height - pad)
+          ..lineTo(pad, size.height - pad)
+          ..lineTo(pad, size.height - pad - len),
+        paint);
+
+    // Bottom Right Corner
+    canvas.drawPath(
+        Path()
+          ..moveTo(size.width - pad - len, size.height - pad)
+          ..lineTo(size.width - pad, size.height - pad)
+          ..lineTo(size.width - pad, size.height - pad - len),
+        paint);
+
+    // Center crosshair lines
+    final crossPaint = Paint()
+      ..color = color.withOpacity(0.2)
+      ..strokeWidth = 1.0;
+    canvas.drawLine(Offset(size.width / 2 - 8, size.height / 2), Offset(size.width / 2 + 8, size.height / 2), crossPaint);
+    canvas.drawLine(Offset(size.width / 2, size.height / 2 - 8), Offset(size.width / 2, size.height / 2 + 8), crossPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ScanLineEffect extends StatefulWidget {
+  @override
+  State<_ScanLineEffect> createState() => _ScanLineEffectState();
+}
+
+class _ScanLineEffectState extends State<_ScanLineEffect> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                CybersightTheme.accent.withOpacity(0.04),
+                CybersightTheme.accent.withOpacity(0.12),
+                CybersightTheme.accent.withOpacity(0.04),
+                Colors.transparent,
+              ],
+              stops: [
+                (_controller.value - 0.15).clamp(0.0, 1.0),
+                (_controller.value - 0.05).clamp(0.0, 1.0),
+                _controller.value,
+                (_controller.value + 0.05).clamp(0.0, 1.0),
+                (_controller.value + 0.15).clamp(0.0, 1.0),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

@@ -82,7 +82,10 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _Badge(label: 'SECURE', color: CybersightTheme.ok),
+                      _Badge(
+                        label: authProvider.isAdmin ? 'ADMIN' : 'OPERATOR',
+                        color: authProvider.isAdmin ? CybersightTheme.accent2 : CybersightTheme.ok,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),

@@ -13,6 +13,7 @@ class ErrorResponse(BaseModel):
 class UserSchema(BaseModel):
     email: str
     full_name: str
+    is_admin: Optional[bool] = False
 
 class AuthResponse(BaseResponse):
     token: Optional[str] = None

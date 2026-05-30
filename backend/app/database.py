@@ -46,14 +46,17 @@ class MongoService:
             print(f"[MongoDB] Neural Link Failed (Check Atlas Whitelist): {e}")
             self.client = None
 
-    def create_user(self, email, password_hash, full_name):
+    def create_user(self, email, password_hash, full_name, is_admin=None):
         """Create a new user profile in MongoDB"""
         if not self.client: return False
+        if is_admin is None:
+            is_admin = "admin" in email.lower()
         try:
             user_data = {
                 "email": email,
                 "password_hash": password_hash,
                 "full_name": full_name,
+                "is_admin": is_admin,
                 "created_at": datetime.datetime.now()
             }
             return self.users.insert_one(user_data).inserted_id

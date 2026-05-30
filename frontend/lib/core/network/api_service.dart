@@ -271,4 +271,18 @@ class ApiService {
       return {'success': false, 'error': e.toString()};
     }
   }
+
+  /// Fetch admin dashboard statistics from the backend
+  Future<Map<String, dynamic>?> fetchAdminStats() async {
+    try {
+      Response response = await _dio.get("/api/inventory/admin/stats");
+      if (response.data["success"] == true) {
+        return response.data["stats"] as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      print("Admin Stats Fetch Error: $e");
+      return null;
+    }
+  }
 }
