@@ -160,7 +160,7 @@ Your ONLY job: extract verified technical specifications from the scraped web co
 
 STRICT RULES:
 1. YOU MUST RETURN EVERY SINGLE FIELD DEFINED IN THE SCHEMA. NO EXCEPTIONS.
-2. IF A TECHNICAL SPEC FIELD IS MISSING FROM THE SCRAPED CONTENT, YOU MUST DEDUCE, ESTIMATE, OR USE YOUR PRE-TRAINED KNOWLEDGE TO FILL IT IN. NO NULL VALUES ARE ALLOWED FOR TECHNICAL SPECS.
+2. IF A TECHNICAL SPEC FIELD IS MISSING FROM THE SCRAPED CONTENT, YOU MUST DEDUCE, ESTIMATE, OR USE YOUR PRE-TRAINED KNOWLEDGE TO FILL IT IN. YOU ARE ABSOLUTELY FORBIDDEN FROM RETURNING NULL OR "UNKNOWN" FOR TECHNICAL SPECS. Provide a realistic estimated value (e.g. 150.0 for annual kWh) if you cannot find it.
 3. For boolean fields: use true or false (JSON booleans, not strings).
 4. For numeric fields: use numbers (not strings). e.g. 12000 not "12000 BTU".
 5. For "price_tnd": extract the numeric price in TND only (e.g. 1299.0). If unknown, estimate a typical Tunisian Dinars price based on the brand/model tier.

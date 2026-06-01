@@ -71,12 +71,28 @@ class WorkflowService:
                     image_path = clean_path
 
             # 1. Run workflow via SDK (Detection + Annotation) on the clean frame
-            result = self.client.run_workflow(
-                workspace_name=self.workspace,
-                workflow_id=self.workflow_id,
-                images={"image": image_path},
-                use_cache=False
-            )
+            import time
+            max_retries = 4
+            result = None
+            for attempt in range(max_retries):
+                try:
+                    result = self.client.run_workflow(
+                        workspace_name=self.workspace,
+                        workflow_id=self.workflow_id,
+                        images={"image": image_path},
+                        use_cache=False
+                    )
+                    break
+                except Exception as api_err:
+                    if "503" in str(api_err) or "500" in str(api_err) or "store full" in str(api_err).lower():
+                        if attempt < max_retries - 1:
+                            wait_time = (attempt + 1) * 2  # 2s, 4s, 6s
+                            print(f"⚠️ Roboflow Server busy (503). Retrying in {wait_time}s... (Attempt {attempt + 1}/{max_retries})")
+                            time.sleep(wait_time)
+                        else:
+                            raise api_err
+                    else:
+                        raise api_err
 
             item = result[0] if result and isinstance(result, list) else {}
             display_b64 = item.get("annotated_image")

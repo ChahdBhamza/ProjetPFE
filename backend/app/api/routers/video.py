@@ -12,7 +12,7 @@ import base64
 
 # ── Shared helper: build standardised equipment_result block ─────────────────
 
-def build_equipment_result(forensic_data: dict, specs: dict | None = None, ai_image: str | None = None) -> dict:
+def build_equipment_result(forensic_data: dict, specs: dict | None = None, ai_image: str | None = None, raw_image: str | None = None) -> dict:
     """
     Converts raw forensic_data (from frame_detector) + optional specs (from
     spec_service) into the standardised equipment_result dict expected by Flutter.
@@ -21,19 +21,22 @@ def build_equipment_result(forensic_data: dict, specs: dict | None = None, ai_im
 
     candidates = forensic_data.get("model_candidates", [])
     top = candidates[0] if candidates else {}
-    brand = (forensic_data.get("brand") or "Unknown").strip()
+    brand = ((specs or {}).get("brand") or forensic_data.get("brand") or "Unknown").strip()
     raw_category = (
-        forensic_data.get("equipment_category")
+        (specs or {}).get("equipment_category")
+        or forensic_data.get("equipment_category")
         or forensic_data.get("equipment_type")
         or "unknown"
     )
     category = normalize_category(raw_category)
 
+    final_model = (specs or {}).get("model") or top.get("model") or "Unknown Model"
+
     return {
         "identity": {
             "equipment_category": category,
             "brand": brand,
-            "top_model": (top.get("model") or "Unknown Model").strip(),
+            "top_model": final_model.strip(),
             "confidence": top.get("confidence", 0),
             "all_candidates": candidates,
             "visual_cues": forensic_data.get("visual_cues", []),
@@ -47,7 +50,7 @@ def build_equipment_result(forensic_data: dict, specs: dict | None = None, ai_im
             "pipeline": (specs or {}).get("pipeline"),
             "summary": (specs or {}).get("summary"),
             "verified": (specs or {}).get("verified", False),
-            "ai_image": ai_image or (specs or {}).get("ai_image") or forensic_data.get("ai_image"),
+            "ai_image": ai_image or (specs or {}).get("ai_image") or forensic_data.get("ai_image") or raw_image,
         },
     }
 
@@ -171,7 +174,7 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
     # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:
         fd = frame.get("forensic_data") or {}
-        frame["equipment_result"] = build_equipment_result(fd, None, frame.get("ai_image"))
+        frame["equipment_result"] = build_equipment_result(fd, None, frame.get("ai_image"), frame.get("raw_image"))
         
         # Log the raw AI detection to MongoDB
         mongo_db.log_detection(req.session_id, fd)

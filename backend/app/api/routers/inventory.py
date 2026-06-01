@@ -5,6 +5,48 @@ from app.api.dependencies import verify_token
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
+
+def _text_value(*values) -> str:
+    for value in values:
+        if value is not None:
+            return str(value).strip().lower()
+    return ""
+
+
+def _is_unknown_value(value: str) -> bool:
+    return (
+        not value
+        or value in {"n/a", "na", "none", "null", "-"}
+        or value.startswith("unknown")
+        or value.startswith("unkown")
+    )
+
+
+def _is_unknown_unknown_item(item: dict) -> bool:
+    identity = item.get("identity") or {}
+    metadata = item.get("metadata") or {}
+    specs = item.get("specs") or metadata.get("specs") or {}
+
+    brand = _text_value(
+        item.get("brand"),
+        identity.get("brand"),
+        metadata.get("brand"),
+        specs.get("brand"),
+    )
+    model = _text_value(
+        item.get("model"),
+        item.get("model_name"),
+        identity.get("top_model"),
+        identity.get("model"),
+        metadata.get("model"),
+        metadata.get("model_name"),
+        metadata.get("top_model"),
+        specs.get("model"),
+        specs.get("model_name"),
+    )
+
+    return _is_unknown_value(brand) and _is_unknown_value(model)
+
 @router.post("/save", response_model=BaseResponse)
 async def save_to_inventory(data: dict = Body(...), current_email: str = Depends(verify_token)):
     """Save an item to the authenticated user's inventory"""
@@ -18,6 +60,10 @@ async def save_to_inventory(data: dict = Body(...), current_email: str = Depends
 async def get_inventory(current_email: str = Depends(verify_token)):
     """Fetch the authenticated user's inventory"""
     inventory = mongo_db.get_user_inventory(current_email)
+    user = mongo_db.find_user_by_email(current_email)
+    if user and user.get("is_admin", False):
+        inventory = [item for item in inventory if not _is_unknown_unknown_item(item)]
+
     for item in inventory:
         if "added_at" in item:
             item["added_at"] = item["added_at"].isoformat()
@@ -28,6 +74,10 @@ async def get_inventory(current_email: str = Depends(verify_token)):
 async def filter_inventory(filters: dict = Body(...), current_email: str = Depends(verify_token)):
     """Filter the authenticated user's inventory using dynamic criteria"""
     inventory = mongo_db.filter_user_inventory(current_email, filters)
+    user = mongo_db.find_user_by_email(current_email)
+    if user and user.get("is_admin", False):
+        inventory = [item for item in inventory if not _is_unknown_unknown_item(item)]
+
     for item in inventory:
         if "added_at" in item:
             try:

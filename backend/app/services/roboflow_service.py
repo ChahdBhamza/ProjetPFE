@@ -1,5 +1,6 @@
 
 import os
+import time
 import requests
 import base64
 from io import BytesIO
@@ -77,10 +78,11 @@ class RoboflowService:
             })
         return normalized
 
-    def detect(self, image: Image.Image, workflow_id="detect-count-and-visualize", quiet=False):
+    def detect(self, image: Image.Image, workflow_id="detect-count-and-visualize", quiet=False, max_retries=3):
         """
         Run a Roboflow workflow on a PIL image using raw HTTP requests (Python 3.13 compatible).
         Returns detections plus optional cloud-rendered annotated_image (base64).
+        Retries automatically on 503/429 (queue full / rate limit) with exponential backoff.
         """
         buffered = BytesIO()
         image.save(buffered, format="JPEG", quality=90)
@@ -97,14 +99,34 @@ class RoboflowService:
             }
         }
 
-        if not quiet:
-            print(f"[Roboflow] Calling workflow: {workflow_id}...")
-        response = requests.post(url, json=payload, timeout=45)
+        _retryable = {429, 500, 502, 503, 504}
 
-        if not quiet:
-            print(f"[Roboflow] Response status: {response.status_code}")
+        for attempt in range(1, max_retries + 1):
+            if not quiet:
+                print(f"[Roboflow] Calling workflow: {workflow_id} (attempt {attempt}/{max_retries})...")
 
-        if response.status_code != 200:
+            try:
+                response = requests.post(url, json=payload, timeout=45)
+            except requests.exceptions.RequestException as e:
+                if attempt == max_retries:
+                    return {"error": f"Roboflow request failed: {e}"}
+                wait = 2 ** attempt
+                print(f"[Roboflow] Network error: {e}. Retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+
+            if not quiet:
+                print(f"[Roboflow] Response status: {response.status_code}")
+
+            if response.status_code == 200:
+                break
+
+            if response.status_code in _retryable and attempt < max_retries:
+                wait = 2 ** attempt
+                print(f"[Roboflow] {response.status_code} — queue full or overloaded. Retrying in {wait}s...")
+                time.sleep(wait)
+                continue
+
             if not quiet:
                 print(f"[Roboflow] Error: {response.text[:300]}")
             return {"error": f"Roboflow API failed: {response.status_code}", "details": response.text}

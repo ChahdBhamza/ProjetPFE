@@ -905,7 +905,7 @@ class _VerificationCarouselSheetState
   String _fetchingLabel = '';
 
   Future<void> _fetchSpecs(
-      String brand, String modelName, String type) async {
+      String brand, String modelName, String type, String? frameImage, {int confidence = 0}) async {
     setState(() {
       _isFetchingSpecs = true;
       _fetchingLabel = '$brand $modelName';
@@ -916,8 +916,25 @@ class _VerificationCarouselSheetState
       if (mounted) {
         Navigator.of(context).pop();
         if (specRes['equipment_result'] != null) {
-          final equipmentResult =
-              EquipmentResult.fromJson(specRes['equipment_result']);
+          // Cast to mutable typed map so assignments actually stick
+          final equipResult = Map<String, dynamic>.from(
+              specRes['equipment_result'] as Map);
+
+          if (frameImage != null) {
+            final meta = Map<String, dynamic>.from(
+                (equipResult['meta'] as Map?) ?? {});
+            meta['ai_image'] = frameImage;
+            equipResult['meta'] = meta;
+          }
+
+          if (confidence > 0) {
+            final identity = Map<String, dynamic>.from(
+                (equipResult['identity'] as Map?) ?? {});
+            identity['confidence'] = confidence;
+            equipResult['identity'] = identity;
+          }
+
+          final equipmentResult = EquipmentResult.fromJson(equipResult);
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
@@ -1073,16 +1090,31 @@ class _VerificationCarouselSheetState
               onPageChanged: (idx) => setState(() => _currentIndex = idx),
               itemCount: widget.detections.length,
               itemBuilder: (context, index) {
+                final detection = widget.detections[index];
+                final frameImage = detection['ai_image'] ?? detection['raw_image'] ?? detection['image'];
                 return _VerificationCard(
-                  detection: widget.detections[index],
+                  detection: detection,
                   icon: _getEquipmentIcon(
-                    widget.detections[index]['forensic_data']
+                    detection['forensic_data']
                             ?['equipment_category']
                             ?.toString() ??
                         '',
                   ),
-                  onVerify: (brand, model, type) =>
-                      _fetchSpecs(brand, model, type),
+                  onVerify: (brand, model, type) {
+                    final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
+                    final candidates = fd['model_candidates'];
+                    Map<String, dynamic> topCandidate = {};
+                    if (candidates is List && candidates.isNotEmpty) {
+                      final first = candidates.first;
+                      if (first is Map) {
+                        topCandidate = first.cast<String, dynamic>();
+                      }
+                    }
+                    final conf = (topCandidate['confidence'] as num?)?.toInt()
+                        ?? (fd['confidence'] as num?)?.toInt()
+                        ?? 0;
+                    _fetchSpecs(brand, model, type, frameImage?.toString(), confidence: conf);
+                  },
                 );
               },
             ),
@@ -1133,37 +1165,8 @@ class _VerificationCardState extends State<_VerificationCard> {
   late TextEditingController _brandController;
   late TextEditingController _modelController;
   late TextEditingController _typeController;
-  late TextEditingController _colorController;
 
-  // Common color keywords to scan in visual_cues
-  static const _colorWords = [
-    'white', 'black', 'silver', 'grey', 'gray', 'red', 'blue', 'green',
-    'yellow', 'orange', 'brown', 'beige', 'cream', 'gold', 'rose gold',
-    'graphite', 'platinum', 'charcoal', 'navy', 'teal', 'purple', 'pink',
-    'metallic', 'stainless', 'space gray', 'dark', 'light',
-  ];
 
-  String _extractColor(Map<dynamic, dynamic> forensic) {
-    // 1. Direct fields
-    final direct = forensic['color'] ??
-        forensic['dominant_color'] ??
-        forensic['primary_color'] ??
-        forensic['colour'];
-    if (direct != null && direct.toString().trim().isNotEmpty) {
-      return direct.toString().trim();
-    }
-    // 2. Mine from visual_cues
-    final cues = (forensic['visual_cues'] as List? ?? []);
-    for (final cue in cues) {
-      final lower = cue.toString().toLowerCase();
-      for (final kw in _colorWords) {
-        if (lower.contains(kw)) {
-          return kw[0].toUpperCase() + kw.substring(1);
-        }
-      }
-    }
-    return '';
-  }
 
   String _extractType(Map<dynamic, dynamic> forensic) {
     // Try every known field name the backend might use
@@ -1210,7 +1213,6 @@ class _VerificationCardState extends State<_VerificationCard> {
         text: forensic['brand']?.toString().trim() ?? '');
     _modelController = TextEditingController(
         text: topCandidate['model']?.toString().trim() ?? '');
-    _colorController = TextEditingController(text: _extractColor(forensic));
   }
 
   @override
@@ -1218,14 +1220,13 @@ class _VerificationCardState extends State<_VerificationCard> {
     _typeController.dispose();
     _brandController.dispose();
     _modelController.dispose();
-    _colorController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final aiImage =
-        widget.detection['ai_image'] ?? widget.detection['image'];
+        widget.detection['ai_image'] ?? widget.detection['raw_image'] ?? widget.detection['image'];
     final displayType = _typeController.text.trim().isNotEmpty
         ? _typeController.text.trim().toUpperCase()
         : 'EQUIPMENT';
@@ -1321,12 +1322,6 @@ class _VerificationCardState extends State<_VerificationCard> {
                     'MODEL REFERENCE',
                     _modelController,
                     hint: 'e.g. Galaxy Book Pro 360…',
-                  ),
-                  const SizedBox(height: 14),
-                  _buildInputField(
-                    'COLOR',
-                    _colorController,
-                    hint: 'e.g. White, Black, Silver…',
                   ),
                   const SizedBox(height: 24),
                   GlowingButton(

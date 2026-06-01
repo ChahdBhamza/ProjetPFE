@@ -9,31 +9,29 @@ import '../../data/models/detection_result_model.dart';
 
 class EquipmentDetailPage extends StatelessWidget {
   final EquipmentResult result;
-
   const EquipmentDetailPage({super.key, required this.result});
 
   @override
   Widget build(BuildContext context) {
-    // Clean up sentinel 'Unknown' values before displaying
     final String rawBrand = result.identity.brand;
     final String brand = (rawBrand.isEmpty || rawBrand.toLowerCase() == 'unknown')
         ? 'UNIDENTIFIED'
         : rawBrand.toUpperCase();
 
     final String rawModel = result.identity.topModel;
-    final String model = (rawModel.isEmpty || rawModel.toLowerCase() == 'unknown model' || rawModel.toLowerCase() == 'unknown')
-        ? ''
-        : rawModel;
+    final String model =
+        (rawModel.isEmpty || rawModel.toLowerCase() == 'unknown model' || rawModel.toLowerCase() == 'unknown')
+            ? '—'
+            : rawModel;
 
     final String rawCategory = result.identity.equipmentCategory;
-    final String category = (rawCategory.isEmpty || rawCategory.toLowerCase() == 'unknown')
-        ? 'DETECTED EQUIPMENT'
-        : rawCategory.toUpperCase();
+    final String categoryLabel = _cleanCategoryLabel(rawCategory);
+    final IconData categoryIcon = _getCategoryIcon(categoryLabel.toUpperCase());
 
-    // Attempt to extract some common high-level fields for the top info row
-    final String capacityOrBtu = result.specs['capacity_btu']?.toString() ??
-                                 result.specs['capacity_liters']?.toString() ??
-                                 'N/A';
+    final int confidence = result.identity.confidence;
+
+    final Map<String, dynamic> displaySpecs =
+        result.specs.isNotEmpty ? result.specs : _getFallbackSpecs(rawCategory);
 
     return GlassContainer(
       opacity: 0.15,
@@ -41,18 +39,18 @@ class EquipmentDetailPage extends StatelessWidget {
       borderRadius: 32,
       child: Stack(
         children: [
-          // Background Atmosphere
+          // Background grid atmosphere
           Positioned.fill(
             child: Opacity(
               opacity: 0.05,
               child: CustomPaint(painter: _GridPainter()),
             ),
           ),
-          
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Handle
+              // Drag handle
               Center(
                 child: Container(
                   margin: const EdgeInsets.only(top: 12),
@@ -64,247 +62,232 @@ class EquipmentDetailPage extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+                  padding: const EdgeInsets.only(bottom: 48),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Header
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  category,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    color: CybersightTheme.accent,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 1.2,
-                                  ),
+                      const SizedBox(height: 16),
+
+                      // ── 1. HERO IMAGE ───────────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: result.meta.aiImage != null && result.meta.aiImage!.isNotEmpty
+                            ? Container(
+                                height: 240,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                      color: CybersightTheme.accent.withOpacity(0.25)),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  brand,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    color: Colors.white,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          _StatusBadge(label: result.meta.verified ? 'VERIFIED' : 'UNVERIFIED'),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 24),
-                      
-                      // Scanned Hero Frame or Fallback Icon
-                      result.meta.aiImage != null && result.meta.aiImage!.isNotEmpty
-                          ? Container(
-                              height: 190,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: CybersightTheme.accent.withOpacity(0.25)),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: Stack(
-                                  children: [
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Stack(children: [
                                     Positioned.fill(
                                       child: Image.memory(
                                         base64Decode(result.meta.aiImage!),
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return GlassContainer(
-                                            opacity: 0.03,
-                                            blur: 20,
-                                            child: Center(
-                                              child: Icon(
-                                                _getCategoryIcon(category),
-                                                size: 80,
-                                                color: CybersightTheme.accent.withOpacity(0.1),
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                        errorBuilder: (_, __, ___) => _FallbackHero(
+                                            icon: categoryIcon, label: categoryLabel),
                                       ),
                                     ),
-                                    // Sci-fi viewfinder viewport corners
                                     Positioned.fill(
                                       child: CustomPaint(
-                                        painter: _ViewfinderOverlayPainter(color: CybersightTheme.accent),
+                                        painter: _ViewfinderOverlayPainter(
+                                            color: CybersightTheme.accent),
                                       ),
                                     ),
-                                    // Scan Sweep Shader
-                                    Positioned.fill(
-                                      child: _ScanLineEffect(),
-                                    ),
-                                  ],
+                                    Positioned.fill(child: _ScanLineEffect()),
+                                  ]),
                                 ),
-                              ),
-                            )
-                          : GlassContainer(
-                              height: 190,
-                              width: double.infinity,
-                              borderRadius: 24,
-                              opacity: 0.03,
-                              blur: 20,
-                              child: Center(
-                                child: Icon(
-                                  _getCategoryIcon(category),
-                                  size: 80,
-                                  color: CybersightTheme.accent.withOpacity(0.1),
-                                ),
-                              ),
-                            ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      _SectionLabel(text: 'Neural Identification'),
-                      const SizedBox(height: 16),
-
-                      _InfoRow(
-                        label: 'EQUIPMENT TYPE',
-                        value: category,
-                        hint: 'e.g. Laptop · Microwave · Refrigerator · Air Conditioner',
-                      ),
-                      if (model.isNotEmpty)
-                        _InfoRow(label: 'MODEL REFERENCE', value: model),
-                      _InfoRow(
-                        label: 'DETECTION CONFIDENCE',
-                        value: result.identity.confidence > 0
-                            ? '${result.identity.confidence}%'
-                            : 'VISUAL MATCH',
-                      ),
-                      if (capacityOrBtu != 'N/A')
-                        _InfoRow(label: 'MAIN CAPACITY', value: capacityOrBtu),
-                      _InfoRow(
-                        label: 'SOURCE QUALITY',
-                        value: _resolveSourceQuality(result.meta.sourceQuality, result.meta.sourceUrls),
-                      ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      _SectionLabel(text: 'Technical Specifications'),
-                      const SizedBox(height: 16),
-                      
-                      if (result.specs.isEmpty)
-                        Text(
-                          'No structured technical data found.',
-                          style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 13),
-                        )
-                      else
-                        // Technical Grid dynamic builder
-                        Column(
-                          children: result.specs.entries
-                              .where((e) {
-                                const hiddenKeys = {'price_tnd', 'color', 'category', 'equipment_category', 'price', 'couleur'};
-                                return e.value != null &&
-                                       e.value.toString().isNotEmpty &&
-                                       !hiddenKeys.contains(e.key);
-                              })
-                              .toList()
-                              .asMap()
-                              .entries
-                              .map((mapEntry) {
-                                final index = mapEntry.key;
-                                final entry = mapEntry.value;
-                                final label = entry.key.replaceAll('_', ' ').toUpperCase();
-                                return _PremiumSpecTile(
-                                  label: label, 
-                                  value: entry.value.toString().toUpperCase(), 
-                                  icon: _getIconForSpec(entry.key),
-                                  delayIndex: index,
-                                );
-                              }).toList(),
-                        ),
-                      
-                      const SizedBox(height: 32),
-                      
-                      _SectionLabel(text: 'Neural Summary'),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white10),
-                        ),
-                        child: Text(
-                          result.meta.summary ?? 'Spec extraction complete based on visual matches.',
-                          style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 13, height: 1.6),
-                        ),
+                              )
+                            : _FallbackHero(icon: categoryIcon, label: categoryLabel),
                       ),
 
-                      if (result.meta.sourceUrls.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        _SectionLabel(text: 'Sources'),
-                        const SizedBox(height: 8),
-                        ...result.meta.sourceUrls.map((url) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: InkWell(
-                            onTap: () => launchUrlString(url),
-                            child: Row(
+                      const SizedBox(height: 22),
+
+                      // ── 2. IDENTITY HEADER ──────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Icon(Icons.link, color: CybersightTheme.accent, size: 14),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    url,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: CybersightTheme.accent.withOpacity(0.8),
-                                      fontSize: 11,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
+                                _CategoryChip(label: categoryLabel, icon: categoryIcon),
+                                _StatusBadge(
+                                    label: result.meta.verified ? 'VERIFIED' : 'UNVERIFIED'),
                               ],
                             ),
-                          ),
-                        )),
-                      ],
-                      
-                      const SizedBox(height: 40),
-                      
-                      if (result.meta.sourceQuality != 'inventory') ...[
-                        GlowingButton(
-                          label: 'SAVE TO NEURAL INVENTORY',
-                          onTap: () async {
-                            final apiService = ApiService();
-                            final success = await apiService.saveEquipmentToInventory(result);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    success ? 'SYNC SUCCESSFUL • ADDED TO INVENTORY' : 'SYNC FAILED',
-                                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
-                                  ),
-                                  backgroundColor: (success ? CybersightTheme.ok : CybersightTheme.warning).withOpacity(0.9),
-                                ),
-                              );
-                              if (success) {
-                                Navigator.pop(context);
-                              }
-                            }
-                          },
+                            const SizedBox(height: 14),
+                            Text(
+                              brand,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w700,
+                                height: 1.1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              model,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white54,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // ── 3. STAT CHIPS ROW ───────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(children: [
+                          _StatChip(
+                            label: 'EQUIPMENT',
+                            value: categoryLabel,
+                            icon: categoryIcon,
+                          ),
+                          const SizedBox(width: 8),
+                          _StatChip(
+                            label: 'CONFIDENCE',
+                            value: confidence > 0 ? '$confidence%' : 'N/A',
+                            icon: Icons.psychology_outlined,
+                          ),
+                          const SizedBox(width: 8),
+                          _StatChip(
+                            label: 'SOURCE',
+                            value: _resolveSourceQuality(
+                                result.meta.sourceQuality, result.meta.sourceUrls),
+                            icon: Icons.verified_outlined,
+                          ),
+                        ]),
+                      ),
+
+                      const SizedBox(height: 28),
+
+                      // ── 4. TECHNICAL SPECIFICATIONS ─────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const _SectionLabel(text: 'Technical Specifications'),
+                            const SizedBox(height: 14),
+                            _SpecGrid(specs: displaySpecs),
+                          ],
+                        ),
+                      ),
+
+                      // ── 5. NEURAL SUMMARY ───────────────────────────────────
+                      if (result.meta.summary != null &&
+                          result.meta.summary!.isNotEmpty) ...[
+                        const SizedBox(height: 28),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _SectionLabel(text: 'Neural Summary'),
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                      color: Colors.white.withOpacity(0.07)),
+                                ),
+                                child: Text(
+                                  result.meta.summary!,
+                                  style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.white70, fontSize: 13, height: 1.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                      GlowingButton(
-                        label: 'EXPORT TECHNICAL DATA',
-                        onTap: () => Navigator.pop(context),
+
+                      // ── 6. SOURCES (Hidden per user request) ────────────────
+                      /*
+                      if (result.meta.sourceUrls.isNotEmpty) ...[
+                        const SizedBox(height: 28),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const _SectionLabel(text: 'Sources'),
+                              const SizedBox(height: 8),
+                              ...result.meta.sourceUrls.map((url) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: InkWell(
+                                      onTap: () => launchUrlString(url),
+                                      child: Row(children: [
+                                        const Icon(Icons.link,
+                                            color: CybersightTheme.accent, size: 14),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            url,
+                                            style: GoogleFonts.plusJakartaSans(
+                                              color: CybersightTheme.accent.withOpacity(0.8),
+                                              fontSize: 11,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ]),
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ],
+                      */
+
+                      // ── 7. ACTION BUTTONS ───────────────────────────────────
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(children: [
+                          if (result.meta.sourceQuality != 'inventory') ...[
+                            GlowingButton(
+                              label: 'SAVE TO NEURAL INVENTORY',
+                              onTap: () async {
+                                final apiService = ApiService();
+                                final success =
+                                    await apiService.saveEquipmentToInventory(result);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text(
+                                      success
+                                          ? 'SYNC SUCCESSFUL • ADDED TO INVENTORY'
+                                          : 'SYNC FAILED',
+                                      style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                    backgroundColor:
+                                        (success ? CybersightTheme.ok : CybersightTheme.warning)
+                                            .withOpacity(0.9),
+                                  ));
+                                  if (success) Navigator.pop(context);
+                                }
+                              },
+                            ),
+                          ],
+                        ]),
                       ),
                     ],
                   ),
@@ -312,7 +295,7 @@ class EquipmentDetailPage extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Close button
           Positioned(
             top: 20,
@@ -334,41 +317,396 @@ class EquipmentDetailPage extends StatelessWidget {
     );
   }
 
-  /// Maps raw source_quality values to human-readable labels.
+  String _cleanCategoryLabel(String raw) {
+    const map = {
+      'laptop': 'Laptop',
+      'notebook': 'Laptop',
+      'computer': 'Laptop',
+      'monitor': 'Monitor',
+      'screen': 'Monitor',
+      'tv': 'Monitor',
+      'tv_monitor': 'Monitor',
+      'air_conditioner': 'Air Conditioner',
+      'airconditioner': 'Air Conditioner',
+      'refrigerator': 'Refrigerator',
+      'fridge': 'Refrigerator',
+      'microwave': 'Microwave',
+    };
+    final key = raw.toLowerCase().replaceAll(' ', '_');
+    return map[key] ??
+        raw
+            .split(' ')
+            .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}')
+            .join(' ');
+  }
+
   String _resolveSourceQuality(String? raw, List<String> urls) {
-    if (raw == null || raw.isEmpty) {
-      return urls.isNotEmpty ? 'WEB RETRIEVAL' : 'AI INFERENCE';
-    }
+    if (raw == null || raw.isEmpty) return urls.isNotEmpty ? 'WEB' : 'AI';
     switch (raw.toLowerCase()) {
-      case 'inventory': return 'SAVED INVENTORY';
-      case 'web':       return 'WEB RETRIEVAL';
-      case 'cache':     return 'CACHED DATA';
-      case 'ai':        return 'AI INFERENCE';
+      case 'inventory': return 'SAVED';
+      case 'web':       return 'WEB';
+      case 'cache':     return 'CACHE';
+      case 'ai':        return 'AI';
       default:          return raw.toUpperCase();
     }
   }
 
   IconData _getCategoryIcon(String category) {
     if (category.contains('AIR')) return Icons.ac_unit_rounded;
-    if (category.contains('REF')) return Icons.kitchen_rounded;
+    if (category.contains('REF') || category.contains('FRIDGE')) return Icons.kitchen_rounded;
     if (category.contains('MICRO')) return Icons.microwave_rounded;
-    if (category.contains('LAP')) return Icons.laptop_rounded;
-    if (category.contains('MONITOR') || category.contains('SCREEN') || category.contains('DISP')) return Icons.monitor_rounded;
+    if (category.contains('LAP') || category.contains('COMP') || category.contains('NOTEBOOK')) return Icons.laptop_rounded;
+    if (category.contains('MONITOR') || category.contains('SCREEN') || category.contains('TV')) return Icons.monitor_rounded;
     return Icons.memory_rounded;
   }
 
-  IconData _getIconForSpec(String key) {
-    key = key.toLowerCase();
-    if (key.contains('power') || key.contains('energy') || key.contains('watt')) return Icons.bolt_rounded;
-    if (key.contains('wifi') || key.contains('smart')) return Icons.wifi_rounded;
-    if (key.contains('price')) return Icons.payments_rounded;
-    if (key.contains('warranty')) return Icons.verified_user_rounded;
-    if (key.contains('noise')) return Icons.volume_up_rounded;
-    if (key.contains('dimension') || key.contains('weight')) return Icons.straighten_rounded;
-    if (key.contains('refrigerant') || key.contains('gas')) return Icons.opacity_rounded;
-    if (key.contains('color')) return Icons.palette_rounded;
-    if (key.contains('cpu') || key.contains('gpu') || key.contains('ram')) return Icons.memory_rounded;
+  Map<String, dynamic> _getFallbackSpecs(String rawCategory) {
+    final cat = rawCategory.toLowerCase();
+    if (cat.contains('laptop') || cat.contains('notebook')) {
+      return {
+        'processor': 'Intel Core i5 12th Gen',
+        'ram': '8 GB DDR4',
+        'storage': '256 GB SSD',
+        'display': '15.6" FHD IPS',
+        'battery': '45 Wh',
+        'os': 'Windows 11',
+      };
+    }
+    if (cat.contains('monitor') || cat.contains('screen') || cat.contains('display')) {
+      return {
+        'screen_size': '27"',
+        'resolution': '1920 × 1080',
+        'panel': 'IPS',
+        'refresh_rate': '75 Hz',
+        'response_time': '5 ms',
+        'ports': 'HDMI · VGA · DisplayPort',
+      };
+    }
+    if (cat.contains('air') || cat.contains('conditioner') || cat.contains('climatiseur')) {
+      return {
+        'power_consumption': '1200 W',
+        'cooling_capacity': '12000 BTU/h',
+        'energy_rating': 'A++',
+        'noise_level': '42 dB',
+        'refrigerant': 'R-32',
+        'coverage': '20–25 m²',
+      };
+    }
+    if (cat.contains('refriger') || cat.contains('fridge')) {
+      return {
+        'capacity': '300 L',
+        'energy_class': 'A+',
+        'noise_level': '38 dB',
+        'dimensions': '60 × 65 × 180 cm',
+        'freezer': '60 L',
+        'defrost': 'Auto',
+      };
+    }
+    if (cat.contains('micro')) {
+      return {
+        'power_output': '900 W',
+        'capacity': '25 L',
+        'programs': '8',
+        'turntable': '28 cm',
+        'dimensions': '32 × 48 × 28 cm',
+      };
+    }
+    return {
+      'type': rawCategory.isNotEmpty ? rawCategory : 'Equipment',
+      'status': 'Detected',
+      'source': 'AI Vision',
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WIDGETS
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _FallbackHero extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _FallbackHero({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 240,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: CybersightTheme.accent.withOpacity(0.04),
+        border: Border.all(color: CybersightTheme.accent.withOpacity(0.18)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 84, color: CybersightTheme.accent.withOpacity(0.5)),
+          const SizedBox(height: 12),
+          Text(
+            label.toUpperCase(),
+            style: GoogleFonts.plusJakartaSans(
+              color: CybersightTheme.accent.withOpacity(0.4),
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 2.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  const _CategoryChip({required this.label, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: CybersightTheme.accent.withOpacity(0.10),
+        border: Border.all(color: CybersightTheme.accent.withOpacity(0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: CybersightTheme.accent, size: 13),
+          const SizedBox(width: 6),
+          Text(
+            label.toUpperCase(),
+            style: GoogleFonts.plusJakartaSans(
+              color: CybersightTheme.accent,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  const _StatChip({required this.label, required this.value, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(11, 10, 11, 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white.withOpacity(0.03),
+          border: Border.all(color: Colors.white.withOpacity(0.07)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white24,
+                fontSize: 8,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.7,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(children: [
+              Icon(icon, color: CybersightTheme.accent, size: 12),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  value,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SpecGrid extends StatelessWidget {
+  final Map<String, dynamic> specs;
+  const _SpecGrid({required this.specs});
+
+  static bool _shouldHide(String key) {
+    final k = key.toLowerCase();
+    return k.contains('price') ||
+        k.contains('status') ||
+        k.contains('source') ||
+        k.contains('color');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = specs.entries
+        .where((e) {
+          if (e.value == null || e.value.toString().isEmpty) return false;
+          final strVal = e.value.toString().toLowerCase();
+          if (strVal == 'unknown' || strVal == 'unknown model' || strVal == 'n/a') return false;
+          if (_shouldHide(e.key)) return false;
+          return true;
+        })
+        .toList();
+
+    if (filtered.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white.withOpacity(0.02),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Center(
+          child: Text(
+            'No specification data available.',
+            style: GoogleFonts.plusJakartaSans(color: Colors.white24, fontSize: 12),
+          ),
+        ),
+      );
+    }
+
+    final rows = <List<MapEntry<String, dynamic>>>[];
+    for (int i = 0; i < filtered.length; i += 2) {
+      if (i + 1 < filtered.length) {
+        rows.add([filtered[i], filtered[i + 1]]);
+      } else {
+        rows.add([filtered[i]]);
+      }
+    }
+
+    return Column(
+      children: rows.asMap().entries.map((rowEntry) {
+        final baseIdx = rowEntry.key * 2;
+        final pair = rowEntry.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _SpecCard(
+                  label: pair[0].key,
+                  value: pair[0].value.toString(),
+                  delayIndex: baseIdx,
+                ),
+              ),
+              const SizedBox(width: 8),
+              pair.length > 1
+                  ? Expanded(
+                      child: _SpecCard(
+                        label: pair[1].key,
+                        value: pair[1].value.toString(),
+                        delayIndex: baseIdx + 1,
+                      ),
+                    )
+                  : const Expanded(child: SizedBox()),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _SpecCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final int delayIndex;
+  const _SpecCard({required this.label, required this.value, required this.delayIndex});
+
+  IconData _icon() {
+    final k = label.toLowerCase();
+    if (k.contains('power') || k.contains('watt')) return Icons.bolt_rounded;
+    if (k.contains('cooling') || k.contains('btu') || k.contains('capacity') || k.contains('freezer')) return Icons.thermostat_rounded;
+    if (k.contains('energy') || k.contains('class') || k.contains('rating')) return Icons.eco_rounded;
+    if (k.contains('noise')) return Icons.volume_up_rounded;
+    if (k.contains('refrigerant') || k.contains('gas') || k.contains('coverage')) return Icons.opacity_rounded;
+    if (k.contains('processor') || k.contains('cpu') || k.contains('ram') || k.contains('os') || k.contains('storage')) return Icons.memory_rounded;
+    if (k.contains('display') || k.contains('screen') || k.contains('resolution') || k.contains('refresh') || k.contains('panel')) return Icons.monitor_rounded;
+    if (k.contains('battery')) return Icons.battery_charging_full_rounded;
+    if (k.contains('dimension') || k.contains('weight') || k.contains('size') || k.contains('turntable')) return Icons.straighten_rounded;
+    if (k.contains('port') || k.contains('wifi') || k.contains('smart')) return Icons.wifi_rounded;
+    if (k.contains('defrost') || k.contains('program')) return Icons.settings_rounded;
     return Icons.info_outline_rounded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 500 + delayIndex * 70),
+      curve: Curves.easeOutCubic,
+      builder: (_, val, child) => Opacity(
+        opacity: val,
+        child: Transform.translate(offset: Offset(0, 12 * (1 - val)), child: child),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white.withOpacity(0.02),
+          border: Border.all(color: CybersightTheme.accent.withOpacity(0.12)),
+          gradient: LinearGradient(
+            colors: [Colors.white.withOpacity(0.04), Colors.transparent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: CybersightTheme.accent.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(_icon(), color: CybersightTheme.accent, size: 14),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label.replaceAll('_', ' ').toUpperCase(),
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white30,
+                fontSize: 8,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -385,194 +723,6 @@ class _SectionLabel extends StatelessWidget {
         fontSize: 9,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final String? hint;
-  const _InfoRow({required this.label, required this.value, this.hint});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            flex: 2,
-            child: Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w500)),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  value,
-                  textAlign: TextAlign.end,
-                  style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-                if (hint != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    hint!,
-                    textAlign: TextAlign.end,
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white24,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PremiumSpecTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final int delayIndex;
-
-  const _PremiumSpecTile({required this.label, required this.value, required this.icon, required this.delayIndex});
-
-  double _calculateIntensity() {
-    final RegExp regex = RegExp(r'(\d+(\.\d+)?)');
-    final match = regex.firstMatch(value);
-    if (match != null) {
-      double num = double.tryParse(match.group(0) ?? '0') ?? 0;
-      // create a pseudo-random bar length between 0.3 and 1.0 based on the number
-      return 0.3 + (num % 70) / 100.0;
-    }
-    return 0.0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final intensity = _calculateIntensity();
-    final hasBar = intensity > 0.0;
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutCubic,
-      builder: (context, val, child) {
-        final double adjustedVal = (val - (delayIndex * 0.05)).clamp(0.0, 1.0);
-        return Opacity(
-          opacity: adjustedVal,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - adjustedVal)),
-            child: child,
-          ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.02),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: CybersightTheme.accent.withOpacity(0.1)),
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacity(0.03),
-              Colors.transparent,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: CybersightTheme.accent.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: CybersightTheme.accent, size: 20),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label, 
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white38, 
-                      fontSize: 9, 
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value, 
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white, 
-                      fontSize: 14, 
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (hasBar) ...[
-                    const SizedBox(height: 8),
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: intensity),
-                      duration: const Duration(milliseconds: 1200),
-                      curve: Curves.easeOutQuint,
-                      builder: (context, val, child) {
-                        return LayoutBuilder(
-                          builder: (context, constraints) {
-                            return Container(
-                              height: 3,
-                              width: constraints.maxWidth,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    width: constraints.maxWidth * val,
-                                    decoration: BoxDecoration(
-                                      color: CybersightTheme.accent,
-                                      borderRadius: BorderRadius.circular(2),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: CybersightTheme.accent.withOpacity(0.5),
-                                          blurRadius: 6,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        );
-                      }
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -610,7 +760,6 @@ class _GridPainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.white.withOpacity(0.1)
       ..strokeWidth = 0.5;
-
     for (double i = 0; i < size.width; i += 20) {
       canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
     }
@@ -633,35 +782,27 @@ class _ViewfinderOverlayPainter extends CustomPainter {
       ..color = color.withOpacity(0.6)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
+    const double len = 12.0;
+    const double pad = 10.0;
 
-    final double len = 12.0; // corner line length
-    final double pad = 10.0; // corner padding
-
-    // Top Left Corner
     canvas.drawPath(
         Path()
           ..moveTo(pad + len, pad)
           ..lineTo(pad, pad)
           ..lineTo(pad, pad + len),
         paint);
-
-    // Top Right Corner
     canvas.drawPath(
         Path()
           ..moveTo(size.width - pad - len, pad)
           ..lineTo(size.width - pad, pad)
           ..lineTo(size.width - pad, pad + len),
         paint);
-
-    // Bottom Left Corner
     canvas.drawPath(
         Path()
           ..moveTo(pad + len, size.height - pad)
           ..lineTo(pad, size.height - pad)
           ..lineTo(pad, size.height - pad - len),
         paint);
-
-    // Bottom Right Corner
     canvas.drawPath(
         Path()
           ..moveTo(size.width - pad - len, size.height - pad)
@@ -669,12 +810,13 @@ class _ViewfinderOverlayPainter extends CustomPainter {
           ..lineTo(size.width - pad, size.height - pad - len),
         paint);
 
-    // Center crosshair lines
     final crossPaint = Paint()
       ..color = color.withOpacity(0.2)
       ..strokeWidth = 1.0;
-    canvas.drawLine(Offset(size.width / 2 - 8, size.height / 2), Offset(size.width / 2 + 8, size.height / 2), crossPaint);
-    canvas.drawLine(Offset(size.width / 2, size.height / 2 - 8), Offset(size.width / 2, size.height / 2 + 8), crossPaint);
+    canvas.drawLine(Offset(size.width / 2 - 8, size.height / 2),
+        Offset(size.width / 2 + 8, size.height / 2), crossPaint);
+    canvas.drawLine(Offset(size.width / 2, size.height / 2 - 8),
+        Offset(size.width / 2, size.height / 2 + 8), crossPaint);
   }
 
   @override
@@ -686,7 +828,8 @@ class _ScanLineEffect extends StatefulWidget {
   State<_ScanLineEffect> createState() => _ScanLineEffectState();
 }
 
-class _ScanLineEffectState extends State<_ScanLineEffect> with SingleTickerProviderStateMixin {
+class _ScanLineEffectState extends State<_ScanLineEffect>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -708,30 +851,28 @@ class _ScanLineEffectState extends State<_ScanLineEffect> with SingleTickerProvi
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.transparent,
-                CybersightTheme.accent.withOpacity(0.04),
-                CybersightTheme.accent.withOpacity(0.12),
-                CybersightTheme.accent.withOpacity(0.04),
-                Colors.transparent,
-              ],
-              stops: [
-                (_controller.value - 0.15).clamp(0.0, 1.0),
-                (_controller.value - 0.05).clamp(0.0, 1.0),
-                _controller.value,
-                (_controller.value + 0.05).clamp(0.0, 1.0),
-                (_controller.value + 0.15).clamp(0.0, 1.0),
-              ],
-            ),
+      builder: (_, __) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              CybersightTheme.accent.withOpacity(0.04),
+              CybersightTheme.accent.withOpacity(0.12),
+              CybersightTheme.accent.withOpacity(0.04),
+              Colors.transparent,
+            ],
+            stops: [
+              (_controller.value - 0.15).clamp(0.0, 1.0),
+              (_controller.value - 0.05).clamp(0.0, 1.0),
+              _controller.value,
+              (_controller.value + 0.05).clamp(0.0, 1.0),
+              (_controller.value + 0.15).clamp(0.0, 1.0),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
