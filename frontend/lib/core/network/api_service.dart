@@ -272,6 +272,19 @@ class ApiService {
     }
   }
 
+  /// Fetch current user's personal stats for profile page
+  Future<Map<String, dynamic>> fetchMyStats() async {
+    try {
+      Response response = await _dio.get("/api/inventory/my-stats");
+      if (response.data["success"] == true) {
+        return Map<String, dynamic>.from(response.data["stats"]);
+      }
+      return {"scans": 0, "detected": 0, "saved": 0};
+    } catch (e) {
+      return {"scans": 0, "detected": 0, "saved": 0};
+    }
+  }
+
   /// Fetch admin dashboard statistics from the backend
   Future<Map<String, dynamic>?> fetchAdminStats() async {
     try {

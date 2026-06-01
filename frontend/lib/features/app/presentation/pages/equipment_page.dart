@@ -62,26 +62,26 @@ class EquipmentPage extends StatelessWidget {
                       Text(
                         'Detect',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 42,
+                          fontSize: 32,
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: -0.5,
                           height: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       if (siteName != null && floorName != null)
                         Row(
                           children: [
                             const Icon(Icons.location_on_rounded,
-                                color: Colors.white24, size: 10),
+                                color: Colors.white30, size: 11),
                             const SizedBox(width: 4),
                             Text(
                               '$siteName · $floorName'.toUpperCase(),
                               style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white24,
-                                letterSpacing: 1.5,
-                                fontSize: 9,
+                                color: Colors.white30,
+                                letterSpacing: 1.4,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -89,12 +89,12 @@ class EquipmentPage extends StatelessWidget {
                         )
                       else
                         Text(
-                          'WELCOME, ${operatorName.toUpperCase()}',
+                          'Welcome, $operatorName',
                           style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white24,
-                            letterSpacing: 2.0,
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white38,
+                            letterSpacing: 0.2,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                     ],
@@ -217,7 +217,7 @@ class _LaunchCardState extends State<_LaunchCard>
         vsync: this, duration: const Duration(milliseconds: 160));
     _scale = Tween<double>(begin: 1.0, end: 0.975)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-    _glow = Tween<double>(begin: 0.18, end: 0.45)
+    _glow = Tween<double>(begin: 0.08, end: 0.22)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
@@ -257,8 +257,11 @@ class _LaunchCardState extends State<_LaunchCard>
               padding: const EdgeInsets.all(1.5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
-                gradient: const LinearGradient(
-                  colors: [CybersightTheme.accent, CybersightTheme.accent2],
+                gradient: LinearGradient(
+                  colors: [
+                    CybersightTheme.accent.withValues(alpha: 0.35),
+                    CybersightTheme.accent2.withValues(alpha: 0.18),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -274,20 +277,20 @@ class _LaunchCardState extends State<_LaunchCard>
                   children: [
                     // Icon badge
                     Container(
-                      width: 58,
-                      height: 58,
+                      width: 52,
+                      height: 52,
                       decoration: BoxDecoration(
-                        color: CybersightTheme.accent.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(18),
+                        color: CybersightTheme.accent.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: CybersightTheme.accent.withOpacity(0.35),
-                          width: 1.5,
+                          color: CybersightTheme.accent.withValues(alpha: 0.20),
+                          width: 1.0,
                         ),
                       ),
                       child: const Icon(
                         Icons.video_library_rounded,
                         color: CybersightTheme.accent,
-                        size: 28,
+                        size: 24,
                       ),
                     ),
                     const SizedBox(height: 22),
@@ -319,32 +322,29 @@ class _LaunchCardState extends State<_LaunchCard>
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
+                              horizontal: 18, vertical: 11),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(999),
-                            gradient: const LinearGradient(
-                              colors: [
-                                CybersightTheme.accent,
-                                CybersightTheme.accent2
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
+                            color: CybersightTheme.accent.withValues(alpha: 0.12),
+                            border: Border.all(
+                              color: CybersightTheme.accent.withValues(alpha: 0.35),
+                              width: 1.0,
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Launch',
+                                'Launch Scan Lab',
                                 style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700,
+                                  color: CybersightTheme.accent,
+                                  fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 8),
                               const Icon(Icons.arrow_forward_rounded,
-                                  color: Colors.black, size: 17),
+                                  color: CybersightTheme.accent, size: 16),
                             ],
                           ),
                         ),

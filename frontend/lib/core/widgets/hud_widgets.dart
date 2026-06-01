@@ -3,125 +3,28 @@ import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import '../design_system/cybersight_theme.dart';
 
-class CybersightAtmosphere extends StatefulWidget {
+class CybersightAtmosphere extends StatelessWidget {
   final Widget child;
   const CybersightAtmosphere({super.key, required this.child});
 
   @override
-  State<CybersightAtmosphere> createState() => _CybersightAtmosphereState();
-}
-
-class _CybersightAtmosphereState extends State<CybersightAtmosphere> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CybersightTheme.obsidian,
-      body: Stack(
-        children: [
-          // 1. Animated Grid
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return CustomPaint(
-                size: Size.infinite,
-                painter: _CybersightGridPainter(offset: _controller.value),
-              );
-            },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF080F1C),
+              Color(0xFF040A14),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          
-          // 2. HUD Vignette & Ambient Glow
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment.center,
-                    radius: 1.2,
-                    colors: [
-                      Colors.transparent,
-                      CybersightTheme.obsidian.withOpacity(0.4),
-                      CybersightTheme.obsidian,
-                    ],
-                    stops: const [0.4, 0.8, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // 3. Content
-          Positioned.fill(child: widget.child),
-        ],
+        ),
+        child: child,
       ),
     );
   }
-}
-
-class _CybersightGridPainter extends CustomPainter {
-  final double offset;
-  _CybersightGridPainter({required this.offset});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.50, size.height * 0.50);
-    final maxRadius = size.longestSide * 0.82;
-
-    // Animated phase for slight breathing movement
-    final phase = offset * 2 * 3.141592653589793;
-
-    // Concentric circles: small at center, growing outward
-    for (double r = 24; r <= maxRadius; r += 32) {
-      final normalized = (r / maxRadius).clamp(0.0, 1.0);
-      final wobble = 2.0 * (0.5 - normalized) * (0.5 + 0.5 * offset);
-      final animatedRadius = r + wobble;
-
-      final color = Color.lerp(
-            CybersightTheme.accent.withOpacity(0.11),
-            CybersightTheme.accent2.withOpacity(0.03),
-            normalized,
-          ) ??
-          CybersightTheme.accent.withOpacity(0.08);
-
-      final p = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = normalized < 0.2 ? 1.2 : 0.85
-        ..color = color;
-
-      canvas.drawCircle(center, animatedRadius, p);
-    }
-
-    // Core glow ring in the middle
-    final corePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = CybersightTheme.accent.withOpacity(0.12 + (0.04 * (0.5 + 0.5 * offset)));
-    canvas.drawCircle(center, 18 + 2 * (0.5 + 0.5 * offset), corePaint);
-
-    // Subtle rotating arc to keep scene dynamic
-    final arcPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..strokeCap = StrokeCap.round
-      ..color = CybersightTheme.accent2.withOpacity(0.14);
-    final rect = Rect.fromCircle(center: center, radius: maxRadius * 0.42);
-    canvas.drawArc(rect, phase, 0.95, false, arcPaint);
-  }
-  @override
-  bool shouldRepaint(covariant _CybersightGridPainter oldDelegate) => oldDelegate.offset != offset;
 }
 
 class GlassContainer extends StatelessWidget {

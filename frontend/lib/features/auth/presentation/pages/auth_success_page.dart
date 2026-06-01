@@ -34,10 +34,9 @@ class _AuthSuccessPageState extends State<AuthSuccessPage> with SingleTickerProv
 
     _controller.forward();
 
-    // Wait for 3 seconds total, then relocate to main app shell
-    Timer(const Duration(milliseconds: 3200), () {
+    Timer(const Duration(milliseconds: 1800), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/sites');
+        Navigator.pushReplacementNamed(context, '/app');
       }
     });
   }

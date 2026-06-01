@@ -25,8 +25,6 @@ class AirConditionerSpecs(BaseModel):
     annual_energy_consumption_kwh: Optional[float] = Field(None, description="Annual energy consumption in kWh")
     dimensions: Optional[str] = Field(None, description="HxWxD in cm")
     warranty_years: Optional[int] = Field(None, description="Warranty in years")
-    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
-    color: Optional[str] = Field(None, description="Color of the unit")
 
 class RefrigeratorSpecs(BaseModel):
     capacity_liters: Optional[int] = Field(None, description="Total capacity in liters")
@@ -40,21 +38,17 @@ class RefrigeratorSpecs(BaseModel):
     power_consumption_w: Optional[int] = Field(None, description="Power consumption in Watts")
     annual_energy_consumption_kwh: Optional[float] = Field(None, description="Annual energy consumption in kWh")
     warranty_years: Optional[int] = Field(None, description="Warranty in years")
-    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
-    color: Optional[str] = Field(None, description="Color of the refrigerator")
 
 class MicrowaveSpecs(BaseModel):
     power_watts: Optional[int] = Field(None, description="Microwave power in Watts")
     annual_energy_consumption_kwh: Optional[float] = Field(None, description="Annual energy consumption in kWh")
     capacity_liters: Optional[int] = Field(None, description="Capacity in liters")
-    functions: Optional[List[str]] = Field(None, description="List of functions/modes, e.g. ['Grill', 'Defrost', 'Convection']")
+    functions: Optional[List[str]] = Field(None, description="List of functions/modes, e.g. ['Grill', 'Defrost',""'Convection']")
     turntable_diameter_cm: Optional[int] = Field(None, description="Turntable plate diameter in cm")
     control_type: Optional[str] = Field(None, description="Digital, Analog, or Touch")
     dimensions: Optional[str] = Field(None, description="HxWxD in cm")
     weight_kg: Optional[float] = Field(None, description="Weight in kg")
     warranty_years: Optional[int] = Field(None, description="Warranty in years")
-    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
-    color: Optional[str] = Field(None, description="Color of the microwave")
 
 class LaptopSpecs(BaseModel):
     cpu: Optional[str] = Field(None, description="Processor model name, e.g. Intel Core i7-12700H")
@@ -68,8 +62,6 @@ class LaptopSpecs(BaseModel):
     os: Optional[str] = Field(None, description="Operating system installed")
     weight_kg: Optional[float] = Field(None, description="Weight in kg")
     warranty_years: Optional[int] = Field(None, description="Warranty in years")
-    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
-    color: Optional[str] = Field(None, description="Color of the laptop")
 
 
 class MonitorSpecs(BaseModel):
@@ -84,8 +76,6 @@ class MonitorSpecs(BaseModel):
     ports: Optional[List[str]] = Field(None, description="Available input/output ports, e.g. ['HDMI', 'DisplayPort', 'USB-C']")
     power_consumption_w: Optional[int] = Field(None, description="Power consumption in Watts")
     warranty_years: Optional[int] = Field(None, description="Warranty in years")
-    price_tnd: Optional[float] = Field(None, description="Price in Tunisian Dinars")
-    color: Optional[str] = Field(None, description="Color of the monitor bezel/chassis")
 
 
 # ── Pydantic Envelopes ────────────────────────────────────────────────────────
@@ -212,8 +202,6 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "annual_energy_consumption_kwh": None, # float e.g. 250.5
         "dimensions":        None,   # str   "HxWxD cm"
         "warranty_years":    None,   # int   e.g. 3
-        "price_tnd":         None,   # float e.g. 1299.0
-        "color":             None,   # str   "Blanc" | "Silver" | ...
     },
 
     "refrigerator": {
@@ -228,8 +216,6 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "power_consumption_w": None, # int   e.g. 150
         "annual_energy_consumption_kwh": None, # float e.g. 300.0
         "warranty_years":    None,   # int   e.g. 2
-        "price_tnd":         None,   # float
-        "color":             None,   # str
     },
 
     "microwave": {
@@ -242,8 +228,6 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "dimensions":             None,   # str
         "weight_kg":              None,   # float
         "warranty_years":         None,   # int
-        "price_tnd":              None,   # float
-        "color":                  None,   # str
     },
 
     "laptop": {
@@ -258,8 +242,6 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "os":                None,   # str   "Windows 11" | "FreeDOS"
         "weight_kg":         None,   # float e.g. 2.3
         "warranty_years":    None,   # int
-        "price_tnd":         None,   # float
-        "color":             None,   # str
     },
 
     "monitor": {
@@ -274,8 +256,6 @@ EQUIPMENT_SCHEMAS: dict[str, dict[str, Any]] = {
         "ports":               None,   # list[str] ["HDMI", "DisplayPort"]
         "power_consumption_w": None,   # int   e.g. 17
         "warranty_years":      None,   # int
-        "price_tnd":           None,   # float
-        "color":               None,   # str
     },
 }
 
@@ -348,10 +328,8 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "noise_level_db": "integer dB",
             "power_consumption_w": "integer Watts",
             "annual_energy_consumption_kwh": "float kWh",
-            "dimensions":     "\"HxWxD cm\" string",
+            "dimensions":     "\"HxWxD cm\" string e.g. \"29x79x19 cm\"",
             "warranty_years": "integer or null",
-            "price_tnd":      "float TND or null",
-            "color":          "color name string or null",
         },
         "refrigerator": {
             "capacity_liters":"integer liters or null",
@@ -359,14 +337,12 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "refrigerant":    "\"R600a\" | \"R134a\" or null",
             "no_frost":       "true or false",
             "inverter":       "true or false",
-            "dimensions":     "\"HxWxD cm\" string or null",
+            "dimensions":     "\"HxWxD cm\" string e.g. \"185x60x65 cm\" or null",
             "weight_kg":      "float kg",
             "noise_level_db": "integer dB",
             "power_consumption_w": "integer Watts",
             "annual_energy_consumption_kwh": "float kWh",
             "warranty_years": "integer",
-            "price_tnd":      "float TND or null",
-            "color":          "color name string or null",
         },
         "microwave": {
             "power_watts":           "integer watts",
@@ -378,8 +354,6 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "dimensions":            "\"HxWxD cm\" string or null",
             "weight_kg":             "float kg or null",
             "warranty_years":        "integer or null",
-            "price_tnd":             "float TND or null",
-            "color":                 "color name string or null",
         },
         "laptop": {
             "cpu":               "full CPU name e.g. \"Intel Core i7-12700H\" or null",
@@ -393,8 +367,6 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "os":                "\"Windows 11\" | \"FreeDOS\" | \"Linux\"",
             "weight_kg":         "float kg or null",
             "warranty_years":    "integer or null",
-            "price_tnd":         "float TND or null",
-            "color":             "color name string or null",
         },
         "monitor": {
             "screen_size_inches":  "float screen size in inches, e.g. 23.8 or 27",
@@ -408,8 +380,6 @@ def schema_as_prompt_fields(equipment_type: str) -> str:
             "ports":               "array of strings, e.g. [\"HDMI\", \"DisplayPort\"] or null",
             "power_consumption_w": "integer Watts",
             "warranty_years":      "integer or null",
-            "price_tnd":           "float TND or null",
-            "color":               "color name string or null",
         },
     }
     category = normalize_category(equipment_type)

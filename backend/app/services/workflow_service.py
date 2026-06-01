@@ -88,8 +88,14 @@ class WorkflowService:
             elif isinstance(preds_data, list):
                 predictions = preds_data
 
-            # Filter out low-confidence predictions
-            predictions = [p for p in predictions if p.get("confidence", 0) >= 0.60]
+            # Air conditioners score lower from Roboflow due to wall-mount variability
+            predictions = [
+                p for p in predictions
+                if p.get("confidence", 0) >= (
+                    0.45 if p.get("class", "").lower() in ("air_conditioner", "airconditioner", "ac")
+                    else 0.60
+                )
+            ]
 
             print(f"✅ AI Result: Found {len(predictions)} items")
 

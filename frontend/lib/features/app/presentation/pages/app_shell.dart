@@ -23,8 +23,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
   late AnimationController _bgController;
   Timer? _inactivityTimer;
 
-  // Set to 15 minutes for standard operation
-  static const int _inactivityTimeoutMinutes = 15;
+  static const int _inactivityTimeoutMinutes = 10;
 
   List<Widget> _buildPages(bool isAdmin) {
     return [

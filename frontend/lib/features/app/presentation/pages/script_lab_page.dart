@@ -170,11 +170,20 @@ class _ScanLabPageState extends State<ScanLabPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'ANALYSIS COMPLETE — ${allDetections.length} equipment detected.',
-              style:
-                  GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+              '${allDetections.length} equipment identified',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
             ),
-            backgroundColor: CybersightTheme.ok.withValues(alpha: 0.9),
+            backgroundColor: const Color(0xFF0E1E3A),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            elevation: 0,
           ),
         );
       }
@@ -212,10 +221,29 @@ class _ScanLabPageState extends State<ScanLabPage> {
                     color: Colors.white, fontSize: 14),
               ),
               const SizedBox(height: 24),
-              GlowingButton(
-                label: 'Close',
+              GestureDetector(
                 onTap: () => Navigator.of(ctx).pop(),
-                isFullWidth: true,
+                child: Container(
+                  height: 44,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withValues(alpha: 0.04),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.09),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Close',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white54,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -249,33 +277,24 @@ class _ScanLabPageState extends State<ScanLabPage> {
   Widget _buildTopBar() {
     final frameCount = _frames.length;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back button
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              width: 40,
-              height: 40,
-              margin: const EdgeInsets.only(top: 3),
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white.withValues(alpha: 0.05),
-                border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
               ),
-              child: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white70,
-                size: 16,
-              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white54, size: 14),
             ),
           ),
           const SizedBox(width: 14),
-
-          // Title + subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,70 +302,51 @@ class _ScanLabPageState extends State<ScanLabPage> {
                 Text(
                   'Scan Lab',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 34,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
-                    letterSpacing: -0.5,
-                    height: 1.05,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
                 Text(
                   frameCount > 0
-                      ? '$frameCount FRAMES EXTRACTED'
-                      : 'UPLOAD · EXTRACT · IDENTIFY',
+                      ? '$frameCount frames extracted'
+                      : 'Upload · Extract · Identify',
                   style: GoogleFonts.plusJakartaSans(
-                    color: frameCount > 0
-                        ? CybersightTheme.accent.withValues(alpha: 0.7)
-                        : Colors.white24,
-                    letterSpacing: 1.8,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
+                    color: Colors.white30,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
           ),
-
-          // Upload button (visible when frames exist, for re-upload)
           if (_frames.isNotEmpty && !_isExtracting)
             GestureDetector(
               onTap: _pickAndProcessVideo,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 9),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  color: CybersightTheme.accent.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: CybersightTheme.accent.withValues(alpha: 0.3),
-                  ),
+                  color: Colors.white.withValues(alpha: 0.04),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.video_library_rounded,
-                        color: CybersightTheme.accent, size: 15),
-                    const SizedBox(width: 6),
+                    const Icon(Icons.refresh_rounded, color: Colors.white30, size: 13),
+                    const SizedBox(width: 5),
                     Text(
-                      'Reupload',
+                      'New video',
                       style: GoogleFonts.plusJakartaSans(
-                        color: CybersightTheme.accent,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.white30,
+                        fontWeight: FontWeight.w400,
                         fontSize: 11,
                       ),
                     ),
                   ],
                 ),
-              ),
-            )
-          else if (_isExtracting)
-            const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                color: CybersightTheme.accent,
-                strokeWidth: 2,
               ),
             ),
         ],
@@ -359,63 +359,42 @@ class _ScanLabPageState extends State<ScanLabPage> {
   Widget _buildEmptyState() {
     if (_isExtracting) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 130,
-                  height: 130,
-                  child: CircularProgressIndicator(
-                    color: CybersightTheme.accent.withValues(alpha: 0.08),
-                    strokeWidth: 2,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  backgroundColor: Colors.white.withValues(alpha: 0.06),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white.withValues(alpha: 0.28),
                   ),
+                  minHeight: 2,
                 ),
-                SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: CircularProgressIndicator(
-                    color: CybersightTheme.accent.withValues(alpha: 0.35),
-                    strokeWidth: 2.5,
-                  ),
-                ),
-                const SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: CircularProgressIndicator(
-                    color: CybersightTheme.accent,
-                    strokeWidth: 3,
-                  ),
-                ),
-                const Icon(Icons.memory_rounded,
-                    size: 22, color: CybersightTheme.accent),
-              ],
-            ),
-            const SizedBox(height: 40),
-            Text(
-              'Extracting Frames',
-              style: GoogleFonts.plusJakartaSans(
-                color: CybersightTheme.accent,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.3,
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Deconstructing video into key signatures...',
-              style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white38, fontSize: 12),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Isolating equipment hardware frames...',
-              style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white24, fontSize: 11),
-            ),
-          ],
+              const SizedBox(height: 28),
+              Text(
+                'Extracting frames',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.1,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Scanning video for key moments',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white24,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -541,13 +520,13 @@ class _ScanLabPageState extends State<ScanLabPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.black.withValues(alpha: 0.55),
+                              Colors.black.withValues(alpha: 0.35),
                               Colors.transparent,
-                              Colors.black.withValues(alpha: 0.55),
+                              Colors.black.withValues(alpha: 0.50),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            stops: const [0.0, 0.45, 1.0],
+                            stops: const [0.0, 0.40, 1.0],
                           ),
                         ),
                       ),
@@ -642,24 +621,23 @@ class _ScanLabPageState extends State<ScanLabPage> {
                                           color: CybersightTheme.ok),
                                       const SizedBox(width: 6),
                                       Text(
-                                        'DECRYPTED',
+                                        'Identified',
                                         style: GoogleFonts.plusJakartaSans(
                                           color: CybersightTheme.ok,
                                           fontSize: 9,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 1.5,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.3,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 1),
                                   Text(
-                                    'TAP FOR INFO',
+                                    'Tap to view',
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.white38,
-                                      fontSize: 7,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.5,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
                                 ],
@@ -698,20 +676,67 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
   Widget _buildActionBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
       decoration: BoxDecoration(
-        color: CybersightTheme.navy2.withValues(alpha: 0.9),
+        color: CybersightTheme.navy2.withValues(alpha: 0.96),
         border: Border(
-          top: BorderSide(
-              color: CybersightTheme.accent.withValues(alpha: 0.15)),
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
         ),
       ),
-      child: GlowingButton(
-        label: _isProcessingAI
-            ? 'Processing...'
-            : 'Analyze ${_selectedFilenames.length} Frame${_selectedFilenames.length != 1 ? 's' : ''}',
-        onTap: _isProcessingAI ? () {} : _runAIOnSelected,
-        isFullWidth: true,
+      child: GestureDetector(
+        onTap: _isProcessingAI ? null : _runAIOnSelected,
+        child: Container(
+          height: 52,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: const Color(0xFF0E1E3A),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.10),
+            ),
+          ),
+          child: Center(
+            child: _isProcessingAI
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          color: Colors.white30,
+                          strokeWidth: 1.5,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Processing...',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white38,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Analyze ${_selectedFilenames.length} Frame${_selectedFilenames.length != 1 ? 's' : ''}',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_rounded,
+                          color: Colors.white38, size: 15),
+                    ],
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -719,181 +744,103 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
 // ── Upload zone card ───────────────────────────────────────────────────────
 
-class _UploadZoneCard extends StatefulWidget {
+class _UploadZoneCard extends StatelessWidget {
   final VoidCallback onTap;
   const _UploadZoneCard({required this.onTap});
 
   @override
-  State<_UploadZoneCard> createState() => _UploadZoneCardState();
-}
-
-class _UploadZoneCardState extends State<_UploadZoneCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _pulse;
-  bool _pressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.85, end: 1.0)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.975 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        // Gradient border wrapper
-        padding: const EdgeInsets.all(1.5),
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(24),
           gradient: LinearGradient(
             colors: [
-              CybersightTheme.accent.withValues(alpha: 0.5),
-              CybersightTheme.accent2.withValues(alpha: 0.3),
+              const Color(0xFF0F2A52),
+              const Color(0xFF0A1535),
+              const Color(0xFF06101F),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            stops: const [0.0, 0.45, 1.0],
+          ),
+          border: Border.all(
+            color: CybersightTheme.accent.withValues(alpha: 0.20),
           ),
         ),
-        child: GlassContainer(
-          borderRadius: 27,
-          opacity: 0.04,
-          blur: 20,
-          border: Border.all(color: Colors.transparent),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(27),
-            ),
-            child: AnimatedBuilder(
-              animation: _pulse,
-              builder: (_, __) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Pulsing icon
-                  Transform.scale(
-                    scale: _pressed ? 0.92 : _pulse.value,
-                    child: Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: CybersightTheme.accent
-                            .withValues(alpha: 0.08),
-                        border: Border.all(
-                          color: CybersightTheme.accent.withValues(
-                              alpha: 0.3 + 0.2 * _pulse.value),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CybersightTheme.accent.withValues(
-                                alpha: 0.15 * _pulse.value),
-                            blurRadius: 28,
-                            spreadRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.video_library_rounded,
-                        color: CybersightTheme.accent,
-                        size: 36,
-                      ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: CybersightTheme.accent.withValues(alpha: 0.07),
+                    border: Border.all(
+                      color: CybersightTheme.accent.withValues(alpha: 0.18),
                     ),
                   ),
-
-                  const SizedBox(height: 28),
-
-                  Text(
-                    'Upload a Video',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
-                    ),
+                  child: const Icon(Icons.video_library_rounded,
+                      color: CybersightTheme.accent, size: 30),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Upload a Video',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.2,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Pick a saved video from your gallery.\nKey frames are extracted automatically.',
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'Pick any saved video from your gallery.\nKey frames are extracted automatically.',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white38,
                       fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      height: 1.55,
+                      height: 1.6,
                     ),
                   ),
-
-                  const SizedBox(height: 32),
-
-                  // Tap indicator pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 11),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      gradient: const LinearGradient(
-                        colors: [
-                          CybersightTheme.accent,
-                          CybersightTheme.accent2
-                        ],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
+                ),
+                const SizedBox(height: 28),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 22, vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: CybersightTheme.accent.withValues(alpha: 0.09),
+                    border: Border.all(
+                      color: CybersightTheme.accent.withValues(alpha: 0.28),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Choose from Gallery',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: CybersightTheme.accent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: CybersightTheme.accent.withValues(
-                              alpha: 0.35 * _pulse.value),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Choose from Gallery',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.arrow_forward_rounded,
-                            color: Colors.black, size: 17),
-                      ],
-                    ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_rounded,
+                          color: CybersightTheme.accent, size: 16),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ),
-      ),
-    ),
-  );
+    );
   }
 }
 
@@ -910,24 +857,21 @@ class _InfoChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white.withValues(alpha: 0.03),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white.withValues(alpha: 0.02),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         ),
         child: Row(
           children: [
-            Icon(icon,
-                color: CybersightTheme.accent.withValues(alpha: 0.7),
-                size: 14),
-            const SizedBox(width: 8),
+            Icon(icon, color: Colors.white24, size: 13),
+            const SizedBox(width: 7),
             Expanded(
               child: Text(
                 label,
                 style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white38,
+                  color: Colors.white30,
                   fontSize: 10,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

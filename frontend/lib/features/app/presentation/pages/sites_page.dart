@@ -13,6 +13,7 @@ class _SiteData {
   final String country;
   final String city;
   final List<String> floors;
+  final List<String> equipmentTypes;
 
   const _SiteData({
     required this.id,
@@ -20,6 +21,7 @@ class _SiteData {
     required this.country,
     required this.city,
     required this.floors,
+    this.equipmentTypes = const [],
   });
 }
 
@@ -30,6 +32,7 @@ const List<_SiteData> _kSites = [
     country: 'Morocco',
     city: 'Casablanca',
     floors: ['Ground Floor', '1st Floor', '2nd Floor', '3rd Floor'],
+    equipmentTypes: ['AC', 'Fridge', 'Laptop'],
   ),
   _SiteData(
     id: 's2',
@@ -37,6 +40,7 @@ const List<_SiteData> _kSites = [
     country: 'Morocco',
     city: 'Rabat',
     floors: ['Ground Floor', '1st Floor', '2nd Floor'],
+    equipmentTypes: ['AC', 'Monitor', 'Microwave'],
   ),
   _SiteData(
     id: 's3',
@@ -44,6 +48,7 @@ const List<_SiteData> _kSites = [
     country: 'France',
     city: 'Paris',
     floors: ['Ground Floor', '1st Floor', '2nd Floor', '3rd Floor', '4th Floor'],
+    equipmentTypes: ['AC', 'Fridge', 'Laptop', 'Monitor'],
   ),
   _SiteData(
     id: 's4',
@@ -51,6 +56,7 @@ const List<_SiteData> _kSites = [
     country: 'Belgium',
     city: 'Brussels',
     floors: ['Ground Floor', '1st Floor'],
+    equipmentTypes: ['AC', 'Microwave'],
   ),
 ];
 
@@ -146,6 +152,16 @@ class _SitesPageState extends State<SitesPage> with SingleTickerProviderStateMix
                                 letterSpacing: 2.0,
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Select a site & floor to begin\nyour equipment detection scan',
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white38,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                height: 1.5,
                               ),
                             ),
                           ],
@@ -464,6 +480,34 @@ class _SiteCard extends StatelessWidget {
                               ),
                             ],
                           ),
+                          if (site.equipmentTypes.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 5,
+                              runSpacing: 4,
+                              children: site.equipmentTypes.map((type) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(999),
+                                    color: CybersightTheme.accent.withOpacity(0.06),
+                                    border: Border.all(
+                                      color: CybersightTheme.accent.withOpacity(0.18),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    type,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: CybersightTheme.accent.withOpacity(0.8),
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ],
                       ),
                     ),

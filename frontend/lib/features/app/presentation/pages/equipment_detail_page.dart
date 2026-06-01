@@ -207,7 +207,12 @@ class EquipmentDetailPage extends StatelessWidget {
                         // Technical Grid dynamic builder
                         Column(
                           children: result.specs.entries
-                              .where((e) => e.value != null && e.value.toString().isNotEmpty)
+                              .where((e) {
+                                const hiddenKeys = {'price_tnd', 'color', 'category', 'equipment_category', 'price', 'couleur'};
+                                return e.value != null &&
+                                       e.value.toString().isNotEmpty &&
+                                       !hiddenKeys.contains(e.key);
+                              })
                               .toList()
                               .asMap()
                               .entries
@@ -399,24 +404,36 @@ class _InfoRow extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w500)),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(value, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-              if (hint != null) ...[
-                const SizedBox(height: 2),
+          Flexible(
+            flex: 2,
+            child: Text(label, style: GoogleFonts.plusJakartaSans(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w500)),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 Text(
-                  hint!,
-                  style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white24,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  value,
+                  textAlign: TextAlign.end,
+                  style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                 ),
+                if (hint != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    hint!,
+                    textAlign: TextAlign.end,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white24,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ],
       ),

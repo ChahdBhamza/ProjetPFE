@@ -1,13 +1,13 @@
 """
-frame_detector.py — Classical CV bounding box + Two-Pass Gemini Vision Identification
+frame_detector.py — Classical CV bounding box + Two-Pass Groq Vision Identification
 
 Pipeline:
   1. OpenCV detects the dominant large object in the frame
   2. Draws a bounding box on the original image
   3. Crops the region of interest
   4. Enhances the crop (CLAHE + upscale) for better brand/text visibility
-  5. PASS 1 (Fast Type Detect): gemini-2.0-flash-lite classifies equipment type + confirms brand visible
-  6. PASS 2 (Forensic ID): Equipment-specific deep-read prompt sent with BOTH images via gemini-2.5-flash
+  5. PASS 1 (Fast Type Detect): groq llama-4-scout classifies equipment type + confirms brand visible
+  6. PASS 2 (Forensic ID): Equipment-specific deep-read prompt sent with BOTH images via groq llama-4-scout
   7. Returns standardised identity dict ready to feed into SpecService
 """
 
@@ -20,7 +20,7 @@ import time
 from dotenv import load_dotenv
 from groq import Groq
 from PIL import Image
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from typing import List, Optional
 
 load_dotenv()
@@ -187,7 +187,10 @@ Respond ONLY with a valid JSON object with exactly these keys:
                 response_format={"type": "json_object"},
             )
             raw = resp.choices[0].message.content.strip()
-            return json.loads(raw)
+            return Pass1Result(**json.loads(raw)).model_dump()
+        except ValidationError as e:
+            print(f"[Pass1] Schema validation failed (attempt {attempt+1}): {e}")
+            time.sleep(3)
         except Exception as e:
             err = str(e)
             if "429" in err or "rate_limit" in err.lower():
@@ -223,8 +226,10 @@ STRICT CONFIDENCE RULES:
 
 IMPORTANT:
 - The model candidates you suggest MUST be highly accurate.
-- If you cannot read the model text, you MAY use your expert visual recognition to deduce the model based on its design, BUT YOU MUST STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG. 
-- Example: If you detect the brand "SABA", you MUST ONLY suggest SABA models (like "P70H20L-DE"). Do NOT hallucinate a competitor's model (like Samsung "MS20F20") just because they share a similar shape or generic parts.
+- If you cannot read the model text, you MAY use your expert visual recognition to deduce the model based on its design, BUT YOU MUST
+ STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG. 
+- Example: If you detect the brand "SABA", you MUST ONLY suggest SABA models (like "P70H20L-DE"). Do NOT hallucinate a competitor's model
+ (like Samsung "MS20F20")  just because they share a similar shape or generic parts.
 - Every model name in "model_candidates" MUST be a single, precise alphanumeric reference code.
 - Confidence values across all candidates MUST sum to exactly 100
 - Reasoning MUST explain exactly what physical features led you to this specific model candidate.
@@ -263,7 +268,8 @@ FORENSIC PROTOCOL FOR MICROWAVE OVENS:
 FORENSIC PROTOCOL FOR LAPTOPS:
 1. READ THE BRAND: Logo on the lid (closed/open), keyboard deck, or screen bezel
 2. SERIES BADGE: Look for "Legion", "IdeaPad", "ThinkPad", "Pavilion", "VivoBook", "ProArt" etc.
-3. BOTTOM LABEL (CRITICAL): The bottom of the laptop has a regulatory sticker with the EXACT model number e.g. "15IAH7", "FX517ZE", "FA507NU" — this is the most reliable identifier
+3. BOTTOM LABEL (CRITICAL): The bottom of the laptop has a regulatory sticker with the EXACT model number e.g. "15IAH7", "FX517ZE", "FA507NU" 
+— this is the most reliable identifier
 4. KEYBOARD BACKLIGHT: RGB or single-color backlight is specific to product series
 5. PORT LAYOUT: Count and identify USB-A, USB-C, HDMI, SD card slots on the sides
 6. SCREEN BORDER: Thin bezels vs thick borders help identify generation
@@ -336,7 +342,12 @@ Respond ONLY with a valid JSON object matching exactly:
                 response_format={"type": "json_object"},
             )
             raw = resp.choices[0].message.content.strip()
-            return json.loads(raw)
+            return Pass2Result(**json.loads(raw)).model_dump()
+        except ValidationError as e:
+            print(f"[Pass2] Schema validation failed (attempt {attempt+1}): {e}")
+            if attempt < 2:
+                time.sleep(5)
+                continue
         except Exception as e:
             err = str(e)
             if "429" in err or "rate_limit" in err.lower():
@@ -359,7 +370,7 @@ Respond ONLY with a valid JSON object matching exactly:
 
 # ── Public entry point ────────────────────────────────────────────────────────
 
-def identify_with_gemini(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
+def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
     """
     Two-pass Groq Llama Vision identification:
       Pass 1: Fast type detection (llama-4-scout-17b) — always runs for brand hint
@@ -427,7 +438,7 @@ def process_frame(image_path: str, api_key: str | None = None, yolo_type_hint: s
     raw_crop = frame[y:y+h, x:x+w]
     enhanced_crop = enhance_crop_for_ocr(raw_crop)
 
-    llm_result = identify_with_gemini(annotated, enhanced_crop, yolo_type_hint=yolo_type_hint)
+    llm_result = identify_with_groq(annotated, enhanced_crop, yolo_type_hint=yolo_type_hint)
 
     return {
         "bbox": {"x": x, "y": y, "w": w, "h": h},

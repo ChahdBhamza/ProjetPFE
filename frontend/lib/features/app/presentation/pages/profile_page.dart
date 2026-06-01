@@ -3,9 +3,30 @@ import 'package:provider/provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../../../../core/widgets/hud_widgets.dart';
+import '../../../../core/network/api_service.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final ApiService _apiService = ApiService();
+  Map<String, dynamic>? _stats;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final data = await _apiService.fetchMyStats();
+    if (mounted) setState(() { _stats = data; _loading = false; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +65,8 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'OPERATOR • ACCESS • PREFERENCES',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, letterSpacing: 3, fontSize: 9),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Colors.white24, letterSpacing: 3, fontSize: 9),
             ),
             const SizedBox(height: 16),
             GlassContainer(
@@ -61,8 +83,14 @@ class ProfilePage extends StatelessWidget {
                         height: 62,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
-                          boxShadow: [BoxShadow(color: CybersightTheme.accent.withOpacity(0.35), blurRadius: 22, spreadRadius: -12)],
+                          gradient: const LinearGradient(
+                              colors: [CybersightTheme.accent, CybersightTheme.accent2]),
+                          boxShadow: [
+                            BoxShadow(
+                                color: CybersightTheme.accent.withOpacity(0.35),
+                                blurRadius: 22,
+                                spreadRadius: -12)
+                          ],
                         ),
                         child: const Icon(Icons.person_rounded, color: Colors.black, size: 34),
                       ),
@@ -71,20 +99,29 @@ class ProfilePage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(name, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+                            Text(name,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.w900)),
                             const SizedBox(height: 4),
                             Text(
                               email,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(color: Colors.white38, fontSize: 11),
                             ),
                           ],
                         ),
                       ),
                       _Badge(
                         label: authProvider.isAdmin ? 'ADMIN' : 'OPERATOR',
-                        color: authProvider.isAdmin ? CybersightTheme.accent2 : CybersightTheme.ok,
+                        color: authProvider.isAdmin
+                            ? CybersightTheme.accent2
+                            : CybersightTheme.ok,
                       ),
                     ],
                   ),
@@ -93,11 +130,29 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: _Stat(label: 'Uploads', value: '28')),
+                      Expanded(
+                        child: _Stat(
+                          label: 'Scans',
+                          value: _loading ? '–' : (_stats?['scans'] ?? 0).toString(),
+                          loading: _loading,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _Stat(label: 'Detected', value: '84')),
+                      Expanded(
+                        child: _Stat(
+                          label: 'Detected',
+                          value: _loading ? '–' : (_stats?['detected'] ?? 0).toString(),
+                          loading: _loading,
+                        ),
+                      ),
                       const SizedBox(width: 12),
-                      Expanded(child: _Stat(label: 'Saved', value: '41')),
+                      Expanded(
+                        child: _Stat(
+                          label: 'Saved',
+                          value: _loading ? '–' : (_stats?['saved'] ?? 0).toString(),
+                          loading: _loading,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -111,14 +166,6 @@ class ProfilePage extends StatelessWidget {
               title: 'Privacy',
               subtitle: 'Data & permissions',
               trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white24),
-              onTap: () {},
-            ),
-            const SizedBox(height: 10),
-            _RowAction(
-              icon: Icons.cloud_outlined,
-              title: 'Backend',
-              subtitle: 'Python API connection',
-              trailing: const _Badge(label: 'MOCK', color: CybersightTheme.warning),
               onTap: () {},
             ),
             const SizedBox(height: 10),
@@ -147,7 +194,10 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white24, letterSpacing: 3, fontSize: 9),
+      style: Theme.of(context)
+          .textTheme
+          .labelLarge
+          ?.copyWith(color: Colors.white24, letterSpacing: 3, fontSize: 9),
     );
   }
 }
@@ -187,13 +237,15 @@ class _RowActionState extends State<_RowAction> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            boxShadow: _isHovered ? [
-              BoxShadow(
-                color: CybersightTheme.accent.withOpacity(0.15),
-                blurRadius: 15,
-                spreadRadius: 1,
-              )
-            ] : [],
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: CybersightTheme.accent.withOpacity(0.15),
+                      blurRadius: 15,
+                      spreadRadius: 1,
+                    )
+                  ]
+                : [],
           ),
           child: GlassContainer(
             opacity: _isHovered ? 0.08 : 0.05,
@@ -213,9 +265,12 @@ class _RowActionState extends State<_RowAction> {
                         CybersightTheme.accent2.withOpacity(0.10),
                       ],
                     ),
-                    border: Border.all(color: Colors.white.withOpacity(_isHovered ? 0.15 : 0.08)),
+                    border: Border.all(
+                        color: Colors.white.withOpacity(_isHovered ? 0.15 : 0.08)),
                   ),
-                  child: Icon(widget.icon, color: _isHovered ? CybersightTheme.accent : Colors.white70, size: 20),
+                  child: Icon(widget.icon,
+                      color: _isHovered ? CybersightTheme.accent : Colors.white70,
+                      size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -226,14 +281,20 @@ class _RowActionState extends State<_RowAction> {
                         widget.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         widget.subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white38, fontSize: 11),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(color: Colors.white38, fontSize: 11),
                       ),
                     ],
                   ),
@@ -264,7 +325,10 @@ class _Badge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white60, fontSize: 10, letterSpacing: 1.8),
+        style: Theme.of(context)
+            .textTheme
+            .labelLarge
+            ?.copyWith(color: Colors.white60, fontSize: 10, letterSpacing: 1.8),
       ),
     );
   }
@@ -273,7 +337,8 @@ class _Badge extends StatelessWidget {
 class _Stat extends StatefulWidget {
   final String label;
   final String value;
-  const _Stat({required this.label, required this.value});
+  final bool loading;
+  const _Stat({required this.label, required this.value, this.loading = false});
 
   @override
   State<_Stat> createState() => _StatState();
@@ -296,22 +361,46 @@ class _StatState extends State<_Stat> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            color: _isHovered ? CybersightTheme.accent.withOpacity(0.05) : Colors.white.withOpacity(0.02),
-            border: Border.all(color: _isHovered ? CybersightTheme.accent.withOpacity(0.2) : Colors.white.withOpacity(0.06)),
-            boxShadow: _isHovered ? [
-              BoxShadow(
-                color: CybersightTheme.accent.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 0,
-              )
-            ] : [],
+            color: _isHovered
+                ? CybersightTheme.accent.withOpacity(0.05)
+                : Colors.white.withOpacity(0.02),
+            border: Border.all(
+                color: _isHovered
+                    ? CybersightTheme.accent.withOpacity(0.2)
+                    : Colors.white.withOpacity(0.06)),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: CybersightTheme.accent.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 0,
+                    )
+                  ]
+                : [],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.label.toUpperCase(), style: Theme.of(context).textTheme.labelLarge?.copyWith(color: _isHovered ? CybersightTheme.accent : Colors.white24, fontSize: 9, letterSpacing: 2.2)),
+              Text(widget.label.toUpperCase(),
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: _isHovered ? CybersightTheme.accent : Colors.white24,
+                      fontSize: 9,
+                      letterSpacing: 2.2)),
               const SizedBox(height: 8),
-              Text(widget.value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+              widget.loading
+                  ? Container(
+                      height: 22,
+                      width: 36,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.white.withOpacity(0.06),
+                      ),
+                    )
+                  : Text(widget.value,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.w900)),
             ],
           ),
         ),
@@ -319,4 +408,3 @@ class _StatState extends State<_Stat> {
     );
   }
 }
-

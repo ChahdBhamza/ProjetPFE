@@ -911,18 +911,23 @@ inference endpoint executed during pipeline runtime.
 CHAPTER 2. Foundational Concepts and Tools
 Figure 2.4: Roboflow computer vision platform logo.
 ### 2.3.7 ### AI Models & Language Orchestration Platforms
-Google Gemini Flash 1.5 is a multimodal large language model developed by Google DeepMind,
+Meta Llama 4 Scout 17B-16E Instruct is a multimodal large language model developed by Meta AI,
 capable of processing images and text together within a single context window. In this project, it
-handles both brand extraction from the enhanced Hero Frame crop and the downstream verification of
-engineering specifications against web-retrieved product documentation.
-### 2.3.8 ### Google AI Studio
-is the prototyping and development environment provided by Google for interacting with Gemini
-models. It was utilized during the engineering phase of this project to design, iterate, and evaluate the
-structural prompting strategies applied to Gemini Flash 1.5.
-### 2.3.9 ### OpenRouter
-is an API gateway providing unified access to a wide range of large language models through a single
-endpoint. It was used during the integration testing phase of this project as an elastic access route to
-Gemini models before configuring dedicated production infrastructure.
+powers the two-pass visual identification pipeline: Pass 1 performs a fast equipment type classification
+and brand visibility check, while Pass 2 executes a forensic deep-read of both the full annotated frame
+and the enhanced close-up crop to extract the brand name and candidate model references. In addition,
+Llama 3.1 8B Instant is used for the downstream specification extraction stage, where it parses
+web-scraped product pages and maps the raw HTML content to the structured equipment schema.
+### 2.3.8 ### Groq Cloud
+is a high-performance AI inference platform that provides low-latency API access to open-weight large
+language models including the Meta Llama family. It was used in this project as the sole inference
+backend for all language model calls — both the multimodal vision passes and the text-based
+specification extraction — offering a free-tier API compatible with the OpenAI SDK interface.
+### 2.3.9 ### Groq SDK (Python)
+is the official Python client library for the Groq inference API. It was integrated directly into the
+backend services to issue structured JSON completion requests to the deployed Llama models, with
+built-in support for JSON-mode responses, image URL encoding, and automatic retry handling under
+rate-limit conditions.
 ### 2.3.10 ### Web Search & Data Extraction
 DuckDuckGo Search is a privacy-focused web search engine accessible programmatically through the
 duckduckgo-search library without requiring rigid developer API keys. In this project, it is used by
@@ -931,7 +936,7 @@ model strings extracted from the visual feed.
 ### 2.3.11 ### BeautifulSoup
 is a Python library for parsing HTML documents and extracting structured content from web pages.
 In this project, it processes the raw markup pages retrieved by DuckDuckGo to extract the clean,
-unformatted specification text injected directly into the Gemini verification prompt.
+unformatted specification text injected directly into the Llama-based specification extraction prompt.
 ### 2.3.12 ### User Interface
 Flutter is an open-source UI toolkit developed by Google for building natively compiled iOS and
 Android applications from a single Dart codebase. In this project, it powers the mobile frontend
@@ -958,9 +963,9 @@ OpenCV Computer Vision & Detection ROI cropping and image enhancement
 YOLOv5 (Ultralytics) Computer Vision & Detection First-pass frame filtering
 RF-DETR Computer Vision & Detection Precise equipment detection — 4 classes
 Roboflow Computer Vision & Detection Dataset management and RF-DETR API hosting
-Gemini Flash 1.5 AI & LLM Brand extraction and specification verification
-Google AI Studio AI & LLM Development and prompt prototyping
-OpenRouter AI & LLM Testing and model access gateway
+Llama 4 Scout 17B (Groq) AI & LLM Multimodal brand extraction — Pass 1 & Pass 2
+Llama 3.1 8B Instant (Groq) AI & LLM Structured specification extraction from web content
+Groq Cloud AI & LLM Inference platform and API gateway for all LLM calls
 DuckDuckGo Search Web Search & Data Retrieval Autonomous web query execution
 BeautifulSoup (bs4) Web Search & Data Retrieval HTML parsing
 Flutter / Dart User Interface Cross-platform mobile frontend

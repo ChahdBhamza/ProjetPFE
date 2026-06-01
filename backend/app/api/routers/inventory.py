@@ -57,6 +57,30 @@ async def get_history(current_email: str = Depends(verify_token)):
             
     return {"success": True, "scan_sessions": scan_sessions}
 
+@router.get("/my-stats")
+async def get_my_stats(current_email: str = Depends(verify_token)):
+    """Return per-user stats for the profile page"""
+    saved = mongo_db.inventory.count_documents({"user_email": current_email})
+    scans = mongo_db.scan_sessions.count_documents({"user_email": current_email})
+
+    detected = 0
+    try:
+        session_ids = [
+            s["session_id"]
+            for s in mongo_db.scan_sessions.find(
+                {"user_email": current_email}, {"session_id": 1, "_id": 0}
+            )
+        ]
+        if session_ids:
+            detected = mongo_db.detections.count_documents(
+                {"scan_session_id": {"$in": session_ids}}
+            )
+    except Exception as e:
+        print(f"[MyStats] detections count error: {e}")
+
+    return {"success": True, "stats": {"scans": scans, "detected": detected, "saved": saved}}
+
+
 @router.get("/admin/stats")
 async def get_admin_stats(current_email: str = Depends(verify_token)):
     """Fetch global KPIs and metrics for the Admin Dashboard"""
@@ -289,6 +313,29 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
     except Exception as e:
         print(f"[AdminStats] Alerts error: {e}")
 
+    # 9. Unknown brand count (identification failures)
+    unknown_brand_count = 0
+    try:
+        unknown_brand_count = mongo_db.inventory.count_documents({
+            "$or": [
+                {"brand": {"$regex": "^unknown", "$options": "i"}},
+                {"identity.brand": {"$regex": "^unknown", "$options": "i"}},
+                {"brand": {"$exists": False}},
+            ]
+        })
+    except Exception as e:
+        print(f"[AdminStats] unknown brand count error: {e}")
+
+    # 10. Assets detected today
+    assets_today = 0
+    try:
+        today_start = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        assets_today = mongo_db.inventory.count_documents({
+            "added_at": {"$gte": today_start}
+        })
+    except Exception as e:
+        print(f"[AdminStats] assets_today error: {e}")
+
     # Assemble response
     stats_data = {
         "total_assets": total_assets,
@@ -296,11 +343,12 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
         "total_operators": total_operators,
         "active_operators": active_operators,
         "avg_confidence": avg_confidence,
+        "unknown_brand_count": unknown_brand_count,
+        "assets_today": assets_today,
         "categories": categories,
         "brands": brands,
         "operator_performance": operators_performance,
         "activity_over_time": activity_over_time,
-        "alerts": alerts
     }
     
     return {"success": True, "stats": stats_data}

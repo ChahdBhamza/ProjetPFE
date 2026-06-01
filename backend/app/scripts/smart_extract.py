@@ -24,8 +24,8 @@ except ImportError as e:
 
 WORKFLOW_ID = "custom-workflow-3"
 MAX_FRAMES_TO_PROCESS = 15
-ROBOFLOW_PROBE_FRAMES = 3  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave)
-MAX_ROBOFLOW_CALLS = 4
+ROBOFLOW_PROBE_FRAMES = 4  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave / AC)
+MAX_ROBOFLOW_CALLS = 5
 
 def is_allowed(cls_name):
     name = cls_name.lower()
@@ -50,6 +50,22 @@ def normalize_equipment_class(cls_name):
     if any(k in name for k in ("tv", "monitor", "display", "screen")):
         return "tv_monitor"
     return name
+
+def _iou(bbox_a, bbox_b):
+    """Intersection-over-Union for two [x1,y1,x2,y2] boxes."""
+    try:
+        xa1, ya1, xa2, ya2 = bbox_a
+        xb1, yb1, xb2, yb2 = bbox_b
+        xi1, yi1 = max(xa1, xb1), max(ya1, yb1)
+        xi2, yi2 = min(xa2, xb2), min(ya2, yb2)
+        inter = max(0, xi2 - xi1) * max(0, yi2 - yi1)
+        area_a = (xa2 - xa1) * (ya2 - ya1)
+        area_b = (xb2 - xb1) * (yb2 - yb1)
+        union = area_a + area_b - inter
+        return inter / max(union, 1e-6)
+    except Exception:
+        return 0.0
+
 
 def calculate_center_score(hit, img_w, img_h):
     try:
@@ -174,7 +190,10 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         fh, fw = data["frame"].shape[:2]
         fs = data["sharp"]
         for hit in res.get("detections", []):
-            if hit.get("confidence", 0) < 0.60:
+            cls_lower = hit.get("class", "").lower()
+            _is_ac = any(k in cls_lower for k in ("air_conditioner", "airconditioner", " ac", "conditioner"))
+            _min_conf = 0.45 if _is_ac else 0.60
+            if hit.get("confidence", 0) < _min_conf:
                 continue
             if not strict or is_allowed(hit["class"]):
                 hit["_source"] = "roboflow"
@@ -261,14 +280,19 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 hit["_frame_id"] = frame_id
                 hit["_category"] = normalize_equipment_class(hit["class"])
                 
-                # [STRICT SAFEGUARD] Stop Roboflow from mislabelling objects based on YOLO ground truth
-                yolo_cats_on_frame = [normalize_equipment_class(h["class"]) for h in base["hits"]]
+                # [STRICT SAFEGUARD] Stop Roboflow from mislabelling objects based on YOLO ground truth.
+                # Only override if YOLO's conflicting box *overlaps* the AC box — avoids silently
+                # discarding a real AC when a different object (e.g. laptop) also exists in the frame.
+                yolo_hits_on_frame = base["hits"]
                 if hit["_category"] == "air_conditioner":
-                    # If YOLO detected a different target category on the exact same frame, override Roboflow to trust YOLO.
-                    # Roboflow has a high tendency to misclassify large/boxy white objects or screens as 'air_conditioner'.
-                    for yolo_cat in ("refrigerator", "computer", "tv_monitor", "microwave"):
-                        if yolo_cat in yolo_cats_on_frame:
-                            print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' → '{yolo_cat}' (YOLO saw {yolo_cat} on this frame)")
+                    rf_bbox = hit.get("bbox", [0, 0, 0, 0])
+                    for yh in yolo_hits_on_frame:
+                        yolo_cat = normalize_equipment_class(yh["class"])
+                        if yolo_cat not in ("refrigerator", "computer", "tv_monitor", "microwave"):
+                            continue
+                        iou_val = _iou(rf_bbox, yh.get("bbox", [0, 0, 0, 0]))
+                        if iou_val > 0.35:
+                            print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' → '{yolo_cat}' (IoU={iou_val:.2f}, YOLO saw {yolo_cat} on same region)")
                             hit["_category"] = yolo_cat
                             hit["class"] = "laptop" if yolo_cat == "computer" else ("tv" if yolo_cat == "tv_monitor" else yolo_cat)
                             hit["_force_local_draw"] = True
@@ -288,21 +312,6 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     # IoU dedup (yolov5_service.py). Here we simply pick the best hero per
     # category, then do a final IoU cross-check to drop any stragglers that
     # slipped through on the same frame.
-
-    def _iou(bbox_a, bbox_b):
-        """Intersection-over-Union for two [x1,y1,x2,y2] boxes."""
-        try:
-            xa1, ya1, xa2, ya2 = bbox_a
-            xb1, yb1, xb2, yb2 = bbox_b
-            xi1, yi1 = max(xa1, xb1), max(ya1, yb1)
-            xi2, yi2 = min(xa2, xb2), min(ya2, yb2)
-            inter = max(0, xi2 - xi1) * max(0, yi2 - yi1)
-            area_a = (xa2 - xa1) * (ya2 - ya1)
-            area_b = (xb2 - xb1) * (yb2 - yb1)
-            union = area_a + area_b - inter
-            return inter / max(union, 1e-6)
-        except Exception:
-            return 0.0
 
     # Best hero per raw category (no merging — each category keeps its own slot)
     by_cat = {}

@@ -184,26 +184,20 @@ Scraped Web Content:
 
         try:
             print(f"[Groq] Extracting {category_label} specs for {brand} {model} using structured output...")
-            
-            # Since Groq strict JSON mode requires the schema in the prompt, let's append it
-            schema_dict = extraction_schema.model_json_schema() if hasattr(extraction_schema, "model_json_schema") else extraction_schema.schema()
-            
-            # FORCE ALL PROPERTIES TO BE REQUIRED IN THE SCHEMA
-            def make_all_required(sch):
-                if sch.get("type") == "object" and "properties" in sch:
-                    sch["required"] = list(sch["properties"].keys())
-                    for prop in sch["properties"].values():
-                        make_all_required(prop)
-            make_all_required(schema_dict)
 
-            schema_json = json.dumps(schema_dict, separators=(',', ':'))  # compact = fewer tokens
-            full_prompt = prompt + f"\n\nYou MUST return ONLY a raw JSON object matching exactly this schema, with NO MARKDOWN formatting. EVERY SINGLE FIELD IN THIS SCHEMA IS STRICTLY REQUIRED:\n{schema_json}"
-            
+            # Use human-readable field hints (much smaller than the full Pydantic schema)
+            field_hints = schema_as_prompt_fields(category)
+            full_prompt = prompt + (
+                f"\n\nReturn ONLY a raw JSON object with exactly these keys — no markdown, no code blocks:\n"
+                f'{{"exact_model_reference": "base model or SKU", "specs": {field_hints}, '
+                f'"summary": "one factual sentence"}}'
+            )
+
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
                 temperature=0.05,
-                max_tokens=1500,   # Capped: 1500 output + ~1800 prompt = ~3300 total, safely under 6K TPM
+                max_tokens=1200,
                 response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
@@ -239,9 +233,14 @@ Scraped Web Content:
             return result
 
         except Exception as e:
+            err_str = str(e)
             print(f"[Groq] Extraction error: {e}")
+            # On json_validate_failed, retry once with even shorter context (Groq token budget issue)
+            if "json_validate_failed" in err_str and scraped_data and len(scraped_data) > 1000:
+                print("[Groq] Retrying with shortened context (1000 chars)...")
+                return self.extract_and_verify_specs(scraped_data[:1000], brand, model, equipment_type)
             return {
-                "error": str(e),
+                "error": err_str,
                 "brand": brand,
                 "model": model,
                 "equipment_category": category,
@@ -262,17 +261,35 @@ Scraped Web Content:
         canonical = EQUIPMENT_SCHEMAS.get(category, {})
         specs = result.get("specs", {})
 
+        # Strip stray keys the model may hallucinate (category, price, color, etc.)
+        _STRIPPED_KEYS = {"category", "equipment_category", "price_tnd", "color",
+                          "price", "prix", "couleur", "type", "brand", "model"}
+        for k in _STRIPPED_KEYS:
+            specs.pop(k, None)
+
+        # Keep only keys that exist in the canonical schema
+        specs = {k: v for k, v in specs.items() if k in canonical}
+
         # Ensure every schema key exists (fill missing with None)
         for key in canonical:
             if key not in specs:
                 specs[key] = None
+
+        # Convert dimensions dict → "HxWxD cm" string if Groq returned an object
+        if "dimensions" in specs and isinstance(specs["dimensions"], dict):
+            d = specs["dimensions"]
+            h = d.get("height") or d.get("h") or ""
+            w = d.get("width")  or d.get("w") or ""
+            depth = d.get("depth") or d.get("d") or ""
+            parts = [str(x) for x in [h, w, depth] if x]
+            specs["dimensions"] = "×".join(parts) + " cm" if parts else None
 
         # Type coercions
         int_fields   = {"capacity_btu", "capacity_liters", "power_watts",
                         "noise_level_db", "ram_gb", "warranty_years",
                         "turntable_diameter_cm", "power_consumption_w", "power_supply_w",
                         "refresh_rate_hz", "brightness_cdm2"}
-        float_fields = {"weight_kg", "display_inches", "battery_wh", "price_tnd", "annual_energy_consumption_kwh",
+        float_fields = {"weight_kg", "display_inches", "battery_wh", "annual_energy_consumption_kwh",
                         "screen_size_inches", "response_time_ms"}
         bool_fields  = {"smart_wifi", "no_frost", "inverter"}
 
@@ -369,9 +386,9 @@ Scraped Web Content:
                 for r in search_results[:5]
             ])
 
-        # Step 3: Extraction — cap at 4,000 chars so total prompt stays within TPM limits
+        # Step 3: Extraction — cap at 3,000 chars so total prompt stays within model limits
         extraction = self.extract_and_verify_specs(
-            combined_text[:4_000], brand, model, equipment_type
+            combined_text[:3_000], brand, model, equipment_type
         )
         extraction["source_urls"] = scraped_urls if scraped_urls else ["DDG snippets"]
         extraction["pipeline"] = (
