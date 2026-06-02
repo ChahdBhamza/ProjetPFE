@@ -145,14 +145,14 @@ class SelectedFramesRequest(BaseModel):
 
 @router.post("/process-selected-frames")
 async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_email: str = Depends(verify_token)):
-    """Runs Roboflow + Brand ID in PARALLEL for all selected frames."""
+    """Runs Roboflow + Brand ID sequentially to avoid Groq rate limits."""
     from app.services.workflow_service import WorkflowService
     from fastapi.concurrency import run_in_threadpool
     import asyncio
-    
+
     workflow_service = WorkflowService()
     base_dir_actual = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "sessions", req.session_id, "final_shots")
-    
+
     async def process_single_frame(f):
         img_path = os.path.join(base_dir_actual, f)
         if not os.path.exists(img_path): return None
@@ -167,9 +167,15 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
             "specs_status": "none"
         }
 
-    tasks = [process_single_frame(f) for f in req.filenames]
-    results = await asyncio.gather(*tasks)
-    final_results = [r for r in results if r is not None]
+    # Process sequentially with a gap between frames so Groq's rate limit
+    # (Pass 1 + Pass 2 = 2 requests per frame) is never exceeded.
+    final_results = []
+    for i, f in enumerate(req.filenames):
+        result = await process_single_frame(f)
+        if result:
+            final_results.append(result)
+        if i < len(req.filenames) - 1:
+            await asyncio.sleep(12)
 
     # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:
@@ -256,7 +262,7 @@ async def video_script_process_endpoint(
         _roboflow_service = RoboflowService()
     
     def _run_smart_extract():
-        smart_extract(video_path=video_path, output_dir=base_dir, interval=1, strict=True, max_frames=15, yolo=_yolov5_service, roboflow=_roboflow_service)
+        smart_extract(video_path=video_path, output_dir=base_dir, interval=1, strict=True, max_frames=60, yolo=_yolov5_service, roboflow=_roboflow_service)
     
     try:
         await run_in_threadpool(_run_smart_extract)

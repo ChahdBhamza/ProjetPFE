@@ -146,7 +146,7 @@ def encode_image_to_base64(img: np.ndarray) -> str:
 
 
 def _img_to_bytes(img: np.ndarray) -> bytes:
-    _, buffer = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    _, buffer = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
     return buffer.tobytes()
 
 
@@ -213,10 +213,38 @@ def _build_pass2_prompt(equipment_type: str, preliminary_brand: str | None) -> s
     base_rules = f"""
 You are a FORENSIC EQUIPMENT IDENTIFICATION SPECIALIST.
 You are given TWO images:
-- Image 1: Full scene with bounding box annotation (context)
-- Image 2: ENHANCED close-up crop (for reading logos, stickers, serial plates)
+- Image 1: Full clean scene (use this to find logos, badges, stickers ANYWHERE in the frame)
+- Image 2: ENHANCED close-up crop (for reading fine text, serial plates, model numbers)
 
 {brand_hint}
+
+BRAND DETECTION — SCAN EVERYWHERE:
+You MUST inspect EVERY part of both images before concluding the brand:
+- Top-left, top-right, bottom corners of the equipment
+- Center panel badges or embossed logos
+- Side stickers or rating plates
+- Screen bezel text (laptops/monitors)
+- Door handles or trim strips (fridges)
+- Control panel labels (microwaves, AC)
+- Any small printed text or sticker visible ANYWHERE on the device
+Do NOT stop at the most obvious location — logos are often in unexpected places.
+
+BRAND GUESSING RULES — WHEN NO LOGO IS VISIBLE:
+If no brand logo or text is visible, you MUST still make your best educated guess using ALL design cues:
+- Chassis material (plastic vs aluminium), color, finish
+- Keyboard layout, key shape, trackpad size and style
+- Port placement and types (USB-A/C, HDMI, headphone jack positions)
+- Screen bezel thickness and webcam notch style
+- Build quality indicators (hinges, vents, speaker grilles)
+- Overall form factor and aesthetic
+
+Give this guess a confidence of 50-69% to reflect uncertainty.
+
+ABSOLUTE RULE — NEVER GUESS APPLE UNLESS YOU SEE THE LOGO:
+Apple laptops have a very specific aluminium unibody chassis, no visible vents on front,
+very thin uniform bezels, and a backlit Apple logo on the lid.
+If you cannot see the Apple logo AND the chassis is plastic or has visible vents/ports on the sides,
+it is NOT Apple. Default to Lenovo, Asus, HP, Dell, or Acer before ever guessing Apple.
 
 STRICT CONFIDENCE RULES:
 - 90%+: You can CLEARLY READ the exact model code/number on the image (e.g. on a sticker or label)
@@ -227,7 +255,7 @@ STRICT CONFIDENCE RULES:
 IMPORTANT:
 - The model candidates you suggest MUST be highly accurate.
 - If you cannot read the model text, you MAY use your expert visual recognition to deduce the model based on its design, BUT YOU MUST
- STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG. 
+ STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG.
 - Example: If you detect the brand "SABA", you MUST ONLY suggest SABA models (like "P70H20L-DE"). Do NOT hallucinate a competitor's model
  (like Samsung "MS20F20")  just because they share a similar shape or generic parts.
 - Every model name in "model_candidates" MUST be a single, precise alphanumeric reference code.
@@ -324,7 +352,7 @@ Respond ONLY with a valid JSON object matching exactly:
 
     for attempt in range(3):
         try:
-            time.sleep(2)  # stay within 30 RPM Groq free tier
+            time.sleep(6)  # stay within 30 RPM Groq free tier
             resp = client.chat.completions.create(
                 model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[
@@ -384,6 +412,8 @@ def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, y
 
     KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
 
+    KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
+
     # Always run Pass 1 to get a preliminary brand (it's fast and cheap)
     print("[Vision] Pass 1: Fast equipment type detection...")
     pass1 = _run_pass1(client, full_bytes)
@@ -394,8 +424,6 @@ def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, y
 
     # Decide which type to use for the forensic prompt
     if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
-        # If Pass 1 agrees with YOLO, use YOLO (strong signal)
-        # If Pass 1 disagrees with high confidence, trust Pass 1 (YOLO may have been wrong)
         if pass1_type == yolo_type_hint or pass1_conf < 70:
             eq_type = yolo_type_hint
             print(f"[Vision] Using YOLO hint: type='{eq_type}'")
@@ -438,7 +466,9 @@ def process_frame(image_path: str, api_key: str | None = None, yolo_type_hint: s
     raw_crop = frame[y:y+h, x:x+w]
     enhanced_crop = enhance_crop_for_ocr(raw_crop)
 
-    llm_result = identify_with_groq(annotated, enhanced_crop, yolo_type_hint=yolo_type_hint)
+    # Pass the clean frame (no annotation) as the full-scene image so the model
+    # can read logos/text anywhere without the green box covering them.
+    llm_result = identify_with_groq(frame, enhanced_crop, yolo_type_hint=yolo_type_hint)
 
     return {
         "bbox": {"x": x, "y": y, "w": w, "h": h},

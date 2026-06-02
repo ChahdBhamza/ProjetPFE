@@ -23,9 +23,36 @@ except ImportError as e:
     sys.exit(1)
 
 WORKFLOW_ID = "custom-workflow-3"
-MAX_FRAMES_TO_PROCESS = 15
-ROBOFLOW_PROBE_FRAMES = 4  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave / AC)
-MAX_ROBOFLOW_CALLS = 5
+MAX_FRAMES_TO_PROCESS = 60
+ROBOFLOW_PROBE_FRAMES = 10  # sharpest full-res frames sent to Roboflow (coverage for fridge / microwave / AC)
+MAX_ROBOFLOW_CALLS = 18
+# Per-category hero limits — only computers/monitors may have multiple instances.
+# Everything else (fridge, microwave, AC) gets 1 slot to prevent false-positive duplicates.
+HEROES_PER_CAT = {
+    "computer":        2,
+    "tv_monitor":      2,
+    "refrigerator":    1,
+    "microwave":       1,
+    "air_conditioner": 1,
+}
+DEFAULT_HEROES = 1
+
+# Minimum frame gap between two heroes of the same category.
+# Computers use 2 (tighter) so the best frame of each PC is never blocked by the other.
+FRAME_GAP_BY_CAT = {
+    "computer":   2,
+    "tv_monitor": 2,
+}
+DEFAULT_FRAME_GAP = 4
+
+# Per-category minimum confidence to qualify as a hero (false-positive gate).
+HERO_MIN_CONFIDENCE = {
+    "refrigerator":    0.35,
+    "air_conditioner": 0.40,
+    "microwave":       0.30,
+    "computer":        0.28,
+    "tv_monitor":      0.28,
+}
 
 def is_allowed(cls_name):
     name = cls_name.lower()
@@ -165,6 +192,22 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         fs = frame_sharpness(frame_img)
         for hit in yolo.detect(pil_small):
             if not strict or is_allowed(hit["class"]):
+                # Refrigerator guard: YOLO's 0.20 floor is too loose and fires on
+                # cabinets/boxes. Require higher confidence AND a meaningful size.
+                cat_hit = normalize_equipment_class(hit["class"])
+                # YOLO fridge hits are used only to guide Roboflow probe selection.
+                # They are tagged _yolo_probe_only so they never become hero candidates.
+                if cat_hit == "refrigerator":
+                    hit["_obj_sharp"] = object_sharpness(frame_img, hit["bbox"], sw, sh)
+                    hit["_quality"] = composite_quality(hit, sw, sh, fs, frame_img, sw, sh)
+                    hit["_yolo_probe_only"] = True
+                    hits.append(hit)
+                    continue
+                if cat_hit == "microwave":
+                    if hit.get("confidence", 0) < 0.30:
+                        continue
+                    if bbox_area_frac(hit, sw, sh) < 0.04:
+                        continue
                 hit["_obj_sharp"] = object_sharpness(frame_img, hit["bbox"], sw, sh)
                 hit["_quality"] = composite_quality(hit, sw, sh, fs, frame_img, sw, sh)
                 hits.append(hit)
@@ -192,14 +235,31 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         for hit in res.get("detections", []):
             cls_lower = hit.get("class", "").lower()
             _is_ac = any(k in cls_lower for k in ("air_conditioner", "airconditioner", " ac", "conditioner"))
-            _min_conf = 0.45 if _is_ac else 0.60
-            if hit.get("confidence", 0) < _min_conf:
+            _is_fridge = any(k in cls_lower for k in ("fridge", "refrigerator"))
+            if _is_ac:
+                _min_conf = 0.45
+            elif _is_fridge:
+                _min_conf = 0.72
+            else:
+                _min_conf = 0.60
+            rf_cat = normalize_equipment_class(hit["class"])
+            conf = hit.get("confidence", 0)
+            area = bbox_area_frac(hit, fw, fh)
+            print(f"[RF f{data['id']:04d}] class={hit['class']} cat={rf_cat} conf={conf:.3f} area={area:.3f} min_conf={_min_conf:.2f}")
+            if conf < _min_conf:
+                print(f"  → SKIP low confidence")
+                continue
+            if rf_cat == "refrigerator" and area < 0.05:
+                print(f"  → SKIP fridge too small")
+                continue
+            if rf_cat == "microwave" and area < 0.04:
+                print(f"  → SKIP microwave too small")
                 continue
             if not strict or is_allowed(hit["class"]):
                 hit["_source"] = "roboflow"
-                # bbox already in full-res coordinates from Roboflow
                 hit["_obj_sharp"] = object_sharpness(data["frame"], hit["bbox"], fw, fh)
                 hit["_quality"] = composite_quality(hit, fw, fh, fs, data["frame"], fw, fh)
+                print(f"  → ACCEPTED quality={hit['_quality']:.3f}")
                 hits.append(hit)
 
         ann_pil = RoboflowService.decode_annotated_image(res.get("image"))
@@ -250,6 +310,13 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     for data in sharp_sorted[:ROBOFLOW_PROBE_FRAMES]:
         probe_ids.add(data["id"])
 
+    # Temporal coverage: evenly spread probes across the whole video so that
+    # YOLO-invisible classes (e.g. air_conditioner) still reach Roboflow.
+    if yolo_results:
+        coverage_step = max(1, len(yolo_results) // ROBOFLOW_PROBE_FRAMES)
+        for data in yolo_results[::coverage_step][:ROBOFLOW_PROBE_FRAMES]:
+            probe_ids.add(data["id"])
+
     # Extra coverage: best frames for fridge / microwave (often missed by global sharp sort)
     for target_cat in ("refrigerator", "microwave"):
         ranked = []
@@ -258,7 +325,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 if normalize_equipment_class(hit["class"]) == target_cat:
                     ranked.append((hit["_quality"], data["id"]))
         ranked.sort(reverse=True)
-        for _, fid in ranked[:4]:
+        for _, fid in ranked[:6]:
             probe_ids.add(fid)
 
     probe_ids = list(probe_ids)[:MAX_ROBOFLOW_CALLS]
@@ -291,7 +358,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                         if yolo_cat not in ("refrigerator", "computer", "tv_monitor", "microwave"):
                             continue
                         iou_val = _iou(rf_bbox, yh.get("bbox", [0, 0, 0, 0]))
-                        if iou_val > 0.35:
+                        if iou_val > 0.55:
                             print(f"🚫 SAFEGUARD: Overriding Roboflow 'air_conditioner' → '{yolo_cat}' (IoU={iou_val:.2f}, YOLO saw {yolo_cat} on same region)")
                             hit["_category"] = yolo_cat
                             hit["class"] = "laptop" if yolo_cat == "computer" else ("tv" if yolo_cat == "tv_monitor" else yolo_cat)
@@ -313,18 +380,37 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     # category, then do a final IoU cross-check to drop any stragglers that
     # slipped through on the same frame.
 
-    # Best hero per raw category (no merging — each category keeps its own slot)
+    # Best heroes per raw category — up to MAX_HEROES_PER_CAT per type,
+    # each separated by at least MIN_FRAME_GAP frames (catches two PCs, etc.)
+    def _hero_score(c):
+        """Combined ranking: quality (visual clarity) + confidence (model certainty).
+        Prevents a sharp false positive from beating a confident true detection."""
+        return 0.70 * c["_quality"] + 0.30 * c.get("confidence", 0)
+
     by_cat = {}
-    for candidate in sorted(global_pool, key=lambda x: (x.get("_source") != "roboflow", -x["_quality"])):
+    for candidate in sorted(
+        [c for c in global_pool if not c.get("_yolo_probe_only")],
+        key=lambda x: (x.get("_source") != "roboflow", -_hero_score(x))
+    ):
         cat = candidate.get("_category") or normalize_equipment_class(candidate["class"])
-        
-        # Filter out extremely low quality / blurry candidates to prevent false positive heroes
-        if candidate["_quality"] < 0.28:
+
+        if candidate["_quality"] < 0.18:
             print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f})")
             continue
-            
-        if cat not in by_cat:
-            by_cat[cat] = candidate
+
+        min_conf = HERO_MIN_CONFIDENCE.get(cat, 0.25)
+        if candidate.get("confidence", 0) < min_conf:
+            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low confidence ({candidate.get('confidence', 0):.2f} < {min_conf})")
+            continue
+
+        max_heroes = HEROES_PER_CAT.get(cat, DEFAULT_HEROES)
+        frame_gap  = FRAME_GAP_BY_CAT.get(cat, DEFAULT_FRAME_GAP)
+        existing = by_cat.get(cat, [])
+        fid = candidate["_frame_id"]
+        too_close = any(abs(fid - h["_frame_id"]) < frame_gap for h in existing)
+        if len(existing) < max_heroes and not too_close:
+            existing.append(candidate)
+            by_cat[cat] = existing
 
     # Cross-frame screen dedup: if both 'computer' and 'tv_monitor' survived
     # (same physical laptop detected across different frames), drop tv_monitor.
@@ -334,7 +420,10 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         del by_cat["tv_monitor"]
 
     # Final IoU pass: drop heroes that still overlap > 50% on the same frame
-    heroes_list = sorted(by_cat.values(), key=lambda h: -h["_quality"])
+    heroes_list = sorted(
+        [h for heroes in by_cat.values() for h in heroes],
+        key=lambda h: -_hero_score(h)
+    )
     final_heros = []
     for hero in heroes_list:
         dominated = False

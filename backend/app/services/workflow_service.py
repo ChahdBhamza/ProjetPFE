@@ -50,6 +50,31 @@ class WorkflowService:
         }
         return mapping.get(raw)
 
+    def _draw_single_box(self, image_path: str, pred: dict) -> str | None:
+        """Draw one clean bounding box on the raw frame and return as base64."""
+        try:
+            import cv2
+            import numpy as np
+            img = cv2.imread(image_path)
+            if img is None:
+                return None
+            h, w = img.shape[:2]
+            # Roboflow returns center x/y + width/height
+            cx = pred.get("x", 0); cy = pred.get("y", 0)
+            bw = pred.get("width", 0); bh = pred.get("height", 0)
+            x1 = int(cx - bw / 2); y1 = int(cy - bh / 2)
+            x2 = int(cx + bw / 2); y2 = int(cy + bh / 2)
+            color = (30, 180, 100)
+            cv2.rectangle(img, (x1, y1), (x2, y2), color, 3)
+            label = f"{pred.get('class', '')} {pred.get('confidence', 0):.0%}"
+            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.65, 2)
+            cv2.rectangle(img, (x1, y1 - th - 12), (x1 + tw + 4, y1), color, -1)
+            cv2.putText(img, label, (x1 + 2, y1 - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+            _, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            return base64.b64encode(buf).decode("utf-8")
+        except Exception:
+            return None
+
     def run_specialized_workflow(self, image_path: str):
         try:
             print(f"📡 SDK Processing: {image_path}")
@@ -112,6 +137,13 @@ class WorkflowService:
                     else 0.60
                 )
             ]
+
+            # Keep only the single highest-confidence detection and redraw with one box
+            if len(predictions) > 1:
+                predictions = [max(predictions, key=lambda p: p.get("confidence", 0))]
+
+            if predictions:
+                display_b64 = self._draw_single_box(image_path, predictions[0])
 
             print(f"✅ AI Result: Found {len(predictions)} items")
 

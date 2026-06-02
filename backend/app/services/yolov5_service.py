@@ -62,7 +62,12 @@ class YOLOv5Service:
                 confidence = float(conf)
                 class_name = self.model.names[int(cls)].lower()
 
-                min_conf = 0.20 if class_name in self.appliance_classes else self.confidence_threshold
+                if class_name == "refrigerator":
+                    min_conf = 0.20
+                elif class_name in self.appliance_classes:
+                    min_conf = 0.20
+                else:
+                    min_conf = self.confidence_threshold
                 if confidence < min_conf:
                     continue
                 
