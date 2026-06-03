@@ -9,7 +9,19 @@ import '../../data/models/detection_result_model.dart';
 
 class EquipmentDetailPage extends StatelessWidget {
   final EquipmentResult result;
-  const EquipmentDetailPage({super.key, required this.result});
+  final VoidCallback? onSaveNext;
+  final VoidCallback? onSkip;
+  final int? currentIndex;
+  final int? totalItems;
+
+  const EquipmentDetailPage({
+    super.key,
+    required this.result,
+    this.onSaveNext,
+    this.onSkip,
+    this.currentIndex,
+    this.totalItems,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -267,11 +279,83 @@ class EquipmentDetailPage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Column(children: [
-                          if (result.meta.sourceQuality != 'inventory') ...[
-                            GlowingButton(
-                              label: 'SAVE TO NEURAL INVENTORY',
-                              onTap: () => _handleSave(context),
+                          // Progress indicator in batch mode
+                          if (currentIndex != null && totalItems != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Item ${currentIndex! + 1} of $totalItems',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: SizedBox(
+                                      height: 4,
+                                      width: 120,
+                                      child: LinearProgressIndicator(
+                                        value: (currentIndex! + 1) / totalItems!,
+                                        backgroundColor: Colors.white.withValues(alpha: 0.1),
+                                        valueColor: const AlwaysStoppedAnimation<Color>(
+                                          CybersightTheme.accent,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          if (result.meta.sourceQuality != 'inventory') ...[
+                            if (onSaveNext != null && currentIndex != null && totalItems != null) ...[
+                              // Batch mode: Show both Save & Next and Skip buttons
+                              GlowingButton(
+                                label: currentIndex! < totalItems! - 1
+                                    ? 'SAVE & NEXT'
+                                    : 'SAVE & FINISH',
+                                onTap: () => _handleSave(context, moveToNext: true),
+                              ),
+                              const SizedBox(height: 12),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  onSkip?.call();
+                                },
+                                child: Container(
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: CybersightTheme.accent.withValues(alpha: 0.3),
+                                    ),
+                                    color: Colors.transparent,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'SKIP THIS ITEM',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: CybersightTheme.accent.withValues(alpha: 0.7),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ] else ...[
+                              // Single mode: Just save normally
+                              GlowingButton(
+                                label: 'SAVE TO NEURAL INVENTORY',
+                                onTap: () => _handleSave(context),
+                              ),
+                            ],
                           ],
                         ]),
                       ),
@@ -303,7 +387,12 @@ class EquipmentDetailPage extends StatelessWidget {
     );
   }
 
-  Future<void> _handleSave(BuildContext context) async {
+  Future<bool> _performSave(BuildContext context) async {
+    final apiService = ApiService();
+    return await apiService.saveEquipmentToInventory(result);
+  }
+
+  Future<void> _handleSave(BuildContext context, {bool moveToNext = false}) async {
     final brand = result.identity.brand.trim().toLowerCase();
     final isUnknownBrand = brand.isEmpty || brand == 'unknown';
 
@@ -347,14 +436,16 @@ class EquipmentDetailPage extends StatelessWidget {
       if (proceed != true) return;
     }
 
-    final apiService = ApiService();
-    final success = await apiService.saveEquipmentToInventory(result);
+    final success = await _performSave(context);
     if (!context.mounted) return;
 
     if (success) {
-      // Show the success page, then it auto-redirects home. Clears the whole
-      // stack so the modal sheets and script-lab page are dismissed cleanly.
-      Navigator.pushNamedAndRemoveUntil(context, '/save-success', (_) => false);
+      if (moveToNext && onSaveNext != null) {
+        Navigator.pop(context);
+        onSaveNext!();
+      } else {
+        Navigator.pushNamedAndRemoveUntil(context, '/save-success', (_) => false);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(

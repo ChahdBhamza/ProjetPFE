@@ -855,6 +855,8 @@ class _VerificationCarouselSheetState
   bool _isFetchingSpecs = false;
   String _fetchingLabel = '';
   late List<Map<String, String>> _cardValues;
+  int _sequentialIndex = 0;
+  bool _inSequentialMode = false;
 
   @override
   void initState() {
@@ -878,20 +880,60 @@ class _VerificationCarouselSheetState
   }
 
   Future<void> _verifyAll() async {
-    for (int i = 0; i < widget.detections.length; i++) {
-      final vals = _cardValues[i];
-      final detection = widget.detections[i];
-      final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
-      final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
-      final candidates = fd['model_candidates'] as List? ?? [];
-      final top = candidates.isNotEmpty ? (candidates.first as Map).cast<String, dynamic>() : <String, dynamic>{};
-      final conf = (top['confidence'] as num?)?.toInt() ?? 0;
-      await _fetchSpecs(vals['brand']!, vals['model']!, vals['type']!, frameImage, confidence: conf);
+    setState(() {
+      _inSequentialMode = true;
+      _sequentialIndex = 0;
+    });
+    await _processSequentialItem(0);
+  }
+
+  Future<void> _processSequentialItem(int index) async {
+    if (index >= widget.detections.length) {
+      if (mounted) {
+        setState(() => _inSequentialMode = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'All items processed!',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+            ),
+            backgroundColor: CybersightTheme.ok.withValues(alpha: 0.9),
+          ),
+        );
+      }
+      return;
     }
+
+    final vals = _cardValues[index];
+    final detection = widget.detections[index];
+    final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
+    final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
+    final candidates = fd['model_candidates'] as List? ?? [];
+    final top = candidates.isNotEmpty ? (candidates.first as Map).cast<String, dynamic>() : <String, dynamic>{};
+    final conf = (top['confidence'] as num?)?.toInt() ?? 0;
+
+    await _fetchSpecs(
+      vals['brand']!,
+      vals['model']!,
+      vals['type']!,
+      frameImage,
+      confidence: conf,
+      sequentialIndex: index,
+      onSaveNext: () => _processSequentialItem(index + 1),
+      onSkip: () => _processSequentialItem(index + 1),
+    );
   }
 
   Future<void> _fetchSpecs(
-      String brand, String modelName, String type, String? frameImage, {int confidence = 0}) async {
+    String brand,
+    String modelName,
+    String type,
+    String? frameImage, {
+    int confidence = 0,
+    int? sequentialIndex,
+    VoidCallback? onSaveNext,
+    VoidCallback? onSkip,
+  }) async {
     setState(() {
       _isFetchingSpecs = true;
       _fetchingLabel = '$brand $modelName';
@@ -930,7 +972,13 @@ class _VerificationCarouselSheetState
             backgroundColor: Colors.transparent,
             builder: (context) => FractionallySizedBox(
               heightFactor: 0.85,
-              child: EquipmentDetailPage(result: equipmentResult),
+              child: EquipmentDetailPage(
+                result: equipmentResult,
+                onSaveNext: onSaveNext,
+                onSkip: onSkip,
+                currentIndex: sequentialIndex,
+                totalItems: widget.detections.length,
+              ),
             ),
           );
         }
