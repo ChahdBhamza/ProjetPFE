@@ -9,6 +9,7 @@ import 'features/auth/presentation/pages/forgot_password_page.dart';
 import 'features/auth/presentation/pages/check_email_page.dart';
 import 'features/auth/presentation/pages/reset_password_page.dart';
 import 'features/app/presentation/pages/app_shell.dart';
+import 'features/app/presentation/pages/save_success_page.dart';
 import 'package:provider/provider.dart';
 import 'features/app/presentation/providers/detection_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
@@ -94,6 +95,8 @@ class CybersightApp extends StatelessWidget {
             return _buildAnimatedRoute(settings, ResetPasswordPage(email: email));
           case '/app':
             return _buildAnimatedRoute(settings, const AppShell());
+          case '/save-success':
+            return _buildAnimatedRoute(settings, const SaveSuccessPage());
           default:
             return _buildAnimatedRoute(settings, const SplashPage());
         }

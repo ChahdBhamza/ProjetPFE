@@ -18,7 +18,9 @@ class AdminDashboardPage extends StatefulWidget {
 }
 
 class _AdminDashboardPageState extends State<AdminDashboardPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   late TabController _tab;
   bool _isLoading = true;
   Map<String, dynamic>? _stats;
@@ -59,6 +61,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
@@ -85,21 +88,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'System Overview',
+                  'Overview',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 22,
+                    fontSize: 32,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
-                    letterSpacing: -0.4,
+                    letterSpacing: -0.5,
+                    height: 1.0,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 6),
                 Text(
-                  'Admin console',
+                  'ADMIN CONSOLE',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: Colors.white30,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 10,
+                    color: Colors.white24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ],

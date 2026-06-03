@@ -21,6 +21,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin {
   int _index = 0;
   late AnimationController _bgController;
+  late PageController _pageController;
   Timer? _inactivityTimer;
 
   static const int _inactivityTimeoutMinutes = 10;
@@ -30,7 +31,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
       const EquipmentPage(),
       InventoryPage(isActive: _index == 1),
       if (isAdmin) const AdminDashboardPage(),
-      ProfilePage(onGoToInventory: () => setState(() => _index = 1)),
+      ProfilePage(onGoToInventory: () => _setIndex(1)),
     ];
   }
 
@@ -41,7 +42,18 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
       vsync: this,
       duration: const Duration(seconds: 12),
     )..repeat();
+    _pageController = PageController(initialPage: _index);
     _resetInactivityTimer();
+  }
+
+  void _setIndex(int newIndex) {
+    if (!mounted) return;
+    setState(() => _index = newIndex);
+    _pageController.animateToPage(
+      newIndex,
+      duration: const Duration(milliseconds: 380),
+      curve: Curves.easeInOutCubic,
+    );
   }
 
   void _resetInactivityTimer() {
@@ -83,6 +95,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
   @override
   void dispose() {
     _bgController.dispose();
+    _pageController.dispose();
     _inactivityTimer?.cancel();
     super.dispose();
   }
@@ -114,7 +127,11 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
                 ),
               ),
               Positioned.fill(
-                child: IndexedStack(index: activeIndex, children: pages),
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: pages,
+                ),
               ),
             ],
           ),
@@ -127,7 +144,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: BottomNavigationBar(
                 currentIndex: activeIndex,
-                onTap: (v) => setState(() => _index = v),
+                onTap: _setIndex,
                 type: BottomNavigationBarType.fixed,
                 elevation: 0,
                 backgroundColor: Colors.transparent,

@@ -26,6 +26,7 @@ dependencies:
 
   # Media
   image_picker: ^1.1.2
+  video_player: ^2.9.0
 
   # Utilities
   url_launcher: ^6.3.1

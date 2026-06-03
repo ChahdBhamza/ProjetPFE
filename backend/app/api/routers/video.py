@@ -167,10 +167,9 @@ class SelectedFramesRequest(BaseModel):
 
 @router.post("/process-selected-frames")
 async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_email: str = Depends(verify_token)):
-    """Runs Roboflow + Brand ID sequentially to avoid Groq rate limits."""
+    """Runs Roboflow + Brand ID per frame; Groq pacing handled by the rate limiter."""
     from app.services.workflow_service import WorkflowService
     from fastapi.concurrency import run_in_threadpool
-    import asyncio
 
     workflow_service = WorkflowService()
     base_dir_actual = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "sessions", req.session_id, "final_shots")
@@ -189,15 +188,13 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
             "specs_status": "none"
         }
 
-    # Process sequentially with a gap between frames so Groq's rate limit
-    # (Pass 1 + Pass 2 = 2 requests per frame) is never exceeded.
+    # Pacing is handled by the shared Groq token-bucket limiter (rate_limiter.py),
+    # so no fixed inter-frame sleep is needed — it only waits when near the cap.
     final_results = []
-    for i, f in enumerate(req.filenames):
+    for f in req.filenames:
         result = await process_single_frame(f)
         if result:
             final_results.append(result)
-        if i < len(req.filenames) - 1:
-            await asyncio.sleep(12)
 
     # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:

@@ -7,9 +7,14 @@ import 'package:equipment_detection_app/core/widgets/hud_widgets.dart';
 import 'package:equipment_detection_app/features/auth/presentation/providers/auth_provider.dart';
 import 'script_lab_page.dart';
 
-class EquipmentPage extends StatelessWidget {
+class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
 
+  @override
+  State<EquipmentPage> createState() => _EquipmentPageState();
+}
+
+class _EquipmentPageState extends State<EquipmentPage> with AutomaticKeepAliveClientMixin {
   void _launchScanLab(BuildContext context) {
     Navigator.push(
       context,
@@ -38,12 +43,13 @@ class EquipmentPage extends StatelessWidget {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context); // Must call build from AutomaticKeepAliveClientMixin
     final operatorName =
         context.watch<AuthProvider>().fullName ?? 'Operator';
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final siteName = args?['site'] as String?;
-    final floorName = args?['floor'] as String?;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -70,33 +76,15 @@ class EquipmentPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      if (siteName != null && floorName != null)
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on_rounded,
-                                color: Colors.white30, size: 11),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$siteName · $floorName'.toUpperCase(),
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white30,
-                                letterSpacing: 1.4,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Text(
-                          'Welcome, $operatorName',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white38,
-                            letterSpacing: 0.2,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
+                      Text(
+                        'Welcome, $operatorName',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.white38,
+                          letterSpacing: 0.2,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -148,9 +136,9 @@ class EquipmentPage extends StatelessWidget {
               'HOW IT WORKS',
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.white24,
-                letterSpacing: 1.8,
-                fontSize: 8,
-                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 14),
@@ -172,9 +160,9 @@ class EquipmentPage extends StatelessWidget {
                   _StepRow(
                     number: '02',
                     icon: Icons.grid_view_rounded,
-                    title: 'Review Key Frames',
+                    title: 'Detect Key Frames',
                     subtitle:
-                        'Browse AI-extracted frames and confirm hero shots.',
+                        'Browse the extracted  Hero Frames.',
                   ),
                   _Divider(),
                   _StepRow(
@@ -182,7 +170,7 @@ class EquipmentPage extends StatelessWidget {
                     icon: Icons.verified_rounded,
                     title: 'Identify Equipment',
                     subtitle:
-                        'Brand, model, and full specs detected automatically.',
+                        'Brand, model, and full specs detected Ready to export.',
                   ),
                 ],
               ),

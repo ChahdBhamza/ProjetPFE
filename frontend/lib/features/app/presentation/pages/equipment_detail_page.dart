@@ -30,8 +30,13 @@ class EquipmentDetailPage extends StatelessWidget {
 
     final int confidence = result.identity.confidence;
 
-    final Map<String, dynamic> displaySpecs =
-        result.specs.isNotEmpty ? result.specs : _getFallbackSpecs(rawCategory);
+    // Always render the FULL schema for this category. Start from the complete
+    // field template (all empty) then overlay whatever real values we have, so
+    // every field is shown — filled values in white, missing ones as "—".
+    final Map<String, dynamic> displaySpecs = {
+      ..._schemaForCategory(rawCategory),
+      ...result.specs,
+    };
 
     return GlassContainer(
       opacity: 0.15,
@@ -345,15 +350,20 @@ class EquipmentDetailPage extends StatelessWidget {
     final apiService = ApiService();
     final success = await apiService.saveEquipmentToInventory(result);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        success ? 'SYNC SUCCESSFUL • ADDED TO INVENTORY' : 'SYNC FAILED',
-        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
-      ),
-      backgroundColor:
-          (success ? CybersightTheme.ok : CybersightTheme.warning).withOpacity(0.9),
-    ));
-    if (success) Navigator.pop(context);
+
+    if (success) {
+      // Show the success page, then it auto-redirects home. Clears the whole
+      // stack so the modal sheets and script-lab page are dismissed cleanly.
+      Navigator.pushNamedAndRemoveUntil(context, '/save-success', (_) => false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          'SYNC FAILED',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+        ),
+        backgroundColor: CybersightTheme.warning.withOpacity(0.9),
+      ));
+    }
   }
 
   String _cleanCategoryLabel(String raw) {
@@ -399,62 +409,45 @@ class EquipmentDetailPage extends StatelessWidget {
     return Icons.memory_rounded;
   }
 
-  Map<String, dynamic> _getFallbackSpecs(String rawCategory) {
+  /// Canonical field list per equipment type — mirrors the backend schema.
+  /// All values empty; real specs are overlaid on top so every field renders
+  /// (filled in white, missing as "—").
+  Map<String, dynamic> _schemaForCategory(String rawCategory) {
     final cat = rawCategory.toLowerCase();
-    if (cat.contains('laptop') || cat.contains('notebook')) {
-      return {
-        'processor': 'Intel Core i5 12th Gen',
-        'ram': '8 GB DDR4',
-        'storage': '256 GB SSD',
-        'display': '15.6" FHD IPS',
-        'battery': '45 Wh',
-        'os': 'Windows 11',
-      };
+    List<String> keys;
+    if (cat.contains('air') || cat.contains('conditioner') || cat.contains('climat')) {
+      keys = [
+        'capacity_btu', 'technology', 'mode', 'energy_class', 'refrigerant',
+        'smart_wifi', 'noise_level_db', 'power_consumption_w',
+        'annual_energy_consumption_kwh', 'dimensions', 'warranty_years',
+      ];
+    } else if (cat.contains('refriger') || cat.contains('fridge')) {
+      keys = [
+        'capacity_liters', 'energy_class', 'refrigerant', 'no_frost', 'inverter',
+        'dimensions', 'weight_kg', 'noise_level_db', 'power_consumption_w',
+        'annual_energy_consumption_kwh', 'warranty_years',
+      ];
+    } else if (cat.contains('micro')) {
+      keys = [
+        'power_watts', 'annual_energy_consumption_kwh', 'capacity_liters',
+        'functions', 'turntable_diameter_cm', 'control_type', 'dimensions',
+        'weight_kg', 'warranty_years',
+      ];
+    } else if (cat.contains('laptop') || cat.contains('notebook') || cat.contains('computer')) {
+      keys = [
+        'cpu', 'ram_gb', 'storage', 'display_inches', 'display_resolution',
+        'gpu', 'battery_wh', 'power_supply_w', 'os', 'weight_kg', 'warranty_years',
+      ];
+    } else if (cat.contains('monitor') || cat.contains('screen') || cat.contains('display') || cat.contains('tv')) {
+      keys = [
+        'screen_size_inches', 'resolution', 'panel_type', 'refresh_rate_hz',
+        'response_time_ms', 'aspect_ratio', 'brightness_cdm2', 'contrast_ratio',
+        'ports', 'power_consumption_w', 'warranty_years',
+      ];
+    } else {
+      keys = [];
     }
-    if (cat.contains('monitor') || cat.contains('screen') || cat.contains('display')) {
-      return {
-        'screen_size': '27"',
-        'resolution': '1920 × 1080',
-        'panel': 'IPS',
-        'refresh_rate': '75 Hz',
-        'response_time': '5 ms',
-        'ports': 'HDMI · VGA · DisplayPort',
-      };
-    }
-    if (cat.contains('air') || cat.contains('conditioner') || cat.contains('climatiseur')) {
-      return {
-        'power_consumption': '1200 W',
-        'cooling_capacity': '12000 BTU/h',
-        'energy_rating': 'A++',
-        'noise_level': '42 dB',
-        'refrigerant': 'R-32',
-        'coverage': '20–25 m²',
-      };
-    }
-    if (cat.contains('refriger') || cat.contains('fridge')) {
-      return {
-        'capacity': '300 L',
-        'energy_class': 'A+',
-        'noise_level': '38 dB',
-        'dimensions': '60 × 65 × 180 cm',
-        'freezer': '60 L',
-        'defrost': 'Auto',
-      };
-    }
-    if (cat.contains('micro')) {
-      return {
-        'power_output': '900 W',
-        'capacity': '25 L',
-        'programs': '8',
-        'turntable': '28 cm',
-        'dimensions': '32 × 48 × 28 cm',
-      };
-    }
-    return {
-      'type': rawCategory.isNotEmpty ? rawCategory : 'Equipment',
-      'status': 'Detected',
-      'source': 'AI Vision',
-    };
+    return {for (final k in keys) k: null};
   }
 }
 

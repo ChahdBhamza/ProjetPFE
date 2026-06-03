@@ -15,7 +15,9 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final ApiService _api = ApiService();
   Map<String, dynamic>? _stats;
   List<dynamic> _recentScans = [];
@@ -82,6 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final auth = Provider.of<AuthProvider>(context);
     final name = auth.fullName ?? 'Cyber Operator';
     final email = auth.userEmail ?? 'Access Denied';
@@ -104,12 +107,19 @@ class _ProfilePageState extends State<ProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Profile',
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              fontWeight: FontWeight.w900, fontSize: 42, height: 1.0)),
-                      const SizedBox(height: 4),
+                          style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 32,
+                              letterSpacing: -0.5,
+                              height: 1.0)),
+                      const SizedBox(height: 6),
                       Text('OPERATOR · ACCESS · PREFERENCES',
                           style: GoogleFonts.plusJakartaSans(
-                              color: Colors.white24, letterSpacing: 3, fontSize: 9)),
+                              color: Colors.white24,
+                              letterSpacing: 1.5,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -321,7 +331,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         text.toUpperCase(),
         style: GoogleFonts.plusJakartaSans(
-            color: Colors.white24, letterSpacing: 3, fontSize: 9,
+            color: Colors.white24, letterSpacing: 1.5, fontSize: 10,
             fontWeight: FontWeight.w600),
       );
 }

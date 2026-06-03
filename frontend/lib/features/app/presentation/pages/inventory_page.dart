@@ -16,7 +16,9 @@ class InventoryPage extends StatefulWidget {
   State<InventoryPage> createState() => _InventoryPageState();
 }
 
-class _InventoryPageState extends State<InventoryPage> {
+class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -219,6 +221,7 @@ class _InventoryPageState extends State<InventoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: _loadInventory,
@@ -244,21 +247,21 @@ class _InventoryPageState extends State<InventoryPage> {
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w700,
                           height: 1.0,
-                          fontSize: 42,
+                          fontSize: 32,
                           color: Colors.white,
                           letterSpacing: -0.5,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         _getCategorySubtitle(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: Colors.white24,
-                          letterSpacing: 2.0,
+                          letterSpacing: 1.5,
                         ),
                       ),
                     ],

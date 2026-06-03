@@ -195,6 +195,8 @@ Scraped Web Content:
                 f'"summary": "one factual sentence"}}'
             )
 
+            from app.services.rate_limiter import groq_throttle
+            groq_throttle()
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
@@ -241,12 +243,17 @@ Scraped Web Content:
             if "json_validate_failed" in err_str and scraped_data and len(scraped_data) > 1000:
                 print("[Groq] Retrying with shortened context (1000 chars)...")
                 return self.extract_and_verify_specs(scraped_data[:1000], brand, model, equipment_type)
+            # Even on failure, return the FULL schema (all keys → None) so the
+            # frontend always renders every field for this equipment type.
             return {
                 "error": err_str,
                 "brand": brand,
                 "model": model,
                 "equipment_category": category,
                 "verified": False,
+                "specs": get_schema(category),
+                "fields_found": 0,
+                "source_quality": "low",
             }
 
     # =========================================================================
@@ -361,6 +368,18 @@ Scraped Web Content:
         print(f"[Pipeline] Hunting specs: {brand} {model} ({category})")
         print(f"{'='*56}")
 
+        # Step 0: Cache lookup — skip the whole search/scrape/extract pipeline on a hit
+        if brand and model:
+            try:
+                from app.database import mongo_db
+                cached = mongo_db.get_cached_specs(brand, model, category)
+                if cached:
+                    print(f"[Pipeline] CACHE HIT for {brand} {model} — returning instantly")
+                    cached["pipeline"] = (cached.get("pipeline") or "") + " (cached)"
+                    return cached
+            except Exception as e:
+                print(f"[Pipeline] Cache lookup failed (continuing live): {e}")
+
         # Step 1: Search
         search_results = self.search_product_urls(brand, model, equipment_type)
         if not search_results:
@@ -374,17 +393,28 @@ Scraped Web Content:
                 "source_quality": "low",
             }
 
-        # Step 2: Scrape top pages
+        # Step 2: Scrape candidate pages in PARALLEL (was sequential with 10s waits each)
+        from concurrent.futures import ThreadPoolExecutor
+
+        candidate_urls = [r.get("url", "") for r in search_results if r.get("url")]
+        # Scrape the top 6 candidates concurrently, then keep the first 3 that succeed
+        candidate_urls = candidate_urls[:6]
+
         combined_text = ""
         scraped_urls: list[str] = []
         valid_pages = 0
 
-        for result in search_results:
-            url = result.get("url", "")
-            if not url:
-                continue
-            print(f"[Scraper] Trying: {url[:80]}...")
-            content = self.scrape_page_content(url)
+        scraped: dict[str, str] = {}
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            for url, content in zip(
+                candidate_urls,
+                executor.map(self.scrape_page_content, candidate_urls),
+            ):
+                scraped[url] = content
+
+        # Preserve search-result ranking order when assembling the context
+        for url in candidate_urls:
+            content = scraped.get(url, "")
             if len(content) > 500:
                 print(f"[Scraper] Got {len(content)} chars from {url[:60]}")
                 combined_text += f"\n\n--- SOURCE: {url} ---\n{content}"
@@ -408,5 +438,15 @@ Scraped Web Content:
         extraction["pipeline"] = (
             f"ddg-3queries -> beautifulsoup({valid_pages} pages) -> groq-{self.model}"
         )
+
+        # Cache the result so future lookups of this model are instant.
+        # Only cache real successes (avoid caching failed/empty extractions).
+        if brand and model and extraction.get("fields_found", 0) > 0 and not extraction.get("error"):
+            try:
+                from app.database import mongo_db
+                mongo_db.cache_specs(brand, model, category, extraction)
+                print(f"[Pipeline] Cached specs for {brand} {model}")
+            except Exception as e:
+                print(f"[Pipeline] Cache write failed: {e}")
 
         return extraction

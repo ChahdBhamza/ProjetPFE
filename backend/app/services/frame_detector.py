@@ -23,6 +23,8 @@ from PIL import Image
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Optional
 
+from app.services.rate_limiter import groq_throttle
+
 load_dotenv()
 
 # ── Pydantic Schemas for Structured Output ────────────────────────────────────
@@ -171,6 +173,7 @@ Respond ONLY with a valid JSON object with exactly these keys:
 
     for attempt in range(3):
         try:
+            groq_throttle()
             resp = client.chat.completions.create(
                 model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[
@@ -352,7 +355,7 @@ Respond ONLY with a valid JSON object matching exactly:
 
     for attempt in range(3):
         try:
-            time.sleep(6)  # stay within 30 RPM Groq free tier
+            groq_throttle()  # token-bucket: only waits if near the rate cap
             resp = client.chat.completions.create(
                 model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[

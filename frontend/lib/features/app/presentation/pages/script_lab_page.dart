@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +26,9 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
   bool _isExtracting = false;
   bool _isProcessingAI = false;
+  int _aiProgress = 0;
+  int _aiTotal = 0;
+  String _aiLabel = '';
   String? _sessionId;
   List<Map<String, dynamic>> _frames = [];
   Set<String> _selectedFilenames = {};
@@ -89,42 +94,29 @@ class _ScanLabPageState extends State<ScanLabPage> {
   Future<void> _runAIOnSelected() async {
     if (_selectedFilenames.isEmpty || _sessionId == null) return;
 
-    setState(() => _isProcessingAI = true);
+    final queue = List<String>.from(_selectedFilenames);
+    setState(() {
+      _isProcessingAI = true;
+      _aiTotal = queue.length;
+      _aiProgress = 0;
+      _aiLabel = '';
+    });
+
     try {
-      final total = _selectedFilenames.length;
-      int processedCount = 0;
       final List<Map<String, dynamic>> allDetections = [];
 
-      for (final filename in List<String>.from(_selectedFilenames)) {
-        processedCount++;
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'PROCESSING $filename ($processedCount/$total)',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  color: CybersightTheme.accent,
-                ),
-              ),
-              duration: const Duration(seconds: 2),
-              backgroundColor: CybersightTheme.navy2.withValues(alpha: 0.9),
-            ),
-          );
-        }
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            barrierColor: Colors.black54,
-            builder: (_) => const Center(
-              child: CircularProgressIndicator(
-                  color: CybersightTheme.accent),
-            ),
-          );
-        }
+      for (final filename in queue) {
+        // Drive the persistent analysis overlay (no flickery per-frame dialogs)
+        final frameMeta = _frames.firstWhere(
+          (f) => f['filename'] == filename,
+          orElse: () => <String, dynamic>{},
+        );
+        setState(() {
+          _aiProgress += 1;
+          _aiLabel = (frameMeta['detected_class'] as String?)?.trim().isNotEmpty == true
+              ? frameMeta['detected_class'] as String
+              : 'Equipment';
+        });
 
         final result = await _apiService.processSelectedFrames(
           _sessionId!,
@@ -138,18 +130,14 @@ class _ScanLabPageState extends State<ScanLabPage> {
                 _frames.indexWhere((f) => f['filename'] == pf['filename']);
             if (idx != -1) {
               setState(() => _frames[idx] = pf);
-              if (pf['has_ai'] == true && pf['forensic_data'] != null) {
-                final brand =
-                    pf['forensic_data']['brand']?.toString();
-                if (brand != null && brand.toLowerCase() != 'unknown') {
-                  allDetections.add(pf);
-                }
-              }
+            }
+            // Include EVERY detected item — even unknown-brand ones — so the
+            // user can verify/edit them in the carousel.
+            if (pf['has_ai'] == true && pf['forensic_data'] != null) {
+              allDetections.add(pf);
             }
           }
         }
-
-        if (mounted) Navigator.of(context, rootNavigator: true).pop();
       }
 
       setState(() => _selectedFilenames.clear());
@@ -165,30 +153,8 @@ class _ScanLabPageState extends State<ScanLabPage> {
           ),
         );
       }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${allDetections.length} equipment identified',
-              style: GoogleFonts.plusJakartaSans(
-                color: Colors.white70,
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            backgroundColor: const Color(0xFF0E1E3A),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            elevation: 0,
-          ),
-        );
-      }
     } finally {
-      setState(() => _isProcessingAI = false);
+      if (mounted) setState(() => _isProcessingAI = false);
     }
   }
 
@@ -256,16 +222,27 @@ class _ScanLabPageState extends State<ScanLabPage> {
   Widget build(BuildContext context) {
     return CybersightAtmosphere(
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            _buildTopBar(),
-            Expanded(
-              child: _frames.isEmpty
-                  ? _buildEmptyState()
-                  : _buildFrameGrid(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTopBar(),
+                Expanded(
+                  child: _frames.isEmpty
+                      ? _buildEmptyState()
+                      : _buildFrameGrid(),
+                ),
+                if (_selectedFilenames.isNotEmpty && !_isProcessingAI)
+                  _buildActionBar(),
+              ],
             ),
-            if (_selectedFilenames.isNotEmpty) _buildActionBar(),
+            if (_isProcessingAI)
+              _AiAnalysisOverlay(
+                progress: _aiProgress,
+                total: _aiTotal,
+                label: _aiLabel,
+              ),
           ],
         ),
       ),
@@ -358,41 +335,15 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
   Widget _buildEmptyState() {
     if (_isExtracting) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  backgroundColor: Colors.white.withValues(alpha: 0.06),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withValues(alpha: 0.28),
-                  ),
-                  minHeight: 2,
-                ),
-              ),
-              const SizedBox(height: 28),
-              Text(
-                'Extracting frames',
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.1,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'Scanning video for key moments',
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white24,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+          padding: EdgeInsets.symmetric(horizontal: 36),
+          child: _ProcessingStages(
+            stages: [
+              _Stage('Uploading video', 'Securing your footage', 2800),
+              _Stage('Extracting key frames', 'Sampling the timeline', 7000),
+              _Stage('Scanning with AI vision', 'Detecting equipment', 16000),
+              _Stage('Selecting best shots', 'Ranking sharpest frames', 0),
             ],
           ),
         ),
@@ -1532,6 +1483,370 @@ class _BlinkingDotState extends State<_BlinkingDot>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── AI analysis overlay ────────────────────────────────────────────────────
+// A single persistent full-screen overlay shown while frames are sent to the
+// AI. Replaces the old flickery per-frame spinner dialog + snackbars.
+
+class _AiAnalysisOverlay extends StatefulWidget {
+  final int progress;
+  final int total;
+  final String label;
+  const _AiAnalysisOverlay({
+    required this.progress,
+    required this.total,
+    required this.label,
+  });
+
+  @override
+  State<_AiAnalysisOverlay> createState() => _AiAnalysisOverlayState();
+}
+
+class _AiAnalysisOverlayState extends State<_AiAnalysisOverlay>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = widget.total <= 0 ? 1 : widget.total;
+    final ratio = (widget.progress / total).clamp(0.0, 1.0);
+
+    return Positioned.fill(
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            color: CybersightTheme.navy2.withValues(alpha: 0.82),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 44),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Pulsing radar / scanning core
+                    AnimatedBuilder(
+                      animation: _pulse,
+                      builder: (_, __) {
+                        return SizedBox(
+                          width: 120,
+                          height: 120,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Expanding pulse ring
+                              Container(
+                                width: 60 + 60 * _pulse.value,
+                                height: 60 + 60 * _pulse.value,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: CybersightTheme.accent.withValues(
+                                        alpha: (1 - _pulse.value) * 0.5),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 96,
+                                height: 96,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      CybersightTheme.accent),
+                                ),
+                              ),
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      CybersightTheme.accent.withValues(alpha: 0.10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: CybersightTheme.accent
+                                          .withValues(alpha: 0.4),
+                                      blurRadius: 30,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(Icons.auto_awesome_rounded,
+                                    color: CybersightTheme.accent, size: 28),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 34),
+                    Text(
+                      'ANALYZING EQUIPMENT',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.label.isEmpty
+                          ? 'Reading brand & specifications'
+                          : 'Identifying ${widget.label}',
+                      style: GoogleFonts.plusJakartaSans(
+                        color: CybersightTheme.accent.withValues(alpha: 0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    // Progress bar + counter
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(999),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0, end: ratio),
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutCubic,
+                              builder: (_, v, __) => LinearProgressIndicator(
+                                value: v,
+                                backgroundColor:
+                                    Colors.white.withValues(alpha: 0.07),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    CybersightTheme.accent),
+                                minHeight: 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '${widget.progress}/${widget.total}',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white54,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Multi-stage processing loader ──────────────────────────────────────────
+// Auto-advances through a list of stages on a timer to give a sense of forward
+// motion during the (single) backend call. The final stage lingers (duration 0)
+// until the parent removes the widget when the real work finishes.
+
+class _Stage {
+  final String title;
+  final String subtitle;
+  final int durationMs; // 0 = linger here until dismissed
+  const _Stage(this.title, this.subtitle, this.durationMs);
+}
+
+class _ProcessingStages extends StatefulWidget {
+  final List<_Stage> stages;
+  const _ProcessingStages({required this.stages});
+
+  @override
+  State<_ProcessingStages> createState() => _ProcessingStagesState();
+}
+
+class _ProcessingStagesState extends State<_ProcessingStages> {
+  int _current = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleNext();
+  }
+
+  void _scheduleNext() {
+    if (_current >= widget.stages.length - 1) return; // last stage lingers
+    final ms = widget.stages[_current].durationMs;
+    if (ms <= 0) return;
+    _timer = Timer(Duration(milliseconds: ms), () {
+      if (!mounted) return;
+      setState(() => _current++);
+      _scheduleNext();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = widget.stages.length;
+    final progress = (_current + 1) / total;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Thin overall progress bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: progress),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutCubic,
+            builder: (_, v, __) => LinearProgressIndicator(
+              value: v,
+              backgroundColor: Colors.white.withValues(alpha: 0.06),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  CybersightTheme.accent),
+              minHeight: 3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+
+        // Stage checklist
+        ...List.generate(total, (i) {
+          final stage = widget.stages[i];
+          final isDone = i < _current;
+          final isActive = i == _current;
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: (isDone || isActive) ? 1.0 : 0.35,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              child: Row(
+                children: [
+                  _StageIcon(isDone: isDone, isActive: isActive),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          stage.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: isActive
+                                ? Colors.white
+                                : isDone
+                                    ? Colors.white60
+                                    : Colors.white38,
+                            fontSize: 13.5,
+                            fontWeight:
+                                isActive ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                        if (isActive) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            stage.subtitle,
+                            style: GoogleFonts.plusJakartaSans(
+                              color: CybersightTheme.accent
+                                  .withValues(alpha: 0.7),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _StageIcon extends StatelessWidget {
+  final bool isDone;
+  final bool isActive;
+  const _StageIcon({required this.isDone, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    if (isDone) {
+      return Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: CybersightTheme.accent.withValues(alpha: 0.15),
+          border: Border.all(color: CybersightTheme.accent.withValues(alpha: 0.5)),
+        ),
+        child: const Icon(Icons.check_rounded,
+            color: CybersightTheme.accent, size: 14),
+      );
+    }
+    if (isActive) {
+      return SizedBox(
+        width: 22,
+        height: 22,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor:
+                    AlwaysStoppedAnimation<Color>(CybersightTheme.accent),
+              ),
+            ),
+            Container(
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: CybersightTheme.accent,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
       ),
     );
   }

@@ -41,6 +41,14 @@ class MongoService:
             self.auth_sessions = self.db.auth_sessions
             self.scan_sessions = self.db.scan_sessions
             self.system_logs = self.db.system_logs
+            self.spec_cache = self.db.spec_cache
+            # Unique index so each (brand, model, category) is cached once
+            try:
+                self.spec_cache.create_index(
+                    [("cache_key", 1)], unique=True
+                )
+            except Exception as _e:
+                print(f"[MongoDB] spec_cache index warning: {_e}")
             print("[MongoDB] Neural Link Established: Atlas Cluster Verified.")
         except Exception as e:
             print(f"[MongoDB] Neural Link Failed (Check Atlas Whitelist): {e}")
@@ -116,6 +124,38 @@ class MongoService:
             
         items = list(self.inventory.find(query, {"_id": 0}))
         return items
+
+    @staticmethod
+    def _spec_cache_key(brand: str, model: str, category: str) -> str:
+        """Normalised lookup key so casing/spacing differences still hit the cache."""
+        return f"{brand.strip().lower()}|{model.strip().lower()}|{category.strip().lower()}"
+
+    def get_cached_specs(self, brand: str, model: str, category: str):
+        """Return a previously-fetched spec result, or None on miss."""
+        if not self.client:
+            return None
+        try:
+            key = self._spec_cache_key(brand, model, category)
+            doc = self.spec_cache.find_one({"cache_key": key}, {"_id": 0, "cache_key": 0, "cached_at": 0})
+            return doc
+        except Exception as e:
+            print(f"[SpecCache] read error: {e}")
+            return None
+
+    def cache_specs(self, brand: str, model: str, category: str, result: dict):
+        """Store a spec result keyed by (brand, model, category). Upserts."""
+        if not self.client:
+            return False
+        try:
+            key = self._spec_cache_key(brand, model, category)
+            doc = dict(result)
+            doc["cache_key"] = key
+            doc["cached_at"] = datetime.datetime.now()
+            self.spec_cache.replace_one({"cache_key": key}, doc, upsert=True)
+            return True
+        except Exception as e:
+            print(f"[SpecCache] write error: {e}")
+            return False
 
     def save_detection(self, brand: str, raw_text: str = None, btu: int = None, details: dict = None):
         """Save a new detection event to the cloud"""
