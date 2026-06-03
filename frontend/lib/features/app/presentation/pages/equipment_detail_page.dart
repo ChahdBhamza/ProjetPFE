@@ -265,26 +265,7 @@ class EquipmentDetailPage extends StatelessWidget {
                           if (result.meta.sourceQuality != 'inventory') ...[
                             GlowingButton(
                               label: 'SAVE TO NEURAL INVENTORY',
-                              onTap: () async {
-                                final apiService = ApiService();
-                                final success =
-                                    await apiService.saveEquipmentToInventory(result);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                    content: Text(
-                                      success
-                                          ? 'SYNC SUCCESSFUL • ADDED TO INVENTORY'
-                                          : 'SYNC FAILED',
-                                      style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w800),
-                                    ),
-                                    backgroundColor:
-                                        (success ? CybersightTheme.ok : CybersightTheme.warning)
-                                            .withOpacity(0.9),
-                                  ));
-                                  if (success) Navigator.pop(context);
-                                }
-                              },
+                              onTap: () => _handleSave(context),
                             ),
                           ],
                         ]),
@@ -315,6 +296,64 @@ class EquipmentDetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleSave(BuildContext context) async {
+    final brand = result.identity.brand.trim().toLowerCase();
+    final isUnknownBrand = brand.isEmpty || brand == 'unknown';
+
+    // Warn before saving an item whose brand the AI could not identify
+    if (isUnknownBrand) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: CybersightTheme.navy2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(children: [
+            const Icon(Icons.warning_amber_rounded,
+                color: CybersightTheme.warning, size: 22),
+            const SizedBox(width: 10),
+            Text('Unidentified Brand',
+                style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+          ]),
+          content: Text(
+            'The AI could not identify this item\'s brand. Saving it will create an incomplete '
+            'inventory entry.\n\nConsider re-scanning with the brand logo or label clearly visible.',
+            style: GoogleFonts.plusJakartaSans(
+                color: Colors.white70, fontSize: 13, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Re-scan',
+                  style: GoogleFonts.plusJakartaSans(
+                      color: CybersightTheme.accent, fontWeight: FontWeight.w700)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text('Save anyway',
+                  style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white38, fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true) return;
+    }
+
+    final apiService = ApiService();
+    final success = await apiService.saveEquipmentToInventory(result);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+        success ? 'SYNC SUCCESSFUL • ADDED TO INVENTORY' : 'SYNC FAILED',
+        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+      ),
+      backgroundColor:
+          (success ? CybersightTheme.ok : CybersightTheme.warning).withOpacity(0.9),
+    ));
+    if (success) Navigator.pop(context);
   }
 
   String _cleanCategoryLabel(String raw) {

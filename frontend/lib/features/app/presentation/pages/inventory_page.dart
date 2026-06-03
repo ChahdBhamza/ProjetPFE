@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,6 +19,7 @@ class InventoryPage extends StatefulWidget {
 class _InventoryPageState extends State<InventoryPage> {
   final ApiService _apiService = ApiService();
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   List<dynamic>? _allInventoryItems;
   List<dynamic>? _filteredItems;
   bool _isLoading = true;
@@ -36,12 +36,21 @@ class _InventoryPageState extends State<InventoryPage> {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive && !oldWidget.isActive) {
       _loadInventory();
+      // Scroll to top whenever the inventory tab becomes active
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(0,
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic);
+        }
+      });
     }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -216,6 +225,7 @@ class _InventoryPageState extends State<InventoryPage> {
         color: CybersightTheme.accent,
         backgroundColor: CybersightTheme.navy2,
         child: SingleChildScrollView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           child: Column(
@@ -225,7 +235,8 @@ class _InventoryPageState extends State<InventoryPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  Expanded(
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -241,6 +252,8 @@ class _InventoryPageState extends State<InventoryPage> {
                       const SizedBox(height: 8),
                       Text(
                         _getCategorySubtitle(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
@@ -249,7 +262,8 @@ class _InventoryPageState extends State<InventoryPage> {
                         ),
                       ),
                     ],
-                  ),
+                  )),
+                  const SizedBox(width: 12),
                   GlassContainer(
                     width: 52,
                     height: 52,
@@ -417,9 +431,17 @@ class _InventoryPageState extends State<InventoryPage> {
                         item: item,
                         onTap: () {
                           final metadata = item['metadata'] as Map<String, dynamic>? ?? {};
-                          final specs = Map<String, dynamic>.from(metadata);
+
+                          // Strip metadata-only keys so they don't appear as spec fields
+                          const nonSpecKeys = {
+                            'category', 'equipment_category', 'equipment_type',
+                            'ai_image', 'annotated_image', 'summary', 'pipeline',
+                            'source_quality', 'fields_found', 'source_urls',
+                            'verified', 'brand', 'model', 'price_tnd', 'price',
+                          };
+                          final specs = Map<String, dynamic>.from(metadata)
+                            ..removeWhere((k, _) => nonSpecKeys.contains(k.toLowerCase()));
                           if (item['btu'] != null) specs['capacity_btu'] = item['btu'];
-                          if (item['price'] != null) specs['price'] = item['price'];
 
                           final equipmentResult = EquipmentResult(
                             identity: EquipmentIdentity(
@@ -715,8 +737,8 @@ class _InventoryCardState extends State<_InventoryCard> {
                           const SizedBox(height: 20),
                           Row(
                             children: [
-                              _MetaTag(label: spec['label']!, value: spec['value']!, color: activeColor),
-                              const SizedBox(width: 24),
+                              Flexible(child: _MetaTag(label: spec['label']!, value: spec['value']!, color: activeColor)),
+                              const SizedBox(width: 16),
                               _MetaTag(label: 'LAST SCAN', value: formattedDate, color: Colors.white30),
                               const Spacer(),
                               AnimatedOpacity(
@@ -803,12 +825,14 @@ class _MetaTag extends StatelessWidget {
         Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w700, color: Colors.white24, letterSpacing: 1.0)),
         const SizedBox(height: 4),
         Text(
-          value, 
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 12, 
-            fontWeight: FontWeight.bold, 
-            color: color == Colors.white30 ? Colors.white70 : color
-          )
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: color == Colors.white30 ? Colors.white70 : color,
+          ),
         ),
       ],
     );

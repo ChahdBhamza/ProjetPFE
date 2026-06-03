@@ -113,6 +113,7 @@ class ApiService {
     try {
       final metadata = Map<String, dynamic>.from(result.specs);
       metadata['category'] = result.identity.equipmentCategory;
+      metadata['confidence'] = result.identity.confidence;
       if (result.meta.aiImage != null) {
         metadata['ai_image'] = result.meta.aiImage;
       }
@@ -282,6 +283,19 @@ class ApiService {
       return {"scans": 0, "detected": 0, "saved": 0};
     } catch (e) {
       return {"scans": 0, "detected": 0, "saved": 0};
+    }
+  }
+
+  /// Fetch current user's recent scan sessions
+  Future<List<dynamic>> fetchScanHistory() async {
+    try {
+      Response response = await _dio.get("/api/inventory/history");
+      if (response.data["success"] == true) {
+        return response.data["scan_sessions"] as List<dynamic>;
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 

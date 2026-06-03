@@ -6,8 +6,30 @@ from typing import Optional
 from app.schemas import ExtractFramesResponse
 from io import BytesIO
 import os
+import time
+import shutil
 import uuid
 import base64
+
+
+# ── Session housekeeping ──────────────────────────────────────────────────────
+
+def _purge_old_sessions(max_age_hours: int = 24):
+    """Delete session folders older than max_age_hours to stop disk from filling up."""
+    sessions_root = "sessions"
+    if not os.path.isdir(sessions_root):
+        return
+    cutoff = time.time() - max_age_hours * 3600
+    for name in os.listdir(sessions_root):
+        path = os.path.join(sessions_root, name)
+        if not os.path.isdir(path):
+            continue
+        try:
+            if os.path.getmtime(path) < cutoff:
+                shutil.rmtree(path, ignore_errors=True)
+                print(f"[Cleanup] Purged stale session: {name}")
+        except Exception as _e:
+            print(f"[Cleanup] Could not purge {name}: {_e}")
 
 
 # ── Shared helper: build standardised equipment_result block ─────────────────
@@ -230,17 +252,20 @@ async def video_script_process_endpoint(
     actual_file = file or video
     if not actual_file:
         return {"success": False, "error": "No file or video field provided."}
-    
+
+    # Housekeeping: purge stale session folders before creating a new one
+    _purge_old_sessions(max_age_hours=24)
+
     session_id = f"lab_{uuid.uuid4().hex[:8]}"
-    
+
     # Start the scan session in the database
     mongo_db.start_scan_session(current_email, session_id, device_info="Video Upload")
-    
+
     base_dir = os.path.join("sessions", session_id)
     raw_dir = os.path.join(base_dir, "raw")
     os.makedirs(raw_dir, exist_ok=True)
     video_path = os.path.join(base_dir, "video.mp4")
-    
+
     contents = await actual_file.read()
     with open(video_path, "wb") as buffer:
         buffer.write(contents)
@@ -252,6 +277,14 @@ async def video_script_process_endpoint(
         await run_in_threadpool(_run_ffmpeg)
     except subprocess.CalledProcessError as e:
         return {"success": False, "error": f"FFmpeg failed: {e.stderr}"}
+
+    # video.mp4 is the largest file and is not needed after frame extraction
+    # (smart_extract works only off the raw/ frames). Delete it immediately.
+    try:
+        if os.path.exists(video_path):
+            os.remove(video_path)
+    except Exception as _e:
+        print(f"[Cleanup] Could not remove video.mp4: {_e}")
 
     global _yolov5_service, _roboflow_service
     if _yolov5_service is None:

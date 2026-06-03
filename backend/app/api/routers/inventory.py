@@ -144,13 +144,15 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
             detail="Neural clearance denied. Authorized Operators only."
         )
 
-    # 2. Total numbers
+    # 2. Core counts
     total_assets = mongo_db.inventory.count_documents({})
-    total_scans = mongo_db.scan_sessions.count_documents({})
-    total_operators = mongo_db.users.count_documents({})
-    
-    # Distinct operators with active scans
-    active_operators = len(mongo_db.inventory.distinct("user_email"))
+    total_scans  = mongo_db.scan_sessions.count_documents({})
+
+    # Total AI detections (much higher than scans — each scan finds multiple items)
+    total_detections = mongo_db.detections.count_documents({})
+
+    # Active operators = those who ran at least one scan session
+    active_operators = len(mongo_db.scan_sessions.distinct("user_email"))
 
     # 3. Average VLM Confidence Score
     avg_confidence = 80.0
@@ -262,52 +264,54 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
         for item in mongo_db.inventory.aggregate(pipeline):
             op_email = item["_id"]
             if not op_email: continue
-            
+
             op_user = mongo_db.find_user_by_email(op_email)
             op_name = op_user.get("full_name", "Operator") if op_user else "Operator"
-            
+
+            # Count raw detections for this operator via their scan sessions
+            op_session_ids = [
+                s["session_id"]
+                for s in mongo_db.scan_sessions.find(
+                    {"user_email": op_email}, {"session_id": 1, "_id": 0}
+                )
+            ]
+            op_detected = mongo_db.detections.count_documents(
+                {"scan_session_id": {"$in": op_session_ids}}
+            ) if op_session_ids else 0
+
             operators_performance.append({
                 "email": op_email,
                 "name": op_name,
+                "items_detected": op_detected,
                 "items_saved": item["items_saved"],
                 "avg_confidence": round(item["avg_conf"], 1) if item["avg_conf"] else 80.0
             })
     except Exception as e:
         print(f"[AdminStats] Operator performance error: {e}")
 
-    # 7. Activity Over Time (daily scans in last 7 days)
+    # 7. Activity Over Time — detections per day (last 7 days)
     activity_over_time = []
     try:
         pipeline = [
-            {
-                "$match": {
-                    "start_time": {"$gte": datetime.datetime.now() - datetime.timedelta(days=7)}
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "$dateToString": {"format": "%Y-%m-%d", "date": "$start_time"}
-                    },
-                    "scans": {"$sum": 1}
-                }
-            },
+            {"$match": {"timestamp": {"$gte": datetime.datetime.now() - datetime.timedelta(days=7)}}},
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
+                "scans": {"$sum": 1}
+            }},
             {"$sort": {"_id": 1}}
         ]
-        for item in mongo_db.scan_sessions.aggregate(pipeline):
-            activity_over_time.append({
-                "date": item["_id"],
-                "scans": item["scans"]
-            })
-            
-        if not activity_over_time:
-            today = datetime.datetime.now()
-            for i in range(6, -1, -1):
-                d = today - datetime.timedelta(days=i)
-                activity_over_time.append({
-                    "date": d.strftime("%Y-%m-%d"),
-                    "scans": 2 + (i % 3)
-                })
+        for item in mongo_db.detections.aggregate(pipeline):
+            activity_over_time.append({"date": item["_id"], "scans": item["scans"]})
+
+        # Fill missing days with 0 so the chart always has 7 bars
+        today = datetime.datetime.now()
+        existing_dates = {d["date"] for d in activity_over_time}
+        for i in range(6, -1, -1):
+            d = (today - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            if d not in existing_dates:
+                activity_over_time.append({"date": d, "scans": 0})
+        activity_over_time.sort(key=lambda x: x["date"])
+        activity_over_time = activity_over_time[-7:]
     except Exception as e:
         print(f"[AdminStats] Activity trend error: {e}")
 
@@ -369,8 +373,9 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
         unknown_brand_count = mongo_db.inventory.count_documents({
             "$or": [
                 {"brand": {"$regex": "^unknown", "$options": "i"}},
-                {"identity.brand": {"$regex": "^unknown", "$options": "i"}},
                 {"brand": {"$exists": False}},
+                {"brand": ""},
+                {"brand": None},
             ]
         })
     except Exception as e:
@@ -386,15 +391,31 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
     except Exception as e:
         print(f"[AdminStats] assets_today error: {e}")
 
+    # ID success rate — % of saved items where AI identified the brand
+    id_success_rate = 0
+    if total_assets > 0:
+        id_success_rate = round((total_assets - unknown_brand_count) / total_assets * 100)
+
+    # Detections today
+    detections_today = 0
+    try:
+        today_start = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        detections_today = mongo_db.detections.count_documents(
+            {"timestamp": {"$gte": today_start}}
+        )
+    except Exception as e:
+        print(f"[AdminStats] detections_today error: {e}")
+
     # Assemble response
     stats_data = {
         "total_assets": total_assets,
+        "total_detections": total_detections,
         "total_scans": total_scans,
-        "total_operators": total_operators,
         "active_operators": active_operators,
-        "avg_confidence": avg_confidence,
+        "id_success_rate": id_success_rate,
         "unknown_brand_count": unknown_brand_count,
         "assets_today": assets_today,
+        "detections_today": detections_today,
         "categories": categories,
         "brands": brands,
         "operator_performance": operators_performance,

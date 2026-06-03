@@ -30,7 +30,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
       const EquipmentPage(),
       InventoryPage(isActive: _index == 1),
       if (isAdmin) const AdminDashboardPage(),
-      const ProfilePage(),
+      ProfilePage(onGoToInventory: () => setState(() => _index = 1)),
     ];
   }
 

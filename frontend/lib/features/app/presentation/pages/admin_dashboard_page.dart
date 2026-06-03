@@ -261,18 +261,18 @@ class _DashboardTab extends StatelessWidget {
             Row(children: [
               Expanded(
                 child: _KpiCard(
-                  label: 'Assets',
-                  value: stats['total_assets'] as int? ?? 0,
-                  icon: Icons.inventory_2_outlined,
+                  label: 'Detections',
+                  value: stats['total_detections'] as int? ?? 0,
+                  icon: Icons.radar_rounded,
                   color: _kPalette[0],
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _KpiCard(
-                  label: 'Operators',
-                  value: stats['total_operators'] as int? ?? 0,
-                  icon: Icons.people_outline_rounded,
+                  label: 'Saved',
+                  value: stats['total_assets'] as int? ?? 0,
+                  icon: Icons.inventory_2_outlined,
                   color: _kPalette[1],
                 ),
               ),
@@ -281,18 +281,18 @@ class _DashboardTab extends StatelessWidget {
             Row(children: [
               Expanded(
                 child: _KpiCard(
-                  label: 'Scans',
-                  value: stats['total_scans'] as int? ?? 0,
-                  icon: Icons.qr_code_scanner_rounded,
+                  label: 'Active Operators',
+                  value: stats['active_operators'] as int? ?? 0,
+                  icon: Icons.people_outline_rounded,
                   color: _kPalette[2],
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _KpiCard(
-                  label: 'AI Confidence',
-                  value: (stats['avg_confidence'] as num?)?.toInt() ?? 0,
-                  icon: Icons.psychology_outlined,
+                  label: 'ID Success',
+                  value: (stats['id_success_rate'] as num?)?.toInt() ?? 0,
+                  icon: Icons.verified_outlined,
                   color: _kPalette[4],
                   suffix: '%',
                 ),
@@ -300,8 +300,8 @@ class _DashboardTab extends StatelessWidget {
             ]),
             const SizedBox(height: 24),
             const _Label(
-                title: 'Scan activity',
-                sub: 'Daily sessions — last 7 days'),
+                title: 'Detection activity',
+                sub: 'AI detections per day — last 7 days'),
             const SizedBox(height: 10),
             _ActivityChart(
               data: List<Map<String, dynamic>>.from(
@@ -332,9 +332,10 @@ class _AnalyticsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetsToday = stats['assets_today'] as int? ?? 0;
+    final detectionsToday = stats['detections_today'] as int? ?? 0;
+    final totalDetections = stats['total_detections'] as int? ?? 0;
+    final idSuccessRate = (stats['id_success_rate'] as num?)?.toInt() ?? 0;
     final totalAssets = stats['total_assets'] as int? ?? 0;
-    final avgConf = (stats['avg_confidence'] as num?)?.toInt() ?? 0;
     final brands = Map<String, dynamic>.from(stats['brands'] ?? {})
       ..removeWhere((k, _) => k.toLowerCase() == 'unknown');
     final categories = Map<String, dynamic>.from(stats['categories'] ?? {})
@@ -361,12 +362,12 @@ class _AnalyticsTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _TodayHero(today: assetsToday, total: totalAssets),
+          _TodayHero(today: detectionsToday, total: totalDetections),
           const SizedBox(height: 12),
           Row(children: [
-            _Chip(label: 'Total assets', value: totalAssets),
+            _Chip(label: 'Saved', value: totalAssets),
             const SizedBox(width: 8),
-            _Chip(label: 'Avg conf.', value: avgConf, suffix: '%'),
+            _Chip(label: 'ID Rate', value: idSuccessRate, suffix: '%'),
             const SizedBox(width: 8),
             _Chip(label: topTypeLabel, value: topTypePct, suffix: '%'),
           ]),
@@ -374,7 +375,7 @@ class _AnalyticsTab extends StatelessWidget {
 
           // 7-day sparkline
           if (scanValues.isNotEmpty) ...[
-            const _Label(title: '7-day activity', sub: 'Scan sessions per day'),
+            const _Label(title: '7-day detections', sub: 'AI detections per day'),
             const SizedBox(height: 10),
             _SparklineCard(values: scanValues),
             const SizedBox(height: 24),
@@ -642,7 +643,7 @@ class _TodayHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Detected today',
+                  'Detections today',
                   style: GoogleFonts.plusJakartaSans(
                       color: Colors.white30,
                       fontSize: 11,
@@ -689,7 +690,7 @@ class _TodayHero extends StatelessWidget {
               duration: const Duration(milliseconds: 1000),
               curve: Curves.easeOutCubic,
               builder: (_, v, __) => Text(
-                'All time: ${v.toInt()}',
+                'Total: ${v.toInt()}',
                 style: GoogleFonts.plusJakartaSans(
                     color: Colors.white38,
                     fontSize: 11,
@@ -779,8 +780,6 @@ class _OperatorList extends StatelessWidget {
           final name = op['name'] as String? ?? 'Operator';
           final email = op['email'] as String? ?? '';
           final saved = op['items_saved'] as int? ?? 0;
-          final conf =
-              (op['avg_confidence'] as num?)?.toStringAsFixed(1) ?? '—';
           final color = _kPalette[idx % _kPalette.length];
 
           return Container(
@@ -832,12 +831,12 @@ class _OperatorList extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('$saved assets',
+                  Text('${op['items_detected'] ?? saved} detected',
                       style: GoogleFonts.plusJakartaSans(
                           color: Colors.white70,
                           fontSize: 12,
                           fontWeight: FontWeight.w600)),
-                  Text('$conf% conf',
+                  Text('$saved saved',
                       style: GoogleFonts.plusJakartaSans(
                           color: color,
                           fontSize: 9,
