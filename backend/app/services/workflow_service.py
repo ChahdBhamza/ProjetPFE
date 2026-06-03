@@ -147,31 +147,27 @@ class WorkflowService:
 
             print(f"✅ AI Result: Found {len(predictions)} items")
 
-            # 2. Forensic Step: Using original SFM Project scripts (IDENTIFICATION ONLY)
+            # 2. Forensic Step: Brand + Model identification (Pass 1 SKIPPED - see frame_detector.py)
             forensic_data = {}
             if len(predictions) > 0:
-                print("🧠 [DEBUG] Identifying Brand (Gemini Vision logic)...")
-                
+                print("🧠 [OPTIMIZED] Single-pass Groq identification (Pass 1 skipped)...")
+
                 try:
                     from app.services.frame_detector import process_frame
                     if yolo_hint:
-                        print(f"🎯 [SAFEGUARD] Anchoring Groq to type='{yolo_hint}' (from filename)")
-                    # Run forensic identification on the clean frame as well for maximum OCR accuracy
+                        print(f"🎯 Using equipment type hint='{yolo_hint}' from Roboflow")
+                    # Run OPTIMIZED forensic identification (Pass 1 already skipped in frame_detector)
                     sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"), yolo_type_hint=yolo_hint)
                     llm_data = sfm_result.get("result", {})
-                    
-                    # Return identification immediately
+
                     forensic_data = llm_data
-                    
+
                     brand = forensic_data.get("brand", "Unknown")
-                    if brand.lower() == "unknown":
-                        print(f"⚠️ [DEBUG] Could NOT detect a clear brand in this frame.")
-                    else:
-                        print(f"🎯 [DEBUG] Brand DETECTED: {brand.upper()}")
-                        
+                    print(f"✅ Brand detected: {brand}")
+
                 except Exception as e:
-                    print(f"❌ [DEBUG] SFM ID Error (Quota limit or API issue): {e}")
-                    forensic_data = {"brand": "Unknown", "error": str(e)}
+                    print(f"❌ Identification error: {e}")
+                    forensic_data = {"brand": "Unknown", "equipment_type": predictions[0].get("class", "unknown") if predictions else "unknown"}
 
             # 3. Read raw image for UI display
             with open(image_path, "rb") as f:

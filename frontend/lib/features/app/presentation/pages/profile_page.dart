@@ -106,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Profile',
+                      Text('Welcome',
                           style: GoogleFonts.plusJakartaSans(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
@@ -114,11 +114,11 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                               letterSpacing: -0.5,
                               height: 1.0)),
                       const SizedBox(height: 6),
-                      Text('OPERATOR · ACCESS · PREFERENCES',
+                      Text(name,
                           style: GoogleFonts.plusJakartaSans(
                               color: Colors.white24,
-                              letterSpacing: 1.5,
-                              fontSize: 10,
+                              letterSpacing: 1.2,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600)),
                     ],
                   ),
@@ -165,12 +165,6 @@ class _ProfilePageState extends State<ProfilePage> with AutomaticKeepAliveClient
                           Text(name,
                               style: Theme.of(context).textTheme.titleLarge
                                   ?.copyWith(fontWeight: FontWeight.w900)),
-                          const SizedBox(height: 4),
-                          Text(email,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white38, fontSize: 11)),
                         ],
                       ),
                     ),

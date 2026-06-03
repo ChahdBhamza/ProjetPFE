@@ -49,6 +49,26 @@ class MongoService:
                 )
             except Exception as _e:
                 print(f"[MongoDB] spec_cache index warning: {_e}")
+            
+            # Performance indexes for fast queries
+            try:
+                self.users.create_index([("email", 1)], unique=True)
+                print("[MongoDB] Index created: users.email")
+            except Exception as _e:
+                print(f"[MongoDB] users.email index warning: {_e}")
+            
+            try:
+                self.inventory.create_index([("user_email", 1)])
+                print("[MongoDB] Index created: inventory.user_email")
+            except Exception as _e:
+                print(f"[MongoDB] inventory.user_email index warning: {_e}")
+            
+            try:
+                self.detections.create_index([("session_id", 1)])
+                print("[MongoDB] Index created: detections.session_id")
+            except Exception as _e:
+                print(f"[MongoDB] detections.session_id index warning: {_e}")
+            
             print("[MongoDB] Neural Link Established: Atlas Cluster Verified.")
         except Exception as e:
             print(f"[MongoDB] Neural Link Failed (Check Atlas Whitelist): {e}")
@@ -58,7 +78,7 @@ class MongoService:
         """Create a new user profile in MongoDB"""
         if not self.client: return False
         if is_admin is None:
-            is_admin = "admin" in email.lower()
+            is_admin = email.lower() == "chahdbenhamza4@gmail.com"
         try:
             user_data = {
                 "email": email,
