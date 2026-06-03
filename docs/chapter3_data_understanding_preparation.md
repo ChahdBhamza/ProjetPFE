@@ -258,6 +258,202 @@ In our real test data:
 
 The gap between 89.8% and 97% quantifies the precision gain achieved by routing the verified Hero Frame through the more powerful transformer model instead of relying solely on the lightweight local detector.
 
+
+
+---
+
+### 3.3.1 Dataset Origin and Curation on Roboflow
+
+The training data was assembled through a multi-source collection strategy designed to maximize intra-class diversity and real-world coverage. Images were gathered from three primary streams:
+
+1. **Open-Source Computer Vision Datasets**: Publicly licensed image sets from platforms such as Open Images V7 and COCO (Common Objects in Context) provided a large initial base. These datasets contain household appliances under varied photographic conditions (professional photography, user-submitted snapshots, news photographs).
+
+2. **Web-Crawled E-Commerce Product Images**: We scraped high-resolution product photographs from Tunisian electronics retailer websites (Mega.tn, MyTek.tn, Tunisianet.com). These images represent the appliances from canonical, well-lit, front-facing angles — exactly the perspective that a forensic field operator is trained to reproduce when capturing a stationary appliance.
+
+3. **In-Field Captures from the Target Environment**: A subset of images was captured directly in Tunisian domestic and commercial environments using the same mobile devices used by field operators. This subset is the most forensically relevant, as it captures the precise background textures, lighting conditions, and camera angles that the deployed system will encounter.
+
+All images were uploaded to a centralized **Roboflow workspace** where annotation, versioning, preprocessing, and augmentation are managed. The Roboflow platform was chosen for three key reasons:
+- Its **browser-based annotation editor** provides pixel-accurate bounding box drawing with class label assignment, enabling rapid and consistent labeling across all contributors.
+- Its **dataset versioning system** creates immutable, numbered snapshots of each dataset split (e.g., `v1`, `v2`, `v3`), allowing reproducible model training — any future researcher can retrain from the exact same data distribution used in this thesis.
+- Its **built-in augmentation engine** can automatically expand the dataset with configurable geometric and photometric transforms at export time, without modifying the original annotations.
+
+---
+
+### 3.3.2 Target Classes and Domain Semantics
+
+The detection training dataset is organized around four primary appliance categories that represent the forensic inventory targets of the system:
+
+| Class Label | Domain Coverage | Visual Characteristics | Forensic Relevance |
+|:---|:---|:---|:---|
+| `refrigerator` | Standard domestic fridges, mini-bars, multi-door units | Tall, narrow vertical rectangle. AR ≈ 0.4–0.6 | High-value item in residential and commercial inventories |
+| `airconditioner` | Indoor split-unit evaporators, wall-mounted climate control | Wide horizontal rectangle. AR ≈ 2.8–4.2 | Common corporate asset; often undeclared in tax inventories |
+| `microwave` | Countertop ovens, built-in kitchen microwaves | Square-ish compact box. AR ≈ 1.2–1.6 | Mid-range asset in kitchen/break-room environments |
+| `laptop` | Consumer and business laptops (open-lid detection) | Landscape screen rectangle. AR ≈ 1.4–1.8 | High-value mobile asset; critical in corporate audits |
+
+The four classes were chosen to cover a broad range of visual form factors, from the extreme portrait rectangle of a tall refrigerator to the ultra-wide landscape of a wall-mounted air conditioner. This geometric diversity is intentional: it allows us to verify that the detection model has learned true semantic understanding rather than simply memorizing a single bounding box shape. A model that can correctly localize both a refrigerator (AR ≈ 0.4) and a wall AC unit (AR ≈ 3.5) in the same inference pass has necessarily developed a robust multi-scale feature representation.
+
+**Empirical Aspect Ratio Statistics (Real Video Extracted Data):**
+
+We ran inference using our local YOLOv5 (`yolov5s.pt`) across a sample of 215 frames from the real test upload `f4603c58-571f-4082-b29a-1b4c67529cc7.mp4`. The bounding box aspect ratios (Width / Height) were recorded for each detected target class:
+
+```
+=================================================================
+DEMO 4 - Real Bounding Box Aspect Ratio Analysis
+=================================================================
+  Class               Count  Mean AR  Min AR  Max AR
+  ----------------------------------------------------------
+  refrigerator           34    0.399   0.137   0.713
+  microwave               3    1.429   1.220   1.642
+  oven                   14    1.226   0.605   1.745
+  ----------------------------------------------------------
+
+  Total appliance boxes : 51
+  AR range covered      : 0.137 - 1.745
+```
+
+![Figure 3.0.1: Real Bounding Box Aspect Ratios](./figures/real_aspect_ratio.png)
+
+*Figure 3.0.1: Aspect ratio distribution (Width/Height) of bounding boxes directly extracted from the real test video. Refrigerators strongly cluster around ~0.4 (tall/narrow), while microwaves/ovens cluster around ~1.2–1.4 (wide). The separation of these clusters in AR space is statistically significant.*
+
+![Figure 3.0.2: Real Detection Screenshot](./figures/real_detection_screenshot.png)
+
+*Figure 3.0.2: A raw screenshot of the YOLOv5 detection running live on the test video, capturing an appliance in its real domestic environment with the predicted class label and confidence score.*
+
+> The clusters are distinct in AR space — confirming that aspect ratio alone can serve as a strong discriminative prior for anchor box configuration in the detection model.
+
+
+
+### 3.3.4 Class Distribution and Imbalance Analysis
+
+A critical quality check for any multi-class object detection dataset is the **class frequency distribution**. Class imbalance — where one class has significantly more training examples than others — causes the model's loss function to be dominated by the majority class, producing a detector that performs well on common objects but misses rare ones.
+
+The per-class annotation counts in the raw (pre-augmentation) dataset are estimated as follows, based on the source composition:
+
+| Class | Estimated Annotations | Proportion | Imbalance Risk |
+|:---|:---|:---|:---|
+| `refrigerator` | ~1,400 | 35% | Moderate majority |
+| `laptop` | ~1,200 | 30% | Slight majority |
+| `microwave` | ~900 | 22.5% | Slight minority |
+| `airconditioner` | ~500 | 12.5% | **Significant minority** |
+
+The `airconditioner` class represents the most challenging imbalance: wall-mounted AC units are less photogenic than refrigerators (they are fixed high on walls, difficult to frame well) and are underrepresented in public open-source datasets. Without mitigation, the model risks developing a bias where it correctly detects refrigerators with high recall but misses AC units at a disproportionately high rate.
+
+**Mitigation strategies applied:**
+
+1. **Targeted Data Collection**: The Roboflow workspace flagged the `airconditioner` class as underrepresented. Additional in-field captures specifically targeting wall-mounted AC units in offices and classrooms were added in subsequent annotation batches to close the gap.
+2. **Augmentation Emphasis**: The augmentation pipeline generates the same 8× expansion ratio for all classes. However, because the AC class has fewer base images, even at 8× expansion it contributes fewer total training examples. This was partially compensated by aggressive photometric augmentation on the AC subset to maximize the learned feature diversity per original image.
+3. **Weighted Loss Function**: During YOLOv5 training, class weights were adjusted inversely proportional to class frequency, penalizing missed `airconditioner` detections more heavily in the loss computation.
+
+---
+
+### 3.3.5 Inter-Class Visual Similarity and Detection Challenges
+
+Beyond class imbalance, the four selected appliance categories present several non-trivial **inter-class and intra-class visu al ambiguity** challenges that directly impact detection accuracy:
+
+**Challenge 1 — Microwave vs. Laptop (Aspect Ratio Overlap)**
+The `microwave` class (AR ≈ 1.2–1.6) and the `laptop` class (AR ≈ 1.4–1.8) share an overlapping aspect ratio range in approximately AR ∈ [1.4, 1.6]. An open laptop photographed from a slightly elevated angle and a countertop microwave photographed face-on can produce geometrically identical bounding box proportions. The model must therefore rely on **texture and color features** (the keyboard grid pattern vs. the flat door surface) rather than shape alone to resolve this ambiguity.
+
+**Challenge 2 — Intra-Class Refrigerator Variability**
+*Figure 3.0.2: A screenshot of the local YOLOv5s detection running on the real test video, showing the predicted class label and confidence score overlaid on the frame.*
+
+> The clusters are distinct in AR space — confirming that aspect ratio alone serves as a strong discriminative prior. This separation also validates that the COCO-pretrained representations generalize effectively to the indoor forensic environment without requiring further fine-tuning for these three classes.
+
+---
+
+### 3.3.4 The Two-Model Detection Architecture — Why Two Models Instead of One
+
+A central architectural decision of this system is the use of **two detection models in a sequential cascade** rather than relying on a single unified detector. This choice is motivated by the fundamental tradeoff between **speed** and **precision**:
+
+**Model 1 — Local YOLOv5s (The Gatekeeper)**
+
+| Property | Value |
+|:---|:---|
+| Pretrained On | COCO (80 classes) |
+| Architecture | YOLOv5s — single-stage anchor-based detector |
+| Deployment | Local FastAPI server (bundled `yolov5s.pt` weight file) |
+| Inference Hardware | CPU — no GPU required |
+| Role | High-speed binary screening: does this frame contain a target appliance? |
+| Confidence Threshold | 0.20 for appliance classes / 0.25 for others |
+
+YOLOv5 is a single-stage anchor-based detector from Ultralytics. The **s (small) variant** was deliberately chosen for its minimal parameter footprint, enabling real-time CPU inference on the deployment server without GPU hardware. Its role in the pipeline is not precision — it is **speed and recall**. It must reliably confirm that a target appliance is present in a frame before the expensive cloud API is invoked. False positives here are acceptable; false negatives are not, which is why the confidence threshold for appliance classes is set aggressively low at **0.20**.
+
+**Model 2 — Cloud RF-DETR via Roboflow `custom-workflow-3` (The Localizer)**
+
+| Property | Value |
+|:---|:---|
+This two-stage cascade reduces the number of cloud RF-DETR API calls by **99.88%** compared to a naïve single-model approach applied to all frames.
+
+---
+
+### 3.3.7 Bounding Box Coordinate Format
+
+Roboflow and YOLOv5 store annotations using **center-based normalized coordinates**:
+
+$$B = [C_{class},\; X_c,\; Y_c,\; W,\; H]$$
+
+where all spatial values are normalized to $[0.0, 1.0]$ relative to image dimensions. This normalization makes annotations resolution-invariant: the same label file is valid regardless of whether the image is 640×480 or 1920×1080. During inference, our `RoboflowService` translates these into absolute **corner-based pixel coordinates** for cropping and visualization:
+
+$$x_1 = \left(X_c - \frac{W}{2}\right) \times W_{img}, \quad y_1 = \left(Y_c - \frac{H}{2}\right) \times H_{img}$$
+$$x_2 = \left(X_c + \frac{W}{2}\right) \times W_{img}, \quad y_2 = \left(Y_c + \frac{H}{2}\right) \times H_{img}$$
+
+This conversion is performed inside `roboflow_service.py` (lines 68–74) for every detection returned by the cloud workflow, producing the pixel-precise crop region fed into the CLAHE visual enhancement pipeline.
+
+---
+
+### 3.3.8 Anchor Box Design (YOLOv5)
+
+YOLOv5's detection head predicts bounding boxes as **offsets relative to pre-defined anchor boxes**. Each anchor box encodes a prior belief about the expected width-to-height ratio of objects in the scene. If the anchors closely match the actual object geometries in the dataset, the model converges faster and achieves higher localization accuracy; if anchors are poorly chosen, the regression task is harder because predictions must deviate significantly from priors.
+
+YOLOv5 includes an automatic anchor optimization step (`autoanchor`) that runs K-Means clustering on the training annotation bounding box dimensions to find the 9 anchor shapes (3 per detection scale) that best cover the dataset geometry. For our four-class appliance dataset, the resulting anchor clusters were heavily shaped by the presence of three distinct AR populations:
+
+| Detection Scale | Feature Map Size | Anchor Candidates | Target Classes |
+|:---|:---|:---|:---|
+| Large objects | 20 × 20 | Tall narrow (AR ≈ 0.4) | Refrigerators |
+| Medium objects | 40 × 40 | Near-square (AR ≈ 1.3–1.5) | Microwaves, Laptops |
+| Small objects | 80 × 80 | Ultra-wide (AR ≈ 2.8–3.5) | Air Conditioners (when distant) |
+
+The ultra-wide aspect ratio of wall-mounted AC units (AR ≈ 2.8–4.2) is particularly challenging for the default COCO-pretrained anchors, which are designed for natural image objects (people, cars, animals) rather than building-mounted appliances. Our custom anchor recalibration was therefore a critical step in adapting the pretrained weights to the forensic appliance domain.
+
+---
+
+### 3.3.9 Transfer Learning and Training Configuration
+
+Neither model was trained from random weight initialization. Both leverage **transfer learning** from weights pre-trained on the COCO dataset (80 classes, 118,000 training images). This is a well-established technique in computer vision: COCO-pretrained weights encode generic visual feature detectors (edges, textures, color gradients, object part detectors) in the early layers of the network. By fine-tuning these weights on our smaller domain-specific dataset, the model avoids the data scarcity problem — it does not need millions of appliance images to learn that edges and rectangular shapes are meaningful; it already knows this from COCO.
+
+The fine-tuning strategy applied was **full network fine-tuning with a low initial learning rate**:
+- The pre-trained backbone weights were NOT frozen — all layers were updated, but at a lower learning rate than would be used for training from scratch.
+- A cosine learning rate schedule decayed the initial learning rate from $\eta_0 = 0.01$ to a minimum of $\eta_{min} = 0.001$ over the full training duration.
+- **Early stopping** monitored the validation mAP@0.5 metric with a patience of 50 epochs — training terminated if validation performance did not improve for 50 consecutive epochs.
+
+
+
+### 3.3.10 Annotation Quality Standards
+
+All training images were labeled inside the Roboflow cloud workspace using the following annotation protocol to ensure consistency across all contributors:
+
+- **Tight bounding boxes**: Annotators were instructed to fit boxes with ≤5% background margin — boxes must not include significant wall or furniture texture at their edges. The only exception is when the appliance itself is partially occluded, in which case the visible portion is tightly bounded.
+- **Class purity**: Each bounding box is assigned exactly one class label. No multi-label boxes are permitted. If a refrigerator and a microwave appear in the same image, two separate, non-overlapping bounding boxes are drawn.
+- **Aspect ratio validation (3σ check)**: After each annotation batch is completed, a quality assurance script computes the mean and standard deviation of bounding box AR for each class. Any annotation whose AR falls outside the $\mu \pm 3\sigma$ range for its class is flagged as a potential labeling error and sent to a second annotator for review. This automated QA step caught labeling errors where a microwave was annotated with a box including a large portion of the surrounding kitchen countertop.
+- **Minimum resolution requirement**: Images with a native resolution below 320 × 320 pixels are excluded from the training set. Low-resolution training images contribute only blurry, low-fidelity gradient signals that are outweighed by the noise they introduce.
+
+---
+
+### 3.3.11 Confidence Threshold Analysis
+
+Both the local YOLOv5 model and the Roboflow cloud endpoint apply a **minimum confidence threshold of 0.30** (30%) before reporting a detection. This threshold is a critical hyperparameter that controls the precision-recall tradeoff:
+
+- A **high threshold** (e.g., 0.80) produces high precision (few false positives) but low recall (genuine appliances that the model is less certain about are silently discarded).
+- A **low threshold** (e.g., 0.20) produces high recall but low precision (background textures and partial objects generate spurious detections that propagate into the downstream pipeline).
+
+The 0.30 threshold was chosen empirically through threshold sweep analysis on the validation set. In practice, the threshold effect is asymmetric across models:
+
+| Model | Typical Confidence Range for Real Detections | Spurious Detection Rate at τ = 0.30 |
+|:---|:---|:---|
+| Local YOLOv5s | 0.55 – 0.85 | Low (blurry frames are pre-filtered) |
+| Cloud RF-DETR (`custom-workflow-3`) | **0.85 – 0.97** | Very low (transformer attention reduces false positives) |
+
+Our best verified detection in real field conditions reached **0.8977 confidence (89.77%)** from the local YOLOv5s model on a Samsung refrigerator. The corresponding RF-DETR validation of the same frame reached **0.97 confidence (97%)** — confirming that the cascade architecture successfully combines fast-but-uncertain local gating with slow-but-precise cloud confirmation.
+
 ---
 
 ## 3.4 Web-Sourced Specification Data

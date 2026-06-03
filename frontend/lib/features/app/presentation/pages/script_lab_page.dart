@@ -56,8 +56,11 @@ class _ScanLabPageState extends State<ScanLabPage> {
           _isExtracting = false;
         });
         if (_selectedFilenames.isNotEmpty) {
-          Future.microtask(() async {
-            await _runAIOnSelected();
+          // Show frames for 2 seconds before analyzing
+          Future.delayed(const Duration(seconds: 2), () async {
+            if (mounted) {
+              await _runAIOnSelected();
+            }
           });
         }
       } else {
@@ -99,23 +102,21 @@ class _ScanLabPageState extends State<ScanLabPage> {
       _isProcessingAI = true;
       _aiTotal = queue.length;
       _aiProgress = 0;
-      _aiLabel = '';
+      _aiLabel = 'Detecting brand & model...';
     });
 
     try {
-      final List<Map<String, dynamic>> allDetections = [];
+      final List<Map<String, dynamic>> detectedFrames = [];
 
+      // STEP 1: Detect brand + model for all frames
       for (final filename in queue) {
-        // Drive the persistent analysis overlay (no flickery per-frame dialogs)
         final frameMeta = _frames.firstWhere(
           (f) => f['filename'] == filename,
           orElse: () => <String, dynamic>{},
         );
         setState(() {
           _aiProgress += 1;
-          _aiLabel = (frameMeta['detected_class'] as String?)?.trim().isNotEmpty == true
-              ? frameMeta['detected_class'] as String
-              : 'Equipment';
+          _aiLabel = 'Detecting: ${(frameMeta['detected_class'] as String?)?.trim() ?? 'Equipment'}';
         });
 
         final result = await _apiService.processSelectedFrames(
@@ -126,32 +127,151 @@ class _ScanLabPageState extends State<ScanLabPage> {
         if (result != null && result['success'] == true) {
           final List<dynamic> processedFrames = result['frames'];
           for (var pf in processedFrames) {
-            final idx =
-                _frames.indexWhere((f) => f['filename'] == pf['filename']);
+            final idx = _frames.indexWhere((f) => f['filename'] == pf['filename']);
             if (idx != -1) {
               setState(() => _frames[idx] = pf);
             }
-            // Include EVERY detected item — even unknown-brand ones — so the
-            // user can verify/edit them in the carousel.
             if (pf['has_ai'] == true && pf['forensic_data'] != null) {
-              allDetections.add(pf);
+              detectedFrames.add(pf);
             }
           }
         }
       }
 
-      setState(() => _selectedFilenames.clear());
+      if (mounted) setState(() => _isProcessingAI = false);
 
-      if (allDetections.isNotEmpty && mounted) {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (ctx) => FractionallySizedBox(
-            heightFactor: 0.85,
-            child: _VerificationCarouselSheet(detections: allDetections),
+      // STEP 2: Show verification dialog
+      if (detectedFrames.isNotEmpty && mounted) {
+        await _showVerificationDialog(detectedFrames);
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessingAI = false);
+    }
+  }
+
+  Future<void> _showVerificationDialog(List<Map<String, dynamic>> detectedFrames) async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassContainer(
+          borderRadius: 24,
+          opacity: 0.15,
+          blur: 30,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '✓ Detection Complete',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ...detectedFrames.asMap().entries.map<Widget>((entry) {
+                final frame = entry.value;
+                final brand = frame['equipment_result']?['identity']?['brand'] ?? 'Unknown';
+                final model = frame['equipment_result']?['identity']?['top_model'] ?? 'Unknown';
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: CybersightTheme.accent.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                brand,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                model,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GlowingButton(
+                      label: 'Verify & Get Specs',
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _fetchSpecsForFrames(detectedFrames);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
+        ),
+      ),
+    );
+  }
+
+  Future<void> _fetchSpecsForFrames(List<Map<String, dynamic>> detectedFrames) async {
+    setState(() {
+      _isProcessingAI = true;
+      _aiLabel = 'Fetching specifications...';
+    });
+
+    try {
+      // STEP 3: Fetch specs for verified frames
+      for (var frame in detectedFrames) {
+        final equipResult = frame['equipment_result'];
+        if (equipResult != null) {
+          final brand = equipResult['identity']?['brand'] ?? 'Unknown';
+          final model = equipResult['identity']?['top_model'] ?? 'Unknown';
+          final category = equipResult['identity']?['equipment_category'] ?? 'unknown';
+
+          // Call spec service
+          final specsResult = await _apiService.getSpecs(
+            brand,
+            model,
+            category,
+          );
+
+          if (specsResult['success'] == true) {
+            // Update frame with full specs
+            final frameIdx = _frames.indexWhere((f) => f['filename'] == frame['filename']);
+            if (frameIdx != -1) {
+              setState(() {
+                _frames[frameIdx]['specs'] = specsResult;
+                _frames[frameIdx]['equipment_result'] = specsResult['equipment_result'];
+              });
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/detection-success', (_) => false);
       }
     } finally {
       if (mounted) setState(() => _isProcessingAI = false);
@@ -335,16 +455,113 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
   Widget _buildEmptyState() {
     if (_isExtracting) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 36),
-          child: _ProcessingStages(
-            stages: [
-              _Stage('Uploading video', 'Securing your footage', 2800),
-              _Stage('Extracting key frames', 'Sampling the timeline', 7000),
-              _Stage('Scanning with AI vision', 'Detecting equipment', 16000),
-              _Stage('Selecting best shots', 'Ranking sharpest frames', 0),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: GlassContainer(
+            opacity: 0.08,
+            blur: 20,
+            borderRadius: 28,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        color: CybersightTheme.accent.withValues(alpha: 0.14),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: CybersightTheme.accent,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'LIVE PROCESSING',
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Processing your video',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Uploading, extracting key frames and scanning for equipment.',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white54,
+                    fontSize: 13,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const _ProcessingStages(
+                  stages: [
+                    _Stage('Uploading video', 'Securing your footage', 2800),
+                    _Stage('Extracting key frames', 'Sampling the timeline', 7000),
+                    _Stage('Scanning with AI vision', 'Detecting equipment', 16000),
+                    _Stage('Selecting best shots', 'Ranking sharpest frames', 0),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.cloud_upload_rounded,
+                          color: CybersightTheme.accent, size: 18),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Your video is being analyzed securely in the background.',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

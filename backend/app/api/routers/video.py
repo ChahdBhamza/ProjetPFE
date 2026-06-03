@@ -10,6 +10,7 @@ import time
 import shutil
 import uuid
 import base64
+import asyncio
 
 
 # ── Session housekeeping ──────────────────────────────────────────────────────
@@ -188,13 +189,16 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
             "specs_status": "none"
         }
 
-    # Pacing is handled by the shared Groq token-bucket limiter (rate_limiter.py),
-    # so no fixed inter-frame sleep is needed — it only waits when near the cap.
-    final_results = []
-    for f in req.filenames:
-        result = await process_single_frame(f)
-        if result:
-            final_results.append(result)
+    # Pacing is handled by the shared Groq token-bucket limiter (rate_limiter.py).
+    # Process frames in parallel (up to 4 concurrent) to max throughput while respecting rate cap.
+    semaphore = asyncio.Semaphore(4)  # Limit concurrent Groq calls to 4
+    
+    async def process_with_semaphore(f):
+        async with semaphore:
+            return await process_single_frame(f)
+    
+    tasks = [process_with_semaphore(f) for f in req.filenames]
+    final_results = [r for r in await asyncio.gather(*tasks) if r is not None]
 
     # Attach standardised equipment_result to each frame and log detection
     for frame in final_results:

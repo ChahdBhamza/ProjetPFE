@@ -128,7 +128,7 @@ class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveCl
   }
 
   Widget _buildFilterChips() {
-    final List<String> categories = ['ALL', 'CLIMATISEURS', 'REFRIGERATEURS', 'LAPTOPS', 'MONITORS', 'MICROWAVES'];
+    final categories = _deriveFilterCategories();
     return Container(
       height: 38,
       margin: const EdgeInsets.only(bottom: 8),
@@ -139,10 +139,10 @@ class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveCl
           final cat = categories[index];
           final isSelected = _selectedCategory == cat;
           Color activeColor = CybersightTheme.accent;
-          if (cat == 'REFRIGERATEURS') activeColor = CybersightTheme.ok;
-          if (cat == 'LAPTOPS') activeColor = Colors.purpleAccent;
-          if (cat == 'MONITORS') activeColor = Colors.greenAccent;
-          if (cat == 'MICROWAVES') activeColor = Colors.pinkAccent;
+          if (cat.contains('REFRIGERATEURS')) activeColor = CybersightTheme.ok;
+          if (cat.contains('LAPTOPS')) activeColor = Colors.purpleAccent;
+          if (cat.contains('MONITORS')) activeColor = Colors.greenAccent;
+          if (cat.contains('MICROWAVES')) activeColor = Colors.pinkAccent;
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -190,6 +190,42 @@ class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveCl
         },
       ),
     );
+  }
+
+  List<String> _deriveFilterCategories() {
+    final Set<String> cats = {'ALL'};
+    if (_allInventoryItems == null) return cats.toList();
+
+    for (final item in _allInventoryItems!) {
+      final metadata = item['metadata'] as Map<String, dynamic>? ?? {};
+      String cat = (metadata['category'] ?? '').toString().trim().toUpperCase();
+      if (cat.isEmpty || cat == 'UNKNOWN' || cat == 'EQUIPMENT') {
+        cat = (metadata['equipment_type'] ?? item['equipment_type'] ?? '').toString().trim().toUpperCase();
+      }
+
+      if (cat.contains('AIR') || cat.contains('AIR_CONDITION') || cat.contains('CLIM')) {
+        cats.add('CLIMATISEURS');
+      } else if (cat.contains('REF')) {
+        cats.add('REFRIGERATEURS');
+      } else if (cat.contains('MICRO')) {
+        cats.add('MICROWAVES');
+      } else if (cat.contains('LAP')) {
+        cats.add('LAPTOPS');
+      } else if (cat.contains('MON') || cat.contains('SCREEN') || cat.contains('DISPLAY') || cat.contains('TV')) {
+        cats.add('MONITORS');
+      } else if (cat.isNotEmpty) {
+        cats.add(cat);
+      }
+    }
+
+    final list = cats.toList();
+    // Ensure stable ordering with ALL first
+    list.sort();
+    if (list.first != 'ALL') {
+      list.remove('ALL');
+      list.insert(0, 'ALL');
+    }
+    return list;
   }
 
   String _getCategorySubtitle() {
@@ -266,15 +302,7 @@ class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveCl
                       ),
                     ],
                   )),
-                  const SizedBox(width: 12),
-                  GlassContainer(
-                    width: 52,
-                    height: 52,
-                    opacity: 0.05,
-                    blur: 24,
-                    borderRadius: 16,
-                    child: const Icon(Icons.qr_code_scanner_rounded, color: CybersightTheme.accent, size: 24),
-                  ),
+
                 ],
               ),
               
@@ -302,17 +330,6 @@ class _InventoryPageState extends State<InventoryPage> with AutomaticKeepAliveCl
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                      boxShadow: [BoxShadow(color: CybersightTheme.accent.withOpacity(0.3), blurRadius: 15)],
-                    ),
-                    child: const Icon(Icons.add_rounded, color: Colors.black, size: 28),
                   ),
                 ],
               ),

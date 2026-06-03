@@ -6,6 +6,11 @@ import 'dart:math' as math;
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 
+const Color _splashBlue = Color(0xFF5B7CFF);
+const Color _splashPurple = Color(0xFF9D4DFF);
+const Color _splashCyan = Color(0xFF60E4FF);
+const Color _splashViolet = Color(0xFFBB64FF);
+
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -96,11 +101,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
                                       colors: [
-                                        CybersightTheme.accent.withOpacity(0.18),
-                                        CybersightTheme.accent2.withOpacity(0.10),
+                                        _splashCyan.withOpacity(0.24),
+                                        _splashBlue.withOpacity(0.16),
                                         Colors.transparent,
                                       ],
-                                      stops: const [0.0, 0.45, 1.0],
+                                      stops: const [0.0, 0.38, 1.0],
                                     ),
                                   ),
                                 ),
@@ -121,10 +126,10 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                   height: 108,
                                   child: Stack(
                                     children: [
-                                      _HUDCorner(Alignment.topLeft, CybersightTheme.accent),
-                                      _HUDCorner(Alignment.topRight, CybersightTheme.accent),
-                                      _HUDCorner(Alignment.bottomLeft, CybersightTheme.accent),
-                                      _HUDCorner(Alignment.bottomRight, CybersightTheme.accent),
+                                      _HUDCorner(Alignment.topLeft, _splashCyan),
+                                      _HUDCorner(Alignment.topRight, _splashCyan),
+                                      _HUDCorner(Alignment.bottomLeft, _splashCyan),
+                                      _HUDCorner(Alignment.bottomRight, _splashCyan),
 
                                       // Scanning Line
                                       AnimatedBuilder(
@@ -139,17 +144,17 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                               decoration: BoxDecoration(
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: CybersightTheme.accent.withOpacity(0.35),
+                                                    color: _splashCyan.withOpacity(0.35),
                                                     blurRadius: 12,
                                                     spreadRadius: 1,
                                                   ),
                                                 ],
                                                 gradient: LinearGradient(
                                                   colors: [
-                                                    CybersightTheme.accent.withOpacity(0),
-                                                    CybersightTheme.accent,
-                                                    CybersightTheme.accent2.withOpacity(0.6),
-                                                    CybersightTheme.accent.withOpacity(0),
+                                                    _splashCyan.withOpacity(0),
+                                                    _splashCyan,
+                                                    _splashBlue.withOpacity(0.65),
+                                                    _splashCyan.withOpacity(0),
                                                   ],
                                                 ),
                                               ),
@@ -164,10 +169,10 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                           height: 26,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            gradient: const LinearGradient(colors: [CybersightTheme.accent, CybersightTheme.accent2]),
+                                            gradient: const LinearGradient(colors: [_splashPurple, _splashCyan]),
                                             boxShadow: [
-                                              BoxShadow(color: CybersightTheme.accent.withOpacity(0.35), blurRadius: 18),
-                                              BoxShadow(color: CybersightTheme.accent2.withOpacity(0.18), blurRadius: 24),
+                                              BoxShadow(color: _splashPurple.withOpacity(0.35), blurRadius: 18),
+                                              BoxShadow(color: _splashCyan.withOpacity(0.18), blurRadius: 24),
                                             ],
                                           ),
                                         ),
@@ -199,16 +204,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     const SizedBox(height: 26),
 
                     // 2) BRANDING
-                    ShaderMask(
-                      shaderCallback: (rect) => const LinearGradient(
-                        colors: [CybersightTheme.accent, Colors.white, CybersightTheme.accent2],
-                        stops: [0.0, 0.45, 1.0],
-                      ).createShader(rect),
-                      blendMode: BlendMode.srcIn,
-                      child: Text(
-                        'CYBERSIGHT',
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(letterSpacing: 3.0),
-                      ),
+                    Text(
+                      'SfmDetect',
+                      style: Theme.of(context)
+                          .textTheme
+                          .displayLarge
+                          ?.copyWith(color: Colors.white, letterSpacing: 3.0),
                     ),
                     const SizedBox(height: 10),
                     Text(
@@ -268,7 +269,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
                     const SizedBox(height: 24),
                     Text(
-                      '© 2026 • CYBERSIGHT',
+                      '© 2026 • SfmDetect',
                       style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white12, letterSpacing: 2.0),
                     ),
                     const SizedBox(height: 12),
@@ -293,8 +294,8 @@ class _AuroraPainter extends CustomPainter {
       ..shader = LinearGradient(
         colors: [
           CybersightTheme.obsidian,
-          CybersightTheme.navy2.withOpacity(0.98),
-          CybersightTheme.navy1.withOpacity(0.98),
+          Color(0xFF0A0B36).withOpacity(0.96),
+          Color(0xFF2A1D8E).withOpacity(0.94),
         ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -338,11 +339,11 @@ class _DotWavePainter extends CustomPainter {
 
         final mix = (d / trailSweep).clamp(0.0, 1.0);
         final color = Color.lerp(
-              CybersightTheme.accent.withOpacity(0.46),
-              CybersightTheme.accent2.withOpacity(0.60),
+              _splashCyan.withOpacity(0.46),
+              _splashViolet.withOpacity(0.60),
               mix,
             ) ??
-            CybersightTheme.accent2.withOpacity(0.60);
+            _splashViolet.withOpacity(0.60);
 
         paint
           ..color = color.withOpacity(0.46 * (1 - mix * 0.72))
@@ -437,7 +438,7 @@ class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixi
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: CybersightTheme.ok,
+                        color: _splashCyan,
                         width: 1.5,
                       ),
                     ),
@@ -450,10 +451,10 @@ class _PulseDotState extends State<_PulseDot> with SingleTickerProviderStateMixi
                 height: 7,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: CybersightTheme.ok,
+                  color: _splashCyan,
                   boxShadow: [
                     BoxShadow(
-                      color: CybersightTheme.ok,
+                      color: _splashCyan,
                       blurRadius: 6,
                     ),
                   ],

@@ -56,10 +56,10 @@ async def signup(data: dict = Body(...)):
             data={"sub": email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
         mongo_db.record_login(email, device_info="Signup")
-        is_admin = "admin" in email.lower()
+        is_admin = email.lower() == "chahdbenhamza4@gmail.com"
         return {
-            "success": True, 
-            "message": "Neural Profile Created", 
+            "success": True,
+            "message": "Neural Profile Created",
             "token": access_token,
             "user": {"email": email, "full_name": full_name, "is_admin": is_admin}
         }
@@ -115,11 +115,14 @@ async def google_auth(data: dict = Body(...)):
         # Create Google User
         mongo_db.create_user(
             email=email,
-            password_hash="GOOGLE_OAUTH_USER", 
+            password_hash="GOOGLE_OAUTH_USER",
             full_name=full_name or "Google Operator"
         )
         user = mongo_db.find_user_by_email(email)
-        
+
+    if not user:
+        raise HTTPException(status_code=500, detail="Database connection failed. Check MongoDB Atlas.")
+
     # Generate JWT Token
     access_token = create_access_token(
         data={"sub": user["email"]}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -127,11 +130,11 @@ async def google_auth(data: dict = Body(...)):
     mongo_db.record_login(user["email"], device_info="Google Auth")
 
     return {
-        "success": True, 
+        "success": True,
         "message": "Google Link Established",
         "token": access_token,
         "user": {
-            "email": user["email"], 
+            "email": user["email"],
             "full_name": user["full_name"],
             "is_admin": user.get("is_admin", False)
         }

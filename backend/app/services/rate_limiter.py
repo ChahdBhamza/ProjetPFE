@@ -43,8 +43,8 @@ class TokenBucket:
 
 
 # Groq free tier is ~30 requests/min. Stay safely under it with a small burst.
-# capacity=4 lets a fresh scan fire its first few calls instantly; then ~25/min pacing.
-_groq_bucket = TokenBucket(rate_per_min=25, capacity=4)
+# capacity=6 allows 4 concurrent frames to start instantly; then smoothly throttled at 25/min.
+_groq_bucket = TokenBucket(rate_per_min=25, capacity=6)
 
 
 def groq_throttle():

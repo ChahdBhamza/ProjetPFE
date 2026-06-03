@@ -97,6 +97,8 @@ class CybersightApp extends StatelessWidget {
             return _buildAnimatedRoute(settings, const AppShell());
           case '/save-success':
             return _buildAnimatedRoute(settings, const SaveSuccessPage());
+          case '/detection-success':
+            return _buildAnimatedRoute(settings, const DetectionSuccessPage());
           default:
             return _buildAnimatedRoute(settings, const SplashPage());
         }

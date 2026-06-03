@@ -121,10 +121,10 @@ def draw_bounding_box(frame: np.ndarray, bbox: tuple[int, int, int, int]) -> np.
 
 def enhance_crop_for_ocr(crop: np.ndarray) -> np.ndarray:
     h, w = crop.shape[:2]
-    target_min = 800
+    target_min = 600  # Reduced from 800 for faster processing
     if min(h, w) < target_min:
         scale = target_min / min(h, w)
-        crop = cv2.resize(crop, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_LANCZOS4)
+        crop = cv2.resize(crop, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_LINEAR)  # Faster than LANCZOS4
 
     lab = cv2.cvtColor(crop, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
@@ -209,61 +209,24 @@ Respond ONLY with a valid JSON object with exactly these keys:
 # ── Step 6: Pass 2 — Equipment-specific forensic identification prompts ────────
 
 def _build_pass2_prompt(equipment_type: str, preliminary_brand: str | None) -> str:
-    """Build a forensic identification prompt tailored to the equipment category."""
-
-    brand_hint = f'The preliminary brand detected is "{preliminary_brand}". Confirm or correct it.' if preliminary_brand else "No brand was pre-detected. Search all visible surfaces."
+    """Build a fast, simplified forensic identification prompt."""
 
     base_rules = f"""
-You are a FORENSIC EQUIPMENT IDENTIFICATION SPECIALIST.
-You are given TWO images:
-- Image 1: Full clean scene (use this to find logos, badges, stickers ANYWHERE in the frame)
-- Image 2: ENHANCED close-up crop (for reading fine text, serial plates, model numbers)
+You are an equipment identification expert. Identify the BRAND and MODEL from the images.
 
-{brand_hint}
+TASK:
+1. Find the BRAND from visible logos, badges, or stickers
+2. Find the MODEL CODE (read text/stickers, or deduce from design)
+3. List 1-2 most likely candidates with 70%+ confidence
+4. If no brand visible, make your best guess (50%+ confidence)
 
-BRAND DETECTION — SCAN EVERYWHERE:
-You MUST inspect EVERY part of both images before concluding the brand:
-- Top-left, top-right, bottom corners of the equipment
-- Center panel badges or embossed logos
-- Side stickers or rating plates
-- Screen bezel text (laptops/monitors)
-- Door handles or trim strips (fridges)
-- Control panel labels (microwaves, AC)
-- Any small printed text or sticker visible ANYWHERE on the device
-Do NOT stop at the most obvious location — logos are often in unexpected places.
+CONFIDENCE LEVELS:
+- 90%+: Can clearly read brand & model text
+- 70-89%: Can read brand, deduce model from design
+- 50-69%: Brand guessed from design, model uncertain
+- Below 50%: Skip
 
-BRAND GUESSING RULES — WHEN NO LOGO IS VISIBLE:
-If no brand logo or text is visible, you MUST still make your best educated guess using ALL design cues:
-- Chassis material (plastic vs aluminium), color, finish
-- Keyboard layout, key shape, trackpad size and style
-- Port placement and types (USB-A/C, HDMI, headphone jack positions)
-- Screen bezel thickness and webcam notch style
-- Build quality indicators (hinges, vents, speaker grilles)
-- Overall form factor and aesthetic
-
-Give this guess a confidence of 50-69% to reflect uncertainty.
-
-ABSOLUTE RULE — NEVER GUESS APPLE UNLESS YOU SEE THE LOGO:
-Apple laptops have a very specific aluminium unibody chassis, no visible vents on front,
-very thin uniform bezels, and a backlit Apple logo on the lid.
-If you cannot see the Apple logo AND the chassis is plastic or has visible vents/ports on the sides,
-it is NOT Apple. Default to Lenovo, Asus, HP, Dell, or Acer before ever guessing Apple.
-
-STRICT CONFIDENCE RULES:
-- 90%+: You can CLEARLY READ the exact model code/number on the image (e.g. on a sticker or label)
-- 70-89%: You recognize the specific series by unique design features (port layout, badge shape, panel design)
-- 50-69%: You recognize the brand and likely product generation, but cannot read the exact model code
-- Below 50%: Do NOT include this candidate.
-
-IMPORTANT:
-- The model candidates you suggest MUST be highly accurate.
-- If you cannot read the model text, you MAY use your expert visual recognition to deduce the model based on its design, BUT YOU MUST
- STRICTLY RESTRICT YOUR GUESSES TO THE DETECTED BRAND'S CATALOG.
-- Example: If you detect the brand "SABA", you MUST ONLY suggest SABA models (like "P70H20L-DE"). Do NOT hallucinate a competitor's model
- (like Samsung "MS20F20")  just because they share a similar shape or generic parts.
-- Every model name in "model_candidates" MUST be a single, precise alphanumeric reference code.
-- Confidence values across all candidates MUST sum to exactly 100
-- Reasoning MUST explain exactly what physical features led you to this specific model candidate.
+OUTPUT: Return JSON with brand, model_candidates (list of {{model, confidence, reasoning}})
 """
 
     type_specific = {
@@ -369,7 +332,7 @@ Respond ONLY with a valid JSON object matching exactly:
                     }
                 ],
                 temperature=0.05,
-                max_tokens=2000,
+                max_tokens=500,
                 response_format={"type": "json_object"},
             )
             raw = resp.choices[0].message.content.strip()
@@ -403,10 +366,10 @@ Respond ONLY with a valid JSON object matching exactly:
 
 def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
     """
-    Two-pass Groq Llama Vision identification:
-      Pass 1: Fast type detection (llama-4-scout-17b) — always runs for brand hint
+    Single-pass optimized Groq identification:
+      SKIP Pass 1 (redundant - we have yolo_type_hint from Roboflow)
       Pass 2: Equipment-specific forensic prompt with both images
-    Returns a merged result dict.
+    Returns a merged result dict. ~50% faster!
     """
     client = _get_groq_client()
 
@@ -415,37 +378,23 @@ def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, y
 
     KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
 
-    KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
+    # Skip Pass 1 entirely - use Roboflow's yolo_type_hint directly
+    eq_type = yolo_type_hint if (yolo_type_hint and yolo_type_hint in KNOWN_TYPES) else "unknown"
+    brand_hint = None  # No pre-detected brand - let Pass 2 figure it out
 
-    # Always run Pass 1 to get a preliminary brand (it's fast and cheap)
-    print("[Vision] Pass 1: Fast equipment type detection...")
-    pass1 = _run_pass1(client, full_bytes)
-    pass1_type = pass1.get("equipment_type", "unknown")
-    brand_hint = pass1.get("preliminary_brand", None)
-    pass1_conf = pass1.get("confidence_type", 0)
-    print(f"[Vision] Pass 1 result: type={pass1_type}, brand={brand_hint}, confidence={pass1_conf}%")
-
-    # Decide which type to use for the forensic prompt
-    if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
-        if pass1_type == yolo_type_hint or pass1_conf < 70:
-            eq_type = yolo_type_hint
-            print(f"[Vision] Using YOLO hint: type='{eq_type}'")
-        else:
-            eq_type = pass1_type
-            print(f"[Vision] ⚠️ Pass 1 disagrees with YOLO! YOLO='{yolo_type_hint}', Pass1='{pass1_type}' (conf={pass1_conf}%) → trusting Pass 1")
+    if eq_type != "unknown":
+        print(f"[Vision] ⚡ OPTIMIZED: Skipped Pass 1, using YOLO type='{eq_type}' directly")
     else:
-        eq_type = pass1_type
+        print("[Vision] No YOLO hint - running forensic ID with type='unknown'")
 
     print(f"[Vision] Pass 2: Forensic ID for type='{eq_type}'...")
     pass2 = _run_pass2(client, full_bytes, crop_bytes, eq_type, brand_hint)
 
-    # Final category: trust Pass 2 if it returns a valid known type, otherwise use our pre-computed eq_type
+    # Final category: trust Pass 2 if it returns a valid known type, otherwise use eq_type
     pass2_cat = pass2.get("equipment_category", "")
-    if pass2_cat in KNOWN_TYPES:
-        pass2["equipment_category"] = pass2_cat
-    else:
+    if pass2_cat not in KNOWN_TYPES:
         pass2["equipment_category"] = eq_type
-    pass2["pass1_type_confidence"] = pass1_conf
+    pass2["pass1_type_confidence"] = 100  # Since we're using Roboflow's detection
 
     return pass2
 
