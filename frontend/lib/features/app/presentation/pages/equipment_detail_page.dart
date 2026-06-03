@@ -547,6 +547,18 @@ class _SpecGrid extends StatelessWidget {
   final Map<String, dynamic> specs;
   const _SpecGrid({required this.specs});
 
+  static bool _isEmpty(dynamic v) {
+    if (v == null) return true;
+    final s = v.toString().toLowerCase().trim();
+    return s.isEmpty || s == 'null' || s == 'unknown' || s == 'unknown model' || s == 'n/a';
+  }
+
+  static String _formatValue(dynamic v) {
+    if (_isEmpty(v)) return '—';
+    if (v is List) return v.join(', ');
+    return v.toString();
+  }
+
   static bool _shouldHide(String key) {
     final k = key.toLowerCase();
     return k.contains('price') ||
@@ -558,13 +570,7 @@ class _SpecGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filtered = specs.entries
-        .where((e) {
-          if (e.value == null || e.value.toString().isEmpty) return false;
-          final strVal = e.value.toString().toLowerCase();
-          if (strVal == 'unknown' || strVal == 'unknown model' || strVal == 'n/a') return false;
-          if (_shouldHide(e.key)) return false;
-          return true;
-        })
+        .where((e) => !_shouldHide(e.key))
         .toList();
 
     if (filtered.isEmpty) {
@@ -605,7 +611,8 @@ class _SpecGrid extends StatelessWidget {
               Expanded(
                 child: _SpecCard(
                   label: pair[0].key,
-                  value: pair[0].value.toString(),
+                  value: _formatValue(pair[0].value),
+                  isEmpty: _isEmpty(pair[0].value),
                   delayIndex: baseIdx,
                 ),
               ),
@@ -614,7 +621,8 @@ class _SpecGrid extends StatelessWidget {
                   ? Expanded(
                       child: _SpecCard(
                         label: pair[1].key,
-                        value: pair[1].value.toString(),
+                        value: _formatValue(pair[1].value),
+                        isEmpty: _isEmpty(pair[1].value),
                         delayIndex: baseIdx + 1,
                       ),
                     )
@@ -631,7 +639,8 @@ class _SpecCard extends StatelessWidget {
   final String label;
   final String value;
   final int delayIndex;
-  const _SpecCard({required this.label, required this.value, required this.delayIndex});
+  final bool isEmpty;
+  const _SpecCard({required this.label, required this.value, required this.delayIndex, this.isEmpty = false});
 
   IconData _icon() {
     final k = label.toLowerCase();
@@ -696,9 +705,9 @@ class _SpecCard extends StatelessWidget {
             Text(
               value,
               style: GoogleFonts.plusJakartaSans(
-                color: Colors.white,
+                color: isEmpty ? Colors.white24 : Colors.white,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: isEmpty ? FontWeight.w400 : FontWeight.w600,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,

@@ -154,23 +154,27 @@ class SpecService:
         category = normalize_category(equipment_type)
         category_label = CATEGORY_LABELS.get(category, equipment_type)
 
-        prompt = f"""You are a strict Technical Data Extraction Agent for {category_label} equipment.
+        field_hints = schema_as_prompt_fields(equipment_type)
 
-Your ONLY job: extract verified technical specifications from the scraped web content below.
+        prompt = f"""You are a technical specifications expert for {category_label} equipment.
 
-STRICT RULES:
-1. YOU MUST RETURN EVERY SINGLE FIELD DEFINED IN THE SCHEMA. NO EXCEPTIONS.
-2. IF A TECHNICAL SPEC FIELD IS MISSING FROM THE SCRAPED CONTENT, YOU MUST DEDUCE, ESTIMATE, OR USE YOUR PRE-TRAINED KNOWLEDGE TO FILL IT IN. YOU ARE ABSOLUTELY FORBIDDEN FROM RETURNING NULL OR "UNKNOWN" FOR TECHNICAL SPECS. Provide a realistic estimated value (e.g. 150.0 for annual kWh) if you cannot find it.
-3. For boolean fields: use true or false (JSON booleans, not strings).
-4. For numeric fields: use numbers (not strings). e.g. 12000 not "12000 BTU".
-5. For "price_tnd": extract the numeric price in TND only (e.g. 1299.0). If unknown, estimate a typical Tunisian Dinars price based on the brand/model tier.
-6. For the "exact_model_reference" field: BE EXTREMELY SPECIFIC. Extract the base model and ANY specific part number, reference code, or SKU found after the name EXACTLY AS WRITTEN. Do NOT say "similar to". If the exact SKU is not in the text, DO NOT hallucinate one; just output the base model name.
-8. IMPORTANT: Output ONLY raw valid JSON format. Do NOT wrap the JSON in markdown code blocks like ```json.
-
-Equipment to identify:
+Equipment:
 - Brand: {brand}
 - Model: {model}
 - Category: {category_label}
+
+Your job: fill EVERY schema field. No field can be null. Use this priority:
+1. Extract from the scraped web content
+2. Use your pre-trained knowledge about {brand} {model}
+3. Use your knowledge of typical {brand} {category_label} specs as a last resort
+
+NULL IS FORBIDDEN. Every single field must have a value.
+
+RULES:
+- For boolean fields: true or false only (no strings).
+- For numeric fields: numbers only, no units in the value (e.g. 12000 not "12000 BTU").
+- For "exact_model_reference": exact SKU/code from the text, or the base model name if not found.
+- Output ONLY raw valid JSON. No markdown, no code blocks.
 
 Scraped Web Content:
 ---
@@ -185,8 +189,6 @@ Scraped Web Content:
         try:
             print(f"[Groq] Extracting {category_label} specs for {brand} {model} using structured output...")
 
-            # Use human-readable field hints (much smaller than the full Pydantic schema)
-            field_hints = schema_as_prompt_fields(category)
             full_prompt = prompt + (
                 f"\n\nReturn ONLY a raw JSON object with exactly these keys — no markdown, no code blocks:\n"
                 f'{{"exact_model_reference": "base model or SKU", "specs": {field_hints}, '
@@ -284,6 +286,7 @@ Scraped Web Content:
             parts = [str(x) for x in [h, w, depth] if x]
             specs["dimensions"] = "×".join(parts) + " cm" if parts else None
 
+
         # Type coercions
         int_fields   = {"capacity_btu", "capacity_liters", "power_watts",
                         "noise_level_db", "ram_gb", "warranty_years",
@@ -316,6 +319,17 @@ Scraped Web Content:
                     specs[key] = [f.strip() for f in re.split(r"[,;/]", val) if f.strip()]
             except Exception:
                 pass  # leave as-is on parse failure
+
+        # Normalize annual_energy_consumption_kwh — scale up if value looks like
+        # monthly (< 50) or daily (< 5) instead of yearly
+        if "annual_energy_consumption_kwh" in specs and specs["annual_energy_consumption_kwh"] is not None:
+            kwh = float(specs["annual_energy_consumption_kwh"])
+            if kwh < 5:       # looks like daily → multiply by 365
+                specs["annual_energy_consumption_kwh"] = round(kwh * 365, 1)
+                print(f"[Normalize] annual kWh {kwh} looked daily → scaled to {specs['annual_energy_consumption_kwh']}")
+            elif kwh < 50:    # looks like monthly → multiply by 12
+                specs["annual_energy_consumption_kwh"] = round(kwh * 12, 1)
+                print(f"[Normalize] annual kWh {kwh} looked monthly → scaled to {specs['annual_energy_consumption_kwh']}")
 
         # Recount non-null fields
         fields_found = sum(1 for v in specs.values() if v is not None)

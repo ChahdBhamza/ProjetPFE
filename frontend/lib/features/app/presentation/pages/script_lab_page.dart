@@ -903,6 +903,41 @@ class _VerificationCarouselSheetState
   int _currentIndex = 0;
   bool _isFetchingSpecs = false;
   String _fetchingLabel = '';
+  late List<Map<String, String>> _cardValues;
+
+  @override
+  void initState() {
+    super.initState();
+    _cardValues = widget.detections.map(_defaultValues).toList();
+  }
+
+  Map<String, String> _defaultValues(Map<String, dynamic> detection) {
+    final f = Map<dynamic, dynamic>.from(detection['forensic_data'] ?? {});
+    final candidates = f['model_candidates'] as List? ?? [];
+    final top = candidates.isNotEmpty ? candidates.first as Map : <dynamic, dynamic>{};
+    final rawType = f['equipment_category'] ?? f['equipment_type'] ?? f['category'] ?? '';
+    final type = rawType.toString().trim().isNotEmpty
+        ? rawType.toString().trim().replaceAll('_', ' ')
+        : '';
+    return {
+      'brand': f['brand']?.toString().trim() ?? '',
+      'model': top['model']?.toString().trim() ?? '',
+      'type': type.isNotEmpty ? type[0].toUpperCase() + type.substring(1).toLowerCase() : '',
+    };
+  }
+
+  Future<void> _verifyAll() async {
+    for (int i = 0; i < widget.detections.length; i++) {
+      final vals = _cardValues[i];
+      final detection = widget.detections[i];
+      final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
+      final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
+      final candidates = fd['model_candidates'] as List? ?? [];
+      final top = candidates.isNotEmpty ? (candidates.first as Map).cast<String, dynamic>() : <String, dynamic>{};
+      final conf = (top['confidence'] as num?)?.toInt() ?? 0;
+      await _fetchSpecs(vals['brand']!, vals['model']!, vals['type']!, frameImage, confidence: conf);
+    }
+  }
 
   Future<void> _fetchSpecs(
       String brand, String modelName, String type, String? frameImage, {int confidence = 0}) async {
@@ -914,9 +949,10 @@ class _VerificationCarouselSheetState
     try {
       final specRes = await _apiService.getSpecs(brand, modelName, type);
       if (mounted) {
-        Navigator.of(context).pop();
+        // Re-show carousel before opening detail — carousel stays alive underneath
+        setState(() => _isFetchingSpecs = false);
+
         if (specRes['equipment_result'] != null) {
-          // Cast to mutable typed map so assignments actually stick
           final equipResult = Map<String, dynamic>.from(
               specRes['equipment_result'] as Map);
 
@@ -935,7 +971,9 @@ class _VerificationCarouselSheetState
           }
 
           final equipmentResult = EquipmentResult.fromJson(equipResult);
-          showModalBottomSheet(
+          // Push detail ON TOP of carousel — user can dismiss it and come back
+          // to verify the remaining cards without restarting the flow.
+          await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
@@ -1091,7 +1129,6 @@ class _VerificationCarouselSheetState
               itemCount: widget.detections.length,
               itemBuilder: (context, index) {
                 final detection = widget.detections[index];
-                final frameImage = detection['ai_image'] ?? detection['raw_image'] ?? detection['image'];
                 return _VerificationCard(
                   detection: detection,
                   icon: _getEquipmentIcon(
@@ -1100,20 +1137,8 @@ class _VerificationCarouselSheetState
                             ?.toString() ??
                         '',
                   ),
-                  onVerify: (brand, model, type) {
-                    final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
-                    final candidates = fd['model_candidates'];
-                    Map<String, dynamic> topCandidate = {};
-                    if (candidates is List && candidates.isNotEmpty) {
-                      final first = candidates.first;
-                      if (first is Map) {
-                        topCandidate = first.cast<String, dynamic>();
-                      }
-                    }
-                    final conf = (topCandidate['confidence'] as num?)?.toInt()
-                        ?? (fd['confidence'] as num?)?.toInt()
-                        ?? 0;
-                    _fetchSpecs(brand, model, type, frameImage?.toString(), confidence: conf);
+                  onChanged: (brand, model, type) {
+                    _cardValues[index] = {'brand': brand, 'model': model, 'type': type};
                   },
                 );
               },
@@ -1139,6 +1164,17 @@ class _VerificationCarouselSheetState
                 ),
               ),
             ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: GlowingButton(
+              label: widget.detections.length > 1
+                  ? 'Verify & Search All (${widget.detections.length})'
+                  : 'Verify & Search',
+              isFullWidth: true,
+              onTap: _verifyAll,
+            ),
+          ),
         ],
       ),
     );
@@ -1150,12 +1186,12 @@ class _VerificationCarouselSheetState
 class _VerificationCard extends StatefulWidget {
   final Map<String, dynamic> detection;
   final IconData icon;
-  final Function(String brand, String model, String type) onVerify;
+  final Function(String brand, String model, String type) onChanged;
 
   const _VerificationCard(
       {required this.detection,
       required this.icon,
-      required this.onVerify});
+      required this.onChanged});
 
   @override
   State<_VerificationCard> createState() => _VerificationCardState();
@@ -1309,31 +1345,24 @@ class _VerificationCardState extends State<_VerificationCard> {
                     'EQUIPMENT TYPE',
                     _typeController,
                     hint: 'e.g. Laptop, Microwave, Refrigerator…',
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (_) {
+                      setState(() {});
+                      widget.onChanged(_brandController.text.trim(), _modelController.text.trim(), _typeController.text.trim());
+                    },
                   ),
                   const SizedBox(height: 14),
                   _buildInputField(
                     'BRAND',
                     _brandController,
                     hint: 'e.g. Samsung, LG, Dell…',
+                    onChanged: (_) => widget.onChanged(_brandController.text.trim(), _modelController.text.trim(), _typeController.text.trim()),
                   ),
                   const SizedBox(height: 14),
                   _buildInputField(
                     'MODEL REFERENCE',
                     _modelController,
                     hint: 'e.g. Galaxy Book Pro 360…',
-                  ),
-                  const SizedBox(height: 24),
-                  GlowingButton(
-                    label: 'Verify & Fetch Specs',
-                    isFullWidth: true,
-                    onTap: () {
-                      widget.onVerify(
-                        _brandController.text.trim(),
-                        _modelController.text.trim(),
-                        _typeController.text.trim(),
-                      );
-                    },
+                    onChanged: (_) => widget.onChanged(_brandController.text.trim(), _modelController.text.trim(), _typeController.text.trim()),
                   ),
                 ],
               ),

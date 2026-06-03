@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/hud_widgets.dart';
+import '../../../../core/network/api_service.dart';
 
 const _kPalette = [
   Color(0xFF5B9BD5),
@@ -41,44 +42,20 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       _isLoading = true;
       _error = null;
     });
-    await Future.delayed(const Duration(milliseconds: 700));
-    setState(() {
-      _stats = _buildFakeStats();
-      _isLoading = false;
-    });
+    try {
+      final stats = await ApiService().fetchAdminStats();
+      setState(() {
+        _stats = stats;
+        _isLoading = false;
+        if (stats == null) _error = 'No data returned';
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
-
-  static Map<String, dynamic> _buildFakeStats() => {
-    'total_assets': 40,
-    'total_operators': 8,
-    'total_scans': 52,
-    'avg_confidence': 91,
-    'assets_today': 15,
-    'brands': {'Dell': 200, 'Saba': 100, 'Maxwell': 60, 'Lenovo': 40},
-    'categories': {
-      'laptop': 45,
-      'monitor': 30,
-      'air_conditioner': 15,
-      'refrigerator': 7,
-      'microwave': 3,
-    },
-    'activity_over_time': [
-      {'date': '2026-05-26', 'scans': 6},
-      {'date': '2026-05-27', 'scans': 10},
-      {'date': '2026-05-28', 'scans': 7},
-      {'date': '2026-05-29', 'scans': 12},
-      {'date': '2026-05-30', 'scans': 6},
-      {'date': '2026-05-31', 'scans': 4},
-      {'date': '2026-06-01', 'scans': 7},
-    ],
-    'operator_performance': [
-      {'name': 'Karim Mansouri',  'email': 'k.mansouri@techcorp.dz',  'items_saved': 12, 'avg_confidence': 93.4},
-      {'name': 'Amira Belhadj',   'email': 'a.belhadj@techcorp.dz',   'items_saved': 10, 'avg_confidence': 91.8},
-      {'name': 'Youssef Hamdani', 'email': 'y.hamdani@techcorp.dz',   'items_saved':  8, 'avg_confidence': 89.5},
-      {'name': 'Lina Sahraoui',   'email': 'l.sahraoui@techcorp.dz',  'items_saved':  6, 'avg_confidence': 87.2},
-      {'name': 'Omar Bensalem',   'email': 'o.bensalem@techcorp.dz',  'items_saved':  4, 'avg_confidence': 85.9},
-    ],
-  };
 
   @override
   Widget build(BuildContext context) {
