@@ -12,14 +12,15 @@ import 'profile_page.dart';
 import 'admin_dashboard_page.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  final int initialIndex;
+  const AppShell({super.key, this.initialIndex = 0});
 
   @override
   State<AppShell> createState() => _AppShellState();
 }
 
 class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin {
-  int _index = 0;
+  late int _index;
   late AnimationController _bgController;
   late PageController _pageController;
   Timer? _inactivityTimer;
@@ -38,6 +39,7 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    _index = widget.initialIndex;
     _bgController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 12),

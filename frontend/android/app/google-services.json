@@ -1,0 +1,43 @@
+{
+  "project_info": {
+    "project_number": "1045907351885",
+    "project_id": "detectapp-498614",
+    "storage_bucket": ""
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1045907351885:android:0000000000000000",
+        "android_client_info": {
+          "package_name": "com.example.equipment_detection_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1045907351885-muh3mu2j49l4a0mj3h18d7ci7qq5pt6s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.equipment_detection_app",
+            "certificate_hash": "c14aad7a16999a5a942617028168875a3cdf628c"
+          }
+        },
+        {
+          "client_id": "1045907351885-lk1d7ss6fqkiqgcpp3010m68491ss9h0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1045907351885-lk1d7ss6fqkiqgcpp3010m68491ss9h0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

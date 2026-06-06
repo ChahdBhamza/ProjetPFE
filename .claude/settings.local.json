@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash('c:\\\\Users\\\\chahd\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe' -c ' *)",
+      "Bash(del \"c:\\\\Users\\\\chahd\\\\Desktop\\\\DetectionAppPFE\\\\frontend\\\\lib\\\\features\\\\app\\\\presentation\\\\pages\\\\analytics_page.dart\")",
+      "PowerShell(Remove-Item -Path \"c:\\\\Users\\\\chahd\\\\Desktop\\\\DetectionAppPFE\\\\frontend\\\\lib\\\\features\\\\app\\\\presentation\\\\pages\\\\analytics_page.dart\" -Force -Confirm:$false)",
+      "Bash(equipment\")",
+      "Bash(cd \"c:\\\\Users\\\\chahd\\\\Desktop\\\\DetectionAppPFE - Copie \\(2\\)\\\\frontend\" && rm -rf build)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\chahd\\Desktop\\DetectionAppPFE - Copie (2)\\frontend\\build"
+    ]
+  }
+}

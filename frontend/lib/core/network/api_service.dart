@@ -109,7 +109,11 @@ class ApiService {
   }
 
   /// Save EquipmentResult directly to user's MongoDB inventory
-  Future<bool> saveEquipmentToInventory(EquipmentResult result) async {
+  Future<bool> saveEquipmentToInventory(
+    EquipmentResult result, {
+    String? brandOverride,
+    String? modelOverride,
+  }) async {
     try {
       final metadata = Map<String, dynamic>.from(result.specs);
       metadata['category'] = result.identity.equipmentCategory;
@@ -121,8 +125,8 @@ class ApiService {
       Response response = await _dio.post(
         "/api/inventory/save",
         data: {
-          "brand": result.identity.brand,
-          "model": result.identity.topModel,
+          "brand": brandOverride ?? result.identity.brand,
+          "model": modelOverride ?? result.identity.topModel,
           "btu": result.specs['capacity_btu']?.toString() ?? result.specs['btu']?.toString(),
           "metadata": metadata,
         },

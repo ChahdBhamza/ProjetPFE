@@ -30,7 +30,7 @@ class WorkflowService:
         import re
         filename = os.path.basename(image_path).lower()
         # Strip prefix like 'hero_1_' and extension
-        m = re.match(r'hero_\d+_(.+?)\.(png|jpg|jpeg)$', filename)
+        m = re.match(r'hero_\d+_(.+?)(?:_f\d+)?\.(png|jpg|jpeg)$', filename)
         if not m:
             return None
         raw = m.group(1)  # e.g. 'tv_monitor', 'air_conditioner', 'computer'

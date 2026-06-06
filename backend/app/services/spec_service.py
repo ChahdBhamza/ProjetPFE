@@ -35,7 +35,7 @@ class SpecService:
         if not self.api_key:
             raise RuntimeError("GROQ_API_KEY not set in .env")
         self.client = Groq(api_key=self.api_key)
-        self.model = "llama-3.1-8b-instant"
+        self.model = "llama-3.3-70b-versatile"
         self.headers = {
             "User-Agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -58,11 +58,37 @@ class SpecService:
         """
         category_label = CATEGORY_LABELS.get(normalize_category(equipment_type), equipment_type)
 
-        queries = [
-            f"{brand} {model} {category_label} specifications fiche technique",
-            f"{brand} {model} site:{brand.lower()}.com OR site:manufacturer specifications",
-            f"{brand} {model} prix tunisie mega.tn OR mytek.tn OR tunisianet.com",
-        ]
+        # Treat junk model values as "model unknown" so searches don't include them
+        _junk = {"not identifiable", "unknown model", "unknown", "n/a", "na", "none", "", "unreadable", "unknown model reference"}
+        model_lower = model.lower().strip()
+        model_is_junk = model_lower in _junk or model_lower.startswith("unreadable") or model_lower.startswith("no visible")
+
+        # If model looks like a capacity hint (e.g. "12000 BTU", "18K"), use it as a search hint only
+        import re as _re
+        capacity_match = _re.search(r'(\d{4,5})\s*(?:btu)?|(\d{1,2})\s*k\b', model_lower)
+        capacity_hint = capacity_match.group(0).strip() if capacity_match else ""
+
+        if not model_is_junk and not capacity_hint:
+            # Clean model code — search with it directly
+            queries = [
+                f"{brand} {model} {category_label} specifications fiche technique",
+                f"{brand} {model} {category_label} datasheet manuel",
+                f"{brand} {model} {category_label} tunisianet.com OR mega.tn OR mytek.tn OR wiki.tn",
+            ]
+        elif capacity_hint:
+            # Capacity visible but no model code — use it to narrow search
+            queries = [
+                f"{brand} {capacity_hint} BTU {category_label} fiche technique specifications",
+                f"{brand} {capacity_hint} {category_label} datasheet manuel",
+                f"{brand} {capacity_hint} {category_label} tunisianet.com OR mega.tn OR mytek.tn",
+            ]
+        else:
+            # No model info at all — search by brand + category
+            queries = [
+                f"{brand} {category_label} fiche technique specifications",
+                f"{brand} {category_label} datasheet manuel",
+                f"{brand} {category_label} tunisianet.com OR mega.tn OR mytek.tn",
+            ]
 
         seen_urls: set[str] = set()
         results: list[dict] = []
@@ -95,8 +121,33 @@ class SpecService:
         Scrape a product page and return cleaned text prioritising spec tables.
         Returns empty string on failure.
         """
+        _headers_list = [
+            {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+            },
+            {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "fr,en;q=0.5",
+            },
+        ]
         try:
-            response = requests.get(url, headers=self.headers, timeout=10)
+            last_err = None
+            for hdrs in _headers_list:
+                try:
+                    response = requests.get(url, headers=hdrs, timeout=12)
+                    if response.status_code == 200:
+                        break
+                    last_err = f"HTTP {response.status_code}"
+                except Exception as e:
+                    last_err = str(e)
+            else:
+                print(f"[Scraper] All attempts failed for {url[:60]}: {last_err}")
+                return ""
             response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
 
@@ -163,17 +214,14 @@ Equipment:
 - Model: {model}
 - Category: {category_label}
 
-Your job: fill EVERY schema field. No field can be null. Use this priority:
-1. Extract from the scraped web content
-2. Use your pre-trained knowledge about {brand} {model}
-3. Use your knowledge of typical {brand} {category_label} specs as a last resort
-
-NULL IS FORBIDDEN. Every single field must have a value.
+Your job: fill every schema field from the scraped web content below.
+For specs fields: you MAY use your training knowledge to fill gaps.
+For "exact_model_reference": ONLY use what is explicitly written in the scraped text. If no model code appears in the text, return "" (empty string). NEVER invent or guess a model reference.
 
 RULES:
 - For boolean fields: true or false only (no strings).
 - For numeric fields: numbers only, no units in the value (e.g. 12000 not "12000 BTU").
-- For "exact_model_reference": exact SKU/code from the text, or the base model name if not found.
+- For "exact_model_reference": copy it verbatim from the scraped text, or "" if not found.
 - Output ONLY raw valid JSON. No markdown, no code blocks.
 
 Scraped Web Content:
@@ -184,7 +232,66 @@ Scraped Web Content:
 
         extraction_schema = SPECS_EXTRACTIONS.get(category)
         if not extraction_schema:
-            raise ValueError(f"No Pydantic extraction schema found for category '{category}'")
+            print(f"[Groq] No schema for category '{category}' — running generic extraction")
+            generic_prompt = f"""You are a technical specifications expert.
+
+Equipment:
+- Brand: {brand}
+- Model: {model}
+
+Extract every technical specification you can find from the scraped content below.
+Return ONLY a raw JSON object with these keys:
+{{
+  "exact_model_reference": "copy verbatim from the text if present, otherwise empty string",
+  "specs": {{ "key": "value", ... }},
+  "summary": "one factual sentence about this equipment"
+}}
+
+IMPORTANT: "exact_model_reference" must come ONLY from the scraped text. If no model code is in the text, return "".
+No markdown, no code blocks. All values must be strings or numbers.
+
+Scraped Web Content:
+---
+{scraped_data}
+---
+"""
+            try:
+                from app.services.rate_limiter import groq_throttle
+                groq_throttle()
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "user", "content": generic_prompt}],
+                    temperature=0.05,
+                    max_tokens=2048,
+                    response_format={"type": "json_object"},
+                )
+                raw = response.choices[0].message.content.strip()
+                raw_json = json.loads(raw)
+                extracted_ref = raw_json.get("exact_model_reference", "")
+                final_model = extracted_ref if extracted_ref and len(extracted_ref) > 3 else model
+                specs = raw_json.get("specs", {})
+                return {
+                    "brand": brand,
+                    "model": final_model,
+                    "equipment_category": category,
+                    "verified": True,
+                    "source_quality": "medium" if specs else "low",
+                    "specs": specs,
+                    "fields_found": len(specs),
+                    "summary": raw_json.get("summary", ""),
+                }
+            except Exception as e:
+                print(f"[Groq] Generic extraction failed: {e}")
+                return {
+                    "brand": brand,
+                    "model": model,
+                    "equipment_category": category,
+                    "verified": False,
+                    "source_quality": "low",
+                    "specs": {},
+                    "fields_found": 0,
+                    "summary": "",
+                }
 
         try:
             print(f"[Groq] Extracting {category_label} specs for {brand} {model} using structured output...")
@@ -201,7 +308,7 @@ Scraped Web Content:
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
                 temperature=0.05,
-                max_tokens=1200,
+                max_tokens=2048,
                 response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
@@ -213,8 +320,14 @@ Scraped Web Content:
                 raise je
 
             # Build outer envelope programmatically
-            extracted_ref = raw_json.get("exact_model_reference", "")
-            final_model = extracted_ref if extracted_ref and len(extracted_ref) > 3 else model
+            _junk_refs = {"not identifiable", "unknown model", "unknown", "n/a", "na", "none", "not available", "not found", "unidentified"}
+            extracted_ref = raw_json.get("exact_model_reference", "").strip()
+            if extracted_ref.lower() in _junk_refs or len(extracted_ref) <= 2:
+                extracted_ref = ""
+            if extracted_ref:
+                print(f"[Groq] ✅ Real model found from web scraping: {extracted_ref}")
+            # Web-scraped model takes priority over AI-guessed model from image
+            final_model = extracted_ref if extracted_ref else model
             
             result = {
                 "brand": brand,
@@ -240,9 +353,9 @@ Scraped Web Content:
             err_str = str(e)
             print(f"[Groq] Extraction error: {e}")
             # On json_validate_failed, retry once with even shorter context (Groq token budget issue)
-            if "json_validate_failed" in err_str and scraped_data and len(scraped_data) > 1000:
-                print("[Groq] Retrying with shortened context (1000 chars)...")
-                return self.extract_and_verify_specs(scraped_data[:1000], brand, model, equipment_type)
+            if "json_validate_failed" in err_str and scraped_data and len(scraped_data) > 500:
+                print("[Groq] Retrying with shortened context (500 chars)...")
+                return self.extract_and_verify_specs(scraped_data[:500], brand, model, equipment_type)
             # Even on failure, return the FULL schema (all keys → None) so the
             # frontend always renders every field for this equipment type.
             return {
@@ -364,8 +477,16 @@ Scraped Web Content:
         """
         category = normalize_category(equipment_type)
 
+        # Sanitize junk model values before anything else
+        _junk = {"not identifiable", "unknown model", "unknown", "n/a", "na", "none", "", "unreadable", "unknown model reference"}
+        _m = model.lower().strip()
+        # Also treat generic fallbacks like "Maxwell Air Conditioner" as no-model
+        _is_generic = any(_m.endswith(x) for x in ("air conditioner", "refrigerator", "microwave", "laptop", "monitor"))
+        if _m in _junk or _m.startswith("unreadable") or _m.startswith("no visible") or _is_generic:
+            model = ""
+
         print(f"\n{'='*56}")
-        print(f"[Pipeline] Hunting specs: {brand} {model} ({category})")
+        print(f"[Pipeline] Hunting specs: {brand} {model or '(model unknown)'} ({category})")
         print(f"{'='*56}")
 
         # Step 0: Cache lookup — skip the whole search/scrape/extract pipeline on a hit

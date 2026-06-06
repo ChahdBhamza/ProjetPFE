@@ -33,10 +33,11 @@ class Pass1Result(BaseModel):
     equipment_type: str = Field(description="Must be one of: 'airconditioner', 'refrigerator', 'microwave', 'laptop', 'monitor', 'unknown'")
     brand_visible: bool = Field(description="True if a manufacturer logo or printed brand name is visible in the image")
     preliminary_brand: Optional[str] = Field(description="Best guess at the brand name, or null if not visible")
+    preliminary_model: Optional[str] = Field(description="Any model code, reference, or capacity visible in the image (e.g. '9000BTU', 'AR09TX', 'IdeaPad'), or null if nothing readable")
     confidence_type: int = Field(description="Confidence percentage for the type classification (0-100)")
 
 class ModelCandidate(BaseModel):
-    model: str = Field(description="Must be an EXACT, SINGLE alphanumeric reference code (e.g., 'Samsung AR12TXHQASINEU'). NO GENERIC NAMES.")
+    model: str = Field(description="The model code EXACTLY as printed/visible in the image. If nothing is readable, describe what you see (e.g. '12000BTU white inverter unit'). Never invent a code.")
     confidence: int = Field(description="Confidence percentage for this candidate (0-100)")
     reasoning: str = Field(description="Forensic reasoning explaining why this model is selected based on visible features")
 
@@ -154,22 +155,25 @@ def _img_to_bytes(img: np.ndarray) -> bytes:
 
 # ── Step 5: Pass 1 — Fast equipment type detection ────────────────────────────
 
-PASS1_PROMPT = """
-You are a fast equipment classifier. Look at this image and identify the equipment type and whether the brand is visible.
-"""
-
-def _run_pass1(client: Groq, full_frame_bytes: bytes) -> dict:
-    """Fast type + brand visibility check via Groq Llama Vision."""
-    b64_img = base64.b64encode(full_frame_bytes).decode('utf-8')
-    prompt = PASS1_PROMPT + """
+PASS1_PROMPT = """You are a fast equipment classifier and identifier.
+Look at this image and extract:
+1. The equipment TYPE
+2. The BRAND (logo or printed name on the unit)
+3. Any MODEL CODE, reference number, or capacity visible (on sticker, label, or badge)
 
 Respond ONLY with a valid JSON object with exactly these keys:
 {
   "equipment_type": "airconditioner" | "refrigerator" | "microwave" | "laptop" | "monitor" | "unknown",
   "brand_visible": true | false,
   "preliminary_brand": "BrandName" | null,
+  "preliminary_model": "model code or capacity visible in image, e.g. AR09TX or 9000BTU" | null,
   "confidence_type": 0-100
 }"""
+
+def _run_pass1(client: Groq, full_frame_bytes: bytes) -> dict:
+    """Fast type + brand + model visibility check via Groq Llama Vision."""
+    b64_img = base64.b64encode(full_frame_bytes).decode('utf-8')
+    prompt = PASS1_PROMPT
 
     for attempt in range(3):
         try:
@@ -208,103 +212,125 @@ Respond ONLY with a valid JSON object with exactly these keys:
 
 # ── Step 6: Pass 2 — Equipment-specific forensic identification prompts ────────
 
-def _build_pass2_prompt(equipment_type: str, preliminary_brand: str | None) -> str:
-    """Build a fast, simplified forensic identification prompt."""
+def _build_pass2_prompt(equipment_type: str, preliminary_brand: str | None, preliminary_model: str | None = None) -> str:
+    """Build forensic identification prompt."""
 
-    base_rules = f"""
-You are an equipment identification expert. Identify the BRAND and MODEL from the images.
-
-TASK:
-1. Find the BRAND from visible logos, badges, or stickers
-2. Find the MODEL CODE (read text/stickers, or deduce from design)
-3. List 1-2 most likely candidates with 70%+ confidence
-4. If no brand visible, make your best guess (50%+ confidence)
-
-CONFIDENCE LEVELS:
-- 90%+: Can clearly read brand & model text
-- 70-89%: Can read brand, deduce model from design
-- 50-69%: Brand guessed from design, model uncertain
-- Below 50%: Skip
-
-OUTPUT: Return JSON with brand, model_candidates (list of {{model, confidence, reasoning}})
-"""
+    hints = []
+    if preliminary_brand:
+        hints.append(f"BRAND (from Pass 1): \"{preliminary_brand}\" — restrict model reference to this brand's real catalog.")
+    if preliminary_model:
+        hints.append(f"MODEL HINT (from Pass 1): \"{preliminary_model}\" was detected. Verify or refine it using the enhanced crop.")
+    brand_hint = "\n".join(hints)
 
     type_specific = {
-        "airconditioner": """
-FORENSIC PROTOCOL FOR AIR CONDITIONERS:
-1. READ THE BRAND: Look at the front panel logo and any side badging
-2. FIND THE BTU/CAPACITY: Look for capacity numbers like "12000", "18K", "24000" on the front badge or label strip
-3. LOOK FOR INVERTER BADGE: Many units have "Inverter", "WindFree", "Dual Inverter", or "Twin Cool" badges
-4. CHECK REFRIGERANT LABEL: Often on the back or service panel — "R32", "R410A"
-5. MODEL CODE: Usually on a silver sticker on the side panel or back unit. Contains alphanumerics like "AR12TXHQASINEU"
-6. SMART FEATURES: Look for WiFi symbol or "Smart" label on the panel
-""",
-        "refrigerator": """
-FORENSIC PROTOCOL FOR REFRIGERATORS:
-1. READ THE BRAND: Front door logo, usually top or center
-2. CAPACITY STICKER: Often inside the door or on the side — look for "L" or "Liters" e.g. "380L"
-3. ENERGY LABEL: The EU energy efficiency label (A/A+/A++/A+++) is usually on the front or side
-4. NO-FROST BADGE: Look for "No-Frost", "Total No Frost", or "Multi Air Flow" badges
-5. REFRIGERANT: On the technical plate inside the door or on the back — "R600a" or "R134a"
-6. MODEL CODE: On the rating plate inside the door or on the back panel — e.g. "RT38CG6421B1"
-7. COMPRESSOR BADGE: "Digital Inverter" or "Inverter" may be on the door
-""",
-        "microwave": """
-FORENSIC PROTOCOL FOR MICROWAVE OVENS:
-1. READ THE BRAND: Front panel, usually centered or top-left
-2. WATTAGE: Look for "W" or "Watts" on the front label strip — e.g. "1000W", "800W"
-3. CAPACITY: Look for "L" or "Liters" — e.g. "25L", "30L"
-4. FUNCTIONS: Check button panel for Grill, Convection, Steam, Defrost labels
-5. CONTROL TYPE: Is it a digital display with touchpad, or analog knobs?
-6. MODEL CODE: Usually on a sticker on the back or inside the door frame
-""",
-        "laptop": """
-FORENSIC PROTOCOL FOR LAPTOPS:
-1. READ THE BRAND: Logo on the lid (closed/open), keyboard deck, or screen bezel
-2. SERIES BADGE: Look for "Legion", "IdeaPad", "ThinkPad", "Pavilion", "VivoBook", "ProArt" etc.
-3. BOTTOM LABEL (CRITICAL): The bottom of the laptop has a regulatory sticker with the EXACT model number e.g. "15IAH7", "FX517ZE", "FA507NU" 
-— this is the most reliable identifier
-4. KEYBOARD BACKLIGHT: RGB or single-color backlight is specific to product series
-5. PORT LAYOUT: Count and identify USB-A, USB-C, HDMI, SD card slots on the sides
-6. SCREEN BORDER: Thin bezels vs thick borders help identify generation
-7. CPU BADGE: Look for Intel/AMD sticker near touchpad area
-""",
-        "monitor": """
-FORENSIC PROTOCOL FOR COMPUTER MONITORS:
-1. READ THE BRAND: Usually front bezel center/bottom, or back panel center.
-2. MODEL CODE: Usually on a sticker label on the back panel, or next to ports (e.g., 'U2419H', 'U2419', 'S2421HN').
-3. SCREEN SIZE: Often part of the model number (e.g. U2419 has '24' for 24-inch).
-4. RESOLUTION & PANEL: Check visual hints: thin bezels, IPS panel, curved screen, aspect ratio.
-5. PORTS: HDMI, DisplayPort, VGA, USB-C, or Audio jack visible on the back or bottom ridge.
-""",
-        "unknown": """
-FORENSIC PROTOCOL (UNKNOWN DEVICE):
-1. Identify what category of equipment this is first
-2. Look for any brand logo, model badge, or sticker
-3. Note distinctive physical features: color, shape, size, controls
-4. Provide your best model candidates based on visible evidence only
-""",
+        "airconditioner": (
+            "EQUIPMENT TYPE: Split Air Conditioner (indoor wall unit)\n"
+            "WHERE TO LOOK FOR MODEL:\n"
+            "- Front panel: brand logo, capacity badge (9K/12K/18K/24K BTU), Inverter/Twin Cool/WindFree badge\n"
+            "- Side panel sticker: alphanumeric model code e.g. AR12TXHQASINEU, F12AK, FTXS35\n"
+            "- Capacity + series visible → use them to identify the exact series model\n"
+            "REAL EXAMPLES: Samsung AR09TXHQASINEU, LG S09EQ, Daikin FTXS25, Gree GWH09AAB"
+        ),
+        "refrigerator": (
+            "EQUIPMENT TYPE: Refrigerator / Fridge-Freezer\n"
+            "WHERE TO LOOK FOR MODEL:\n"
+            "- Front door: brand logo, No-Frost badge, capacity (L), energy label (A+++)\n"
+            "- Inside door frame: model rating plate or sticker e.g. RT38CG6421B1, GBB72PZDMN\n"
+            "- Side or back panel: data plate (metal or plastic), may be engraved or stamped\n"
+            "- Plastic interior walls: model/serial number may be ENGRAVED or MOLDED into the plastic\n"
+            "- Door handle area or bottom grille: sometimes has embossed model info\n"
+            "REAL EXAMPLES: Samsung RT38CG6421B1, LG GBB72PZDMN, Bosch KGN39XIDR"
+        ),
+        "microwave": (
+            "EQUIPMENT TYPE: Microwave Oven\n"
+            "WHERE TO LOOK FOR MODEL:\n"
+            "- Front: brand, wattage (800W/1000W), capacity (25L/30L), control type\n"
+            "- Back sticker or inside door frame: model code\n"
+            "- Button panel: Grill, Convection, Steam functions\n"
+            "REAL EXAMPLES: Samsung MS23K3513AK, LG MH6535GIS, Whirlpool MWP303SB"
+        ),
+        "laptop": (
+            "EQUIPMENT TYPE: Laptop / Notebook\n"
+            "WHERE TO LOOK FOR MODEL:\n"
+            "- Lid: brand logo\n"
+            "- Screen bezel or keyboard deck: series badge (Legion, IdeaPad, VivoBook, ProArt, Pavilion)\n"
+            "- Bottom sticker (CRITICAL): exact model number e.g. 82SB, FX517ZE, FA507NU\n"
+            "- Near touchpad: Intel/AMD CPU badge\n"
+            "REAL EXAMPLES: ASUS TUF FX517ZE, Lenovo Legion 5 82SB, HP Pavilion 15-eg2"
+        ),
+        "monitor": (
+            "EQUIPMENT TYPE: Computer Monitor / Display\n"
+            "WHERE TO LOOK FOR MODEL:\n"
+            "- Front bezel bottom: brand logo\n"
+            "- Back panel sticker: model code e.g. U2422H, S2421HN, 27G2U\n"
+            "- Screen size clue in model number (24→24inch, 27→27inch)\n"
+            "- Ports on back/bottom: HDMI, DP, USB-C, VGA\n"
+            "REAL EXAMPLES: Dell U2422H, Samsung S27AG552, AOC 27G2U"
+        ),
+        "unknown": (
+            "EQUIPMENT TYPE: Unknown — identify category first, then brand and model.\n"
+            "Look for any logo, badge, sticker, or distinctive design features."
+        ),
     }
 
     type_key = equipment_type if equipment_type in type_specific else "unknown"
+    type_block = type_specific[type_key]
 
-    return f"""{base_rules}
+    return f"""You are a FORENSIC EQUIPMENT IDENTIFICATION SPECIALIST.
+You are given TWO images:
+- Image 1: Full scene — the complete frame, may show stickers, labels, or text anywhere on the equipment
+- Image 2: Enhanced crop — zoomed in on the equipment for closer detail
 
-{type_specific[type_key]}
+{brand_hint}
 
-CRITICAL: You are provided with TWO images. The FIRST is the full scene. The SECOND is a zoomed-in crop of the equipment. 
-If the equipment is far away in the first image, rely heavily on the SECOND (cropped) image to read the brand logo and model text.
-NEVER leave the "brand" field empty. If you cannot read the exact brand, make your absolute best guess based on the logo shape, colors, and equipment design.
+{type_block}
 
-IMPORTANT: detected must be true only if equipment is visible and identifiable.
-"""
+YOUR TASK: Return the SINGLE most accurate brand + model reference.
+
+STEP 1 — SCAN BOTH IMAGES FOR ANY VISIBLE TEXT OR MARKINGS:
+Look for ALL of the following in BOTH images:
+- Stickers or labels (adhesive, paper, metallic)
+- Rating plates or data plates (metal or plastic)
+- Engraved or embossed text (molded into the plastic or metal body)
+- Stamped markings (pressed into metal panels)
+- Printed text on the front panel, door, or casing
+- Any alphanumeric code, reference number, or model designation anywhere on the unit
+If you find ANY readable text in EITHER image → that is your answer, copy it exactly
+
+STEP 2 — SOURCE PRIORITY:
+A) Text readable in Image 1 or Image 2 (sticker, engraving, stamp, print) → copy EXACTLY as seen, letter by letter. Confidence 90%+.
+   State which image you read it from: "READ from Image 1" or "READ from Image 2"
+B) No text readable in either image → use visual cues + brand training knowledge to identify the most likely real model. Confidence 70-89%.
+C) Cannot determine → return capacity/description only (e.g. "380L No-Frost" or "9000BTU Inverter"). Confidence 50-69%.
+
+ABSOLUTE RULES:
+- If you READ text from either image: do NOT change it, correct it, or replace it with training knowledge
+- If you DEDUCE from training: only suggest models you are certain exist in that brand's catalog
+- Return exactly ONE candidate — the most confident
+- Brand must never be empty
+- Reasoning must explicitly say "READ from Image 1/2: [text seen]" OR "DEDUCED from: [visual features]"
+
+OUTPUT: Valid JSON only, no markdown:
+{{
+  "brand": "string",
+  "equipment_category": "string",
+  "model_candidates": [
+    {{
+      "model": "string",
+      "confidence": number,
+      "reasoning": "READ from Image 1/2: [exact text seen] OR DEDUCED from: [features used]"
+    }}
+  ],
+  "visual_cues": ["specific things observed in Image 1 and/or Image 2"],
+  "detected": true
+}}"""
 
 
-def _run_pass2(client: Groq, full_frame_bytes: bytes, crop_bytes: bytes, equipment_type: str, preliminary_brand: str | None) -> dict:
+def _run_pass2(client: Groq, full_frame_bytes: bytes, crop_bytes: bytes, equipment_type: str, preliminary_brand: str | None, preliminary_model: str | None = None) -> dict:
     """Deep forensic identification using Groq Llama Vision."""
     b64_full = base64.b64encode(full_frame_bytes).decode('utf-8')
     b64_crop = base64.b64encode(crop_bytes).decode('utf-8')
-    prompt = _build_pass2_prompt(equipment_type, preliminary_brand)
+    prompt = _build_pass2_prompt(equipment_type, preliminary_brand, preliminary_model)
     prompt += """
 
 Respond ONLY with a valid JSON object matching exactly:
@@ -366,10 +392,9 @@ Respond ONLY with a valid JSON object matching exactly:
 
 def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, yolo_type_hint: str | None = None) -> dict:
     """
-    Single-pass optimized Groq identification:
-      SKIP Pass 1 (redundant - we have yolo_type_hint from Roboflow)
-      Pass 2: Equipment-specific forensic prompt with both images
-    Returns a merged result dict. ~50% faster!
+    Two-pass Groq identification:
+      Pass 1: Fast equipment type confirmation + brand visibility check
+      Pass 2: Equipment-specific forensic identification (brand + model)
     """
     client = _get_groq_client()
 
@@ -378,23 +403,30 @@ def identify_with_groq(annotated_frame: np.ndarray, enhanced_crop: np.ndarray, y
 
     KNOWN_TYPES = {"airconditioner", "refrigerator", "microwave", "laptop", "monitor"}
 
-    # Skip Pass 1 entirely - use Roboflow's yolo_type_hint directly
-    eq_type = yolo_type_hint if (yolo_type_hint and yolo_type_hint in KNOWN_TYPES) else "unknown"
-    brand_hint = None  # No pre-detected brand - let Pass 2 figure it out
+    # Pass 1 — Fast type + brand visibility check
+    print(f"[Vision] Pass 1: Equipment type detection...")
+    pass1 = _run_pass1(client, full_bytes)
+    print(f"[Vision] Pass 1 result: type='{pass1['equipment_type']}' brand_visible={pass1['brand_visible']} brand='{pass1['preliminary_brand']}' conf={pass1['confidence_type']}%")
 
-    if eq_type != "unknown":
-        print(f"[Vision] ⚡ OPTIMIZED: Skipped Pass 1, using YOLO type='{eq_type}' directly")
+    # Resolve equipment type: trust YOLO hint if Pass 1 returns unknown
+    pass1_type = pass1.get("equipment_type", "unknown")
+    if yolo_type_hint and yolo_type_hint in KNOWN_TYPES:
+        eq_type = yolo_type_hint if pass1_type == "unknown" else pass1_type
     else:
-        print("[Vision] No YOLO hint - running forensic ID with type='unknown'")
+        eq_type = pass1_type if pass1_type in KNOWN_TYPES else "unknown"
 
-    print(f"[Vision] Pass 2: Forensic ID for type='{eq_type}'...")
-    pass2 = _run_pass2(client, full_bytes, crop_bytes, eq_type, brand_hint)
+    preliminary_brand = pass1.get("preliminary_brand") if pass1.get("brand_visible") else None
+    preliminary_model = pass1.get("preliminary_model")
 
-    # Final category: trust Pass 2 if it returns a valid known type, otherwise use eq_type
+    # Pass 2 — Forensic identification: brand + model (deep read with crop)
+    print(f"[Vision] Pass 2: Forensic ID for type='{eq_type}' brand='{preliminary_brand}' model_hint='{preliminary_model}'...")
+    pass2 = _run_pass2(client, full_bytes, crop_bytes, eq_type, preliminary_brand, preliminary_model)
+
+    # Final category: trust Pass 2 if valid, fallback to resolved type
     pass2_cat = pass2.get("equipment_category", "")
     if pass2_cat not in KNOWN_TYPES:
         pass2["equipment_category"] = eq_type
-    pass2["pass1_type_confidence"] = 100  # Since we're using Roboflow's detection
+    pass2["pass1_type_confidence"] = pass1.get("confidence_type", 0)
 
     return pass2
 

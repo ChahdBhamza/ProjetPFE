@@ -7,7 +7,7 @@ import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/network/api_service.dart';
 import '../../data/models/detection_result_model.dart';
 
-class EquipmentDetailPage extends StatelessWidget {
+class EquipmentDetailPage extends StatefulWidget {
   final EquipmentResult result;
   final VoidCallback? onSaveNext;
   final VoidCallback? onSkip;
@@ -24,18 +24,41 @@ class EquipmentDetailPage extends StatelessWidget {
   });
 
   @override
+  State<EquipmentDetailPage> createState() => _EquipmentDetailPageState();
+}
+
+class _EquipmentDetailPageState extends State<EquipmentDetailPage> {
+  late final TextEditingController _brandController;
+  late final TextEditingController _modelController;
+
+  EquipmentResult get result => widget.result;
+  VoidCallback? get onSaveNext => widget.onSaveNext;
+  VoidCallback? get onSkip => widget.onSkip;
+  int? get currentIndex => widget.currentIndex;
+  int? get totalItems => widget.totalItems;
+
+  @override
+  void initState() {
+    super.initState();
+    final rawBrand = result.identity.brand;
+    final rawModel = result.identity.topModel;
+    _brandController = TextEditingController(
+      text: (rawBrand.isEmpty || rawBrand.toLowerCase() == 'unknown') ? '' : rawBrand,
+    );
+    _modelController = TextEditingController(
+      text: (rawModel.isEmpty || rawModel.toLowerCase() == 'unknown model' || rawModel.toLowerCase() == 'unknown') ? '' : rawModel,
+    );
+  }
+
+  @override
+  void dispose() {
+    _brandController.dispose();
+    _modelController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final String rawBrand = result.identity.brand;
-    final String brand = (rawBrand.isEmpty || rawBrand.toLowerCase() == 'unknown')
-        ? 'UNIDENTIFIED'
-        : rawBrand.toUpperCase();
-
-    final String rawModel = result.identity.topModel;
-    final String model =
-        (rawModel.isEmpty || rawModel.toLowerCase() == 'unknown model' || rawModel.toLowerCase() == 'unknown')
-            ? '—'
-            : rawModel;
-
     final String rawCategory = result.identity.equipmentCategory;
     final String categoryLabel = _cleanCategoryLabel(rawCategory);
     final IconData categoryIcon = _getCategoryIcon(categoryLabel.toUpperCase());
@@ -140,23 +163,23 @@ class EquipmentDetailPage extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 14),
-                            Text(
-                              brand,
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w700,
-                                height: 1.1,
-                              ),
+                            // Editable brand field
+                            _EditableIdentityField(
+                              controller: _brandController,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              hint: 'Brand',
+                              uppercase: true,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              model,
-                              style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white54,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                              ),
+                            const SizedBox(height: 6),
+                            // Editable model/reference field
+                            _EditableIdentityField(
+                              controller: _modelController,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white54,
+                              hint: 'Model / Reference',
                             ),
                           ],
                         ),
@@ -389,11 +412,15 @@ class EquipmentDetailPage extends StatelessWidget {
 
   Future<bool> _performSave(BuildContext context) async {
     final apiService = ApiService();
-    return await apiService.saveEquipmentToInventory(result);
+    return await apiService.saveEquipmentToInventory(
+      result,
+      brandOverride: _brandController.text.trim().isEmpty ? null : _brandController.text.trim(),
+      modelOverride: _modelController.text.trim().isEmpty ? null : _modelController.text.trim(),
+    );
   }
 
   Future<void> _handleSave(BuildContext context, {bool moveToNext = false}) async {
-    final brand = result.identity.brand.trim().toLowerCase();
+    final brand = _brandController.text.trim().toLowerCase();
     final isUnknownBrand = brand.isEmpty || brand == 'unknown';
 
     // Warn before saving an item whose brand the AI could not identify
@@ -444,7 +471,13 @@ class EquipmentDetailPage extends StatelessWidget {
         Navigator.pop(context);
         onSaveNext!();
       } else {
-        Navigator.pushNamedAndRemoveUntil(context, '/save-success', (_) => false);
+        // Navigate straight to inventory tab so user sees the saved item
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/app',
+          (_) => false,
+          arguments: {'initialTab': 1},
+        );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -545,6 +578,67 @@ class EquipmentDetailPage extends StatelessWidget {
 // ══════════════════════════════════════════════════════════════════════════════
 // WIDGETS
 // ══════════════════════════════════════════════════════════════════════════════
+
+class _EditableIdentityField extends StatelessWidget {
+  final TextEditingController controller;
+  final double fontSize;
+  final FontWeight fontWeight;
+  final Color color;
+  final String hint;
+  final bool uppercase;
+
+  const _EditableIdentityField({
+    required this.controller,
+    required this.fontSize,
+    required this.fontWeight,
+    required this.color,
+    required this.hint,
+    this.uppercase = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            textCapitalization: uppercase ? TextCapitalization.characters : TextCapitalization.words,
+            style: GoogleFonts.plusJakartaSans(
+              color: color,
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              height: 1.2,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.plusJakartaSans(
+                color: color.withOpacity(0.3),
+                fontSize: fontSize,
+                fontWeight: fontWeight,
+              ),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 4),
+              border: InputBorder.none,
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.08)),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: CybersightTheme.accent.withOpacity(0.6)),
+              ),
+              suffixIcon: Icon(
+                Icons.edit_rounded,
+                size: 14,
+                color: CybersightTheme.accent.withOpacity(0.4),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _FallbackHero extends StatelessWidget {
   final IconData icon;

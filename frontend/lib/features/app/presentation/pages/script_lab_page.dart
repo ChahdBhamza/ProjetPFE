@@ -151,86 +151,15 @@ class _ScanLabPageState extends State<ScanLabPage> {
 
   Future<void> _showVerificationDialog(List<Map<String, dynamic>> detectedFrames) async {
     if (!mounted) return;
-
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        child: GlassContainer(
-          borderRadius: 24,
-          opacity: 0.15,
-          blur: 30,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '✓ Detection Complete',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...detectedFrames.asMap().entries.map<Widget>((entry) {
-                final frame = entry.value;
-                final brand = frame['equipment_result']?['identity']?['brand'] ?? 'Unknown';
-                final model = frame['equipment_result']?['identity']?['top_model'] ?? 'Unknown';
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: CybersightTheme.accent.withValues(alpha: 0.3)),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                brand,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                model,
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: GlowingButton(
-                      label: 'Verify & Get Specs',
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _fetchSpecsForFrames(detectedFrames);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (ctx) => FractionallySizedBox(
+        heightFactor: 0.88,
+        child: _VerificationCarouselSheet(detections: detectedFrames),
       ),
     );
   }
@@ -1345,6 +1274,11 @@ class _VerificationCarouselSheetState
               itemCount: widget.detections.length,
               itemBuilder: (context, index) {
                 final detection = widget.detections[index];
+                final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
+                final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
+                final candidates = fd['model_candidates'] as List? ?? [];
+                final top = candidates.isNotEmpty ? (candidates.first as Map).cast<String, dynamic>() : <String, dynamic>{};
+                final conf = (top['confidence'] as num?)?.toInt() ?? 0;
                 return _VerificationCard(
                   detection: detection,
                   icon: _getEquipmentIcon(
@@ -1356,6 +1290,10 @@ class _VerificationCarouselSheetState
                   onChanged: (brand, model, type) {
                     _cardValues[index] = {'brand': brand, 'model': model, 'type': type};
                   },
+                  onVerify: (brand, model, type) => _fetchSpecs(
+                    brand, model, type, frameImage,
+                    confidence: conf,
+                  ),
                 );
               },
             ),
@@ -1380,17 +1318,19 @@ class _VerificationCarouselSheetState
                 ),
               ),
             ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: GlowingButton(
-              label: widget.detections.length > 1
-                  ? 'Verify & Search All (${widget.detections.length})'
-                  : 'Verify & Search',
-              isFullWidth: true,
-              onTap: _verifyAll,
+          const SizedBox(height: 8),
+          if (widget.detections.length > 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Swipe to view all ${widget.detections.length} detections — tap the button on each card',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white24,
+                  fontSize: 11,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1403,11 +1343,13 @@ class _VerificationCard extends StatefulWidget {
   final Map<String, dynamic> detection;
   final IconData icon;
   final Function(String brand, String model, String type) onChanged;
+  final Future<void> Function(String brand, String model, String type)? onVerify;
 
   const _VerificationCard(
       {required this.detection,
       required this.icon,
-      required this.onChanged});
+      required this.onChanged,
+      this.onVerify});
 
   @override
   State<_VerificationCard> createState() => _VerificationCardState();
@@ -1417,6 +1359,7 @@ class _VerificationCardState extends State<_VerificationCard> {
   late TextEditingController _brandController;
   late TextEditingController _modelController;
   late TextEditingController _typeController;
+  bool _isVerifying = false;
 
 
 
@@ -1548,25 +1491,25 @@ class _VerificationCardState extends State<_VerificationCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'AI Extracted Data',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  // ── Equipment type — read-only chip ───────────────────────
+                  Row(
+                    children: [
+                      Icon(widget.icon, color: CybersightTheme.accent, size: 14),
+                      const SizedBox(width: 8),
+                      Text(
+                        _typeController.text.trim().isEmpty
+                            ? 'EQUIPMENT'
+                            : _typeController.text.trim().toUpperCase(),
+                        style: GoogleFonts.plusJakartaSans(
+                          color: CybersightTheme.accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-                  _buildInputField(
-                    'EQUIPMENT TYPE',
-                    _typeController,
-                    hint: 'e.g. Laptop, Microwave, Refrigerator…',
-                    onChanged: (_) {
-                      setState(() {});
-                      widget.onChanged(_brandController.text.trim(), _modelController.text.trim(), _typeController.text.trim());
-                    },
-                  ),
-                  const SizedBox(height: 14),
                   _buildInputField(
                     'BRAND',
                     _brandController,
@@ -1579,6 +1522,81 @@ class _VerificationCardState extends State<_VerificationCard> {
                     _modelController,
                     hint: 'e.g. Galaxy Book Pro 360…',
                     onChanged: (_) => widget.onChanged(_brandController.text.trim(), _modelController.text.trim(), _typeController.text.trim()),
+                  ),
+                  const SizedBox(height: 20),
+                  // ── Verify & Search for Specs button ──────────────────────
+                  SizedBox(
+                    width: double.infinity,
+                    child: GestureDetector(
+                      onTap: _isVerifying || widget.onVerify == null
+                          ? null
+                          : () async {
+                              setState(() => _isVerifying = true);
+                              await widget.onVerify!(
+                                _brandController.text.trim(),
+                                _modelController.text.trim(),
+                                _typeController.text.trim(),
+                              );
+                              if (mounted) setState(() => _isVerifying = false);
+                            },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: 52,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          color: _isVerifying
+                              ? CybersightTheme.accent.withValues(alpha: 0.15)
+                              : CybersightTheme.accent.withValues(alpha: 0.12),
+                          border: Border.all(
+                            color: CybersightTheme.accent.withValues(
+                                alpha: _isVerifying ? 0.3 : 0.5),
+                          ),
+                        ),
+                        child: Center(
+                          child: _isVerifying
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: CybersightTheme.accent,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'SEARCHING SPECS...',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: CybersightTheme.accent,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.search_rounded,
+                                        color: CybersightTheme.accent, size: 18),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'VERIFY & SEARCH FOR SPECS',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: CybersightTheme.accent,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

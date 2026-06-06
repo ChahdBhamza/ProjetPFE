@@ -45,13 +45,22 @@ FRAME_GAP_BY_CAT = {
 }
 DEFAULT_FRAME_GAP = 4
 
-# Per-category minimum confidence to qualify as a hero (false-positive gate).
+# Per-category minimum Roboflow confidence to qualify as a hero.
 HERO_MIN_CONFIDENCE = {
     "refrigerator":    0.35,
-    "air_conditioner": 0.40,
+    "air_conditioner": 0.55,
     "microwave":       0.30,
-    "computer":        0.28,
+    "computer":        0.55,
     "tv_monitor":      0.28,
+}
+
+# Per-category minimum composite quality score.
+HERO_MIN_QUALITY = {
+    "air_conditioner": 0.42,
+    "computer":        0.42,
+    "refrigerator":    0.18,
+    "microwave":       0.18,
+    "tv_monitor":      0.18,
 }
 
 def is_allowed(cls_name):
@@ -394,8 +403,9 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     ):
         cat = candidate.get("_category") or normalize_equipment_class(candidate["class"])
 
-        if candidate["_quality"] < 0.18:
-            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f})")
+        min_quality = HERO_MIN_QUALITY.get(cat, 0.18)
+        if candidate["_quality"] < min_quality:
+            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f} < {min_quality})")
             continue
 
         min_conf = HERO_MIN_CONFIDENCE.get(cat, 0.25)

@@ -94,7 +94,9 @@ class CybersightApp extends StatelessWidget {
             final email = (args?['email'] as String?) ?? 'you@example.com';
             return _buildAnimatedRoute(settings, ResetPasswordPage(email: email));
           case '/app':
-            return _buildAnimatedRoute(settings, const AppShell());
+            final appArgs = settings.arguments as Map<String, dynamic>?;
+            final initialTab = (appArgs?['initialTab'] as int?) ?? 0;
+            return _buildAnimatedRoute(settings, AppShell(initialIndex: initialTab));
           case '/save-success':
             return _buildAnimatedRoute(settings, const SaveSuccessPage());
           case '/detection-success':

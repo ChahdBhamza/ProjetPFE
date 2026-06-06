@@ -247,6 +247,8 @@ async def video_script_process_endpoint(
     current_email: str = Depends(verify_token)
 ):
     import subprocess
+    import imageio_ffmpeg
+    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
     from fastapi.concurrency import run_in_threadpool
     from app.scripts.smart_extract import smart_extract
     
@@ -272,11 +274,29 @@ async def video_script_process_endpoint(
         buffer.write(contents)
 
     def _run_ffmpeg():
-        return subprocess.run(["ffmpeg", "-y", "-i", video_path, "-vf", "fps=1", os.path.join(raw_dir, "frame_%04d.jpg")], check=True, capture_output=True, text=True)
+        fixed_path = video_path + "_fixed.mp4"
+        # Pass 1: remux with corrected color space metadata (no re-encode, fast)
+        subprocess.run([ffmpeg_exe, "-y", "-i", video_path,
+                        "-c", "copy",
+                        "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+                        fixed_path], check=True, capture_output=True, text=True)
+        # Pass 2: extract 1 frame/sec from the fixed video
+        result = subprocess.run([ffmpeg_exe, "-y", "-i", fixed_path,
+                                 "-r", "1", "-pix_fmt", "yuvj420p",
+                                 os.path.join(raw_dir, "frame_%04d.jpg")],
+                                check=True, capture_output=True, text=True)
+        try:
+            os.remove(fixed_path)
+        except Exception:
+            pass
+        return result
 
     try:
         await run_in_threadpool(_run_ffmpeg)
     except subprocess.CalledProcessError as e:
+        print(f"[FFMPEG ERROR] returncode={e.returncode}")
+        print(f"[FFMPEG STDERR] {e.stderr}")
+        print(f"[FFMPEG STDOUT] {e.stdout}")
         return {"success": False, "error": f"FFmpeg failed: {e.stderr}"}
 
     # video.mp4 is the largest file and is not needed after frame extraction
