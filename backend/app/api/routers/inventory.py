@@ -5,6 +5,8 @@ from app.api.dependencies import verify_token
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
+ADMIN_EMAIL = "chahdbenhamza4@gmail.com"
+
 
 def _text_value(*values) -> str:
     for value in values:
@@ -47,6 +49,8 @@ def _is_unknown_unknown_item(item: dict) -> bool:
 
     return _is_unknown_value(brand) and _is_unknown_value(model)
 
+# POST /inventory/save
+# Saves a detected equipment item to the logged-in user's inventory in MongoDB.
 @router.post("/save", response_model=BaseResponse)
 async def save_to_inventory(data: dict = Body(...), current_email: str = Depends(verify_token)):
     """Save an item to the authenticated user's inventory"""
@@ -56,12 +60,13 @@ async def save_to_inventory(data: dict = Body(...), current_email: str = Depends
     else:
         raise HTTPException(status_code=500, detail="Failed to save item")
 
+# GET /inventory/list
+# Returns all saved items for the logged-in user. Admins get junk-filtered results (unknown brand+model removed).
 @router.get("/list", response_model=InventoryListResponse)
 async def get_inventory(current_email: str = Depends(verify_token)):
     """Fetch the authenticated user's inventory"""
     inventory = mongo_db.get_user_inventory(current_email)
-    user = mongo_db.find_user_by_email(current_email)
-    if user and user.get("is_admin", False):
+    if current_email.lower() == ADMIN_EMAIL:
         inventory = [item for item in inventory if not _is_unknown_unknown_item(item)]
 
     for item in inventory:
@@ -70,12 +75,23 @@ async def get_inventory(current_email: str = Depends(verify_token)):
             
     return {"success": True, "inventory": inventory}
 
+# DELETE /inventory/item/{item_id}
+# Permanently removes a single inventory item belonging to the authenticated user.
+@router.delete("/item/{item_id}", response_model=BaseResponse)
+async def delete_inventory_item(item_id: str, current_email: str = Depends(verify_token)):
+    """Delete a single inventory item by its ID"""
+    success = mongo_db.delete_inventory_item(current_email, item_id)
+    if success:
+        return {"success": True, "message": "Item removed from inventory"}
+    raise HTTPException(status_code=404, detail="Item not found or access denied")
+
+# POST /inventory/filter
+# Same as /list but accepts filter criteria in the body (category, brand, price range, BTU).
 @router.post("/filter", response_model=InventoryListResponse)
 async def filter_inventory(filters: dict = Body(...), current_email: str = Depends(verify_token)):
     """Filter the authenticated user's inventory using dynamic criteria"""
     inventory = mongo_db.filter_user_inventory(current_email, filters)
-    user = mongo_db.find_user_by_email(current_email)
-    if user and user.get("is_admin", False):
+    if current_email.lower() == ADMIN_EMAIL:
         inventory = [item for item in inventory if not _is_unknown_unknown_item(item)]
 
     for item in inventory:
@@ -89,6 +105,8 @@ async def filter_inventory(filters: dict = Body(...), current_email: str = Depen
             
     return {"success": True, "inventory": inventory}
 
+# GET /inventory/history
+# Returns the user's scan sessions sorted newest-first (start time, end time, status).
 @router.get("/history")
 async def get_history(current_email: str = Depends(verify_token)):
     """Fetch the authenticated user's scan history and raw detections"""
@@ -107,6 +125,8 @@ async def get_history(current_email: str = Depends(verify_token)):
             
     return {"success": True, "scan_sessions": scan_sessions}
 
+# GET /inventory/my-stats
+# Returns 3 numbers for the profile page: total scans run, total items detected, total items saved.
 @router.get("/my-stats")
 async def get_my_stats(current_email: str = Depends(verify_token)):
     """Return per-user stats for the profile page"""
@@ -131,16 +151,18 @@ async def get_my_stats(current_email: str = Depends(verify_token)):
     return {"success": True, "stats": {"scans": scans, "detected": detected, "saved": saved}}
 
 
+# GET /inventory/admin/stats
+# Admin-only. Returns the full dashboard payload: totals, category breakdown, top brands,
+# per-operator performance, 7-day activity chart, and quality alerts (low confidence / unknown brand).
 @router.get("/admin/stats")
 async def get_admin_stats(current_email: str = Depends(verify_token)):
     """Fetch global KPIs and metrics for the Admin Dashboard"""
     import datetime
     
     # 1. Authorize Admin
-    user = mongo_db.find_user_by_email(current_email)
-    if not user or not user.get("is_admin", False):
+    if current_email.lower() != ADMIN_EMAIL:
         raise HTTPException(
-            status_code=403, 
+            status_code=403,
             detail="Neural clearance denied. Authorized Operators only."
         )
 

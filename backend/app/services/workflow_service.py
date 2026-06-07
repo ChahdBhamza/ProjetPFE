@@ -129,17 +129,47 @@ class WorkflowService:
             elif isinstance(preds_data, list):
                 predictions = preds_data
 
-            # Air conditioners score lower from Roboflow due to wall-mount variability
+            def _pred_category(cls: str) -> str:
+                """Map a Roboflow class name to the canonical category used by yolo_hint."""
+                c = cls.lower()
+                if any(k in c for k in ("fridge", "refrigerator")):
+                    return "refrigerator"
+                if "microwave" in c:
+                    return "microwave"
+                if any(k in c for k in ("air_conditioner", "airconditioner", "ac")):
+                    return "airconditioner"
+                if any(k in c for k in ("laptop", "computer")):
+                    return "laptop"
+                if any(k in c for k in ("tv", "monitor")):
+                    return "monitor"
+                return c
+
+            # Per-category confidence thresholds — fridges score lower on partial/angle views
+            def _min_conf(cls: str) -> float:
+                c = cls.lower()
+                if any(k in c for k in ("fridge", "refrigerator")):
+                    return 0.30
+                if any(k in c for k in ("air_conditioner", "airconditioner", "ac")):
+                    return 0.45
+                return 0.60
+
             predictions = [
                 p for p in predictions
-                if p.get("confidence", 0) >= (
-                    0.45 if p.get("class", "").lower() in ("air_conditioner", "airconditioner", "ac")
-                    else 0.60
-                )
+                if p.get("confidence", 0) >= _min_conf(p.get("class", ""))
             ]
 
-            # Keep only the single highest-confidence detection and redraw with one box
-            if len(predictions) > 1:
+            # When yolo_hint is known (from hero filename), prefer the prediction that
+            # matches that category over a higher-confidence prediction of the wrong type.
+            # Example: frame_0028 has both fridge + microwave; hero is tagged refrigerator,
+            # so we must use the fridge bbox, NOT the higher-confidence microwave bbox.
+            if yolo_hint and len(predictions) > 1:
+                matching = [p for p in predictions if _pred_category(p.get("class", "")) == yolo_hint]
+                if matching:
+                    predictions = [max(matching, key=lambda p: p.get("confidence", 0))]
+                    print(f"🎯 Category-matched prediction: kept '{predictions[0].get('class')}' to match yolo_hint='{yolo_hint}'")
+                else:
+                    predictions = [max(predictions, key=lambda p: p.get("confidence", 0))]
+            elif len(predictions) > 1:
                 predictions = [max(predictions, key=lambda p: p.get("confidence", 0))]
 
             if predictions:
@@ -148,16 +178,34 @@ class WorkflowService:
             print(f"✅ AI Result: Found {len(predictions)} items")
 
             # 2. Forensic Step: Brand + Model identification (Pass 1 SKIPPED - see frame_detector.py)
+            # Always run if yolo_hint is known (hero frame already confirmed the equipment type).
             forensic_data = {}
-            if len(predictions) > 0:
+            if len(predictions) > 0 or yolo_hint:
                 print("🧠 [OPTIMIZED] Single-pass Groq identification (Pass 1 skipped)...")
 
                 try:
                     from app.services.frame_detector import process_frame
                     if yolo_hint:
                         print(f"🎯 Using equipment type hint='{yolo_hint}' from Roboflow")
-                    # Run OPTIMIZED forensic identification (Pass 1 already skipped in frame_detector)
-                    sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"), yolo_type_hint=yolo_hint)
+
+                    # Convert Roboflow center-x/y/w/h bbox → x/y/w/h for process_frame.
+                    # Only use the bbox if it matches the expected category (yolo_hint).
+                    # This prevents passing a microwave bbox to the fridge identification
+                    # when both appear in the same frame.
+                    rf_bbox_override = None
+                    if predictions:
+                        pred = predictions[0]
+                        pred_cat = _pred_category(pred.get("class", ""))
+                        if not yolo_hint or pred_cat == yolo_hint:
+                            cx, cy = pred.get("x", 0), pred.get("y", 0)
+                            bw, bh = pred.get("width", 0), pred.get("height", 0)
+                            if bw > 0 and bh > 0:
+                                rf_bbox_override = (int(cx - bw / 2), int(cy - bh / 2), int(bw), int(bh))
+                                print(f"🔲 Passing Roboflow bbox to process_frame: {rf_bbox_override}")
+                        else:
+                            print(f"⚠️ Roboflow pred '{pred.get('class')}' doesn't match yolo_hint='{yolo_hint}' — using detect_dominant_object fallback")
+
+                    sfm_result = process_frame(image_path, os.getenv("OPENROUTER_API_KEY"), yolo_type_hint=yolo_hint, bbox_override=rf_bbox_override)
                     llm_data = sfm_result.get("result", {})
 
                     forensic_data = llm_data

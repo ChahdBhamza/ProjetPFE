@@ -45,22 +45,13 @@ FRAME_GAP_BY_CAT = {
 }
 DEFAULT_FRAME_GAP = 4
 
-# Per-category minimum Roboflow confidence to qualify as a hero.
+# Per-category minimum confidence to qualify as a hero (false-positive gate).
 HERO_MIN_CONFIDENCE = {
-    "refrigerator":    0.35,
-    "air_conditioner": 0.55,
+    "refrigerator":    0.30,
+    "air_conditioner": 0.40,
     "microwave":       0.30,
-    "computer":        0.55,
+    "computer":        0.28,
     "tv_monitor":      0.28,
-}
-
-# Per-category minimum composite quality score.
-HERO_MIN_QUALITY = {
-    "air_conditioner": 0.42,
-    "computer":        0.42,
-    "refrigerator":    0.18,
-    "microwave":       0.18,
-    "tv_monitor":      0.18,
 }
 
 def is_allowed(cls_name):
@@ -151,16 +142,64 @@ def object_sharpness(full_bgr, bbox, small_w, small_h):
         return 0.0
 
 
+def text_region_score(full_bgr, bbox, small_w, small_h):
+    """Detect presence of label/sticker text rows in the equipment crop.
+    Uses adaptive threshold + horizontal dilation to find word-shaped blobs.
+    Returns 0-1: higher means a model plate or rating sticker is visible.
+    """
+    try:
+        fh, fw = full_bgr.shape[:2]
+        x1, y1, x2, y2 = bbox
+        sx = fw / max(small_w, 1)
+        sy = fh / max(small_h, 1)
+        fx1 = int(max(0, x1 * sx))
+        fy1 = int(max(0, y1 * sy))
+        fx2 = int(min(fw, x2 * sx))
+        fy2 = int(min(fh, y2 * sy))
+        if fx2 - fx1 < 20 or fy2 - fy1 < 20:
+            return 0.0
+        crop = full_bgr[fy1:fy2, fx1:fx2]
+        gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV, 15, 6
+        )
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18, 3))
+        dilated = cv2.dilate(thresh, kernel, iterations=1)
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        crop_area = float((fx2 - fx1) * (fy2 - fy1))
+        label_area = 0
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            if h < 4 or w < 20:
+                continue
+            aspect = w / max(h, 1)
+            if 2.5 <= aspect <= 30.0 and w * h > 150:
+                label_area += w * h
+        return min(label_area / max(crop_area * 0.12, 1.0), 1.0)
+    except Exception:
+        return 0.0
+
+
 def composite_quality(hit, img_w, img_h, frame_sharp, full_bgr, small_w, small_h):
-    """Prefer sharp, confident, reasonably large subjects (reduces blurry tiny boxes)."""
+    """Prefer sharp, confident frames — with a text-label bonus for fridges.
+    text_region_score gives a boost to frames where a model sticker is visible,
+    so the LLM reads the real reference instead of guessing from appearance.
+    """
     conf = float(hit.get("confidence", 0))
     center = calculate_center_score(hit, img_w, img_h)
     area = bbox_area_frac(hit, img_w, img_h)
     obj_sharp = object_sharpness(full_bgr, hit["bbox"], small_w, small_h)
-    # Normalize typical ranges so scores stay in ~0..1
     fs = min(frame_sharp / 400.0, 1.0)
     os_ = min(obj_sharp / 300.0, 1.0)
-    ar = min(area / 0.12, 1.0)  # large appliance ~10–40% of frame
+    ar = min(area / 0.12, 1.0)
+
+    cat = hit.get("_category", "")
+    if cat == "refrigerator":
+        # text_region_score is the dominant factor for fridges:
+        # the frame showing the model sticker must always beat a sharper front-view shot.
+        ts = text_region_score(full_bgr, hit["bbox"], small_w, small_h)
+        return 0.18 * os_ + 0.10 * fs + 0.12 * conf + 0.06 * center + 0.04 * ar + 0.50 * ts
     return 0.38 * os_ + 0.22 * fs + 0.22 * conf + 0.10 * center + 0.08 * ar
 
 def smart_extract(video_path, output_dir, interval=10, window_size=5, required_hits=3, strict=True, max_frames=MAX_FRAMES_TO_PROCESS, yolo=None, roboflow=None):
@@ -248,7 +287,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
             if _is_ac:
                 _min_conf = 0.45
             elif _is_fridge:
-                _min_conf = 0.72
+                _min_conf = 0.30
             else:
                 _min_conf = 0.60
             rf_cat = normalize_equipment_class(hit["class"])
@@ -355,7 +394,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                 hit["_frame"] = base["frame"]
                 hit["_frame_id"] = frame_id
                 hit["_category"] = normalize_equipment_class(hit["class"])
-                
+
                 # [STRICT SAFEGUARD] Stop Roboflow from mislabelling objects based on YOLO ground truth.
                 # Only override if YOLO's conflicting box *overlaps* the AC box — avoids silently
                 # discarding a real AC when a different object (e.g. laptop) also exists in the frame.
@@ -373,7 +412,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
                             hit["class"] = "laptop" if yolo_cat == "computer" else ("tv" if yolo_cat == "tv_monitor" else yolo_cat)
                             hit["_force_local_draw"] = True
                             break
-                
+
                 # If safeguard triggered, discard the bad Roboflow annotated image
                 if hit.get("_force_local_draw"):
                     hit["_rf_annotated"] = None
@@ -384,13 +423,6 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     print(f"[Pass 2] Done in {time.time() - t2:.1f}s | total pool={len(global_pool)}")
 
     # ── Hero Selection ────────────────────────────────────────────────────────
-    # Duplicates across categories are already suppressed by YOLO's per-frame
-    # IoU dedup (yolov5_service.py). Here we simply pick the best hero per
-    # category, then do a final IoU cross-check to drop any stragglers that
-    # slipped through on the same frame.
-
-    # Best heroes per raw category — up to MAX_HEROES_PER_CAT per type,
-    # each separated by at least MIN_FRAME_GAP frames (catches two PCs, etc.)
     def _hero_score(c):
         """Combined ranking: quality (visual clarity) + confidence (model certainty).
         Prevents a sharp false positive from beating a confident true detection."""
@@ -403,9 +435,8 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
     ):
         cat = candidate.get("_category") or normalize_equipment_class(candidate["class"])
 
-        min_quality = HERO_MIN_QUALITY.get(cat, 0.18)
-        if candidate["_quality"] < min_quality:
-            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f} < {min_quality})")
+        if candidate["_quality"] < 0.18:
+            print(f"⚠️ SKIP: '{cat}' candidate on frame {candidate['_frame_id']} rejected due to low quality ({candidate['_quality']:.2f})")
             continue
 
         min_conf = HERO_MIN_CONFIDENCE.get(cat, 0.25)
@@ -422,9 +453,7 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
             existing.append(candidate)
             by_cat[cat] = existing
 
-    # Cross-frame screen dedup: if both 'computer' and 'tv_monitor' survived
-    # (same physical laptop detected across different frames), drop tv_monitor.
-    # 'computer'/'laptop' is the more specific COCO class for a laptop screen.
+    # Cross-frame screen dedup
     if "computer" in by_cat and "tv_monitor" in by_cat:
         print("🚫 CROSS-FRAME DEDUP: Both 'computer' and 'tv_monitor' detected — dropping 'tv_monitor' (same physical screen device)")
         del by_cat["tv_monitor"]
@@ -447,26 +476,60 @@ def smart_extract(video_path, output_dir, interval=10, window_size=5, required_h
         if not dominated:
             final_heros.append(hero)
 
+    # ── Refrigerator label refinement ─────────────────────────────────────────
+    # The Roboflow hero is the sharpest clear-front-view frame, but the frame
+    # showing the model plate (e.g. "MP0500") is often a neighbor frame.
+    # Scan ±5 raw frames around each fridge hero and swap to the one with the
+    # highest text_region_score — no re-probing Roboflow needed.
+    FRIDGE_REFINE_WINDOW = 5
+    for hero in final_heros:
+        if hero.get("_category") != "refrigerator":
+            continue
+        hero_fid = hero["_frame_id"]
+        h_fw = hero["_frame"].shape[1]
+        h_fh = hero["_frame"].shape[0]
+        hero_bbox = hero.get("bbox", [0, 0, h_fw, h_fh])
+        hero_ts = text_region_score(hero["_frame"], hero_bbox, h_fw, h_fh)
+        print(f"[Fridge Refine] Hero f{hero_fid:04d} text_score={hero_ts:.3f} — scanning ±{FRIDGE_REFINE_WINDOW} neighbors...")
+
+        best_ts = hero_ts
+        best_fid = hero_fid
+        best_frame = hero["_frame"]
+
+        for delta in range(-FRIDGE_REFINE_WINDOW, FRIDGE_REFINE_WINDOW + 1):
+            if delta == 0:
+                continue
+            adj_fid = hero_fid + delta
+            if adj_fid not in id_to_data:
+                continue
+            adj_frame = id_to_data[adj_fid]["frame"]
+            a_fw = adj_frame.shape[1]
+            a_fh = adj_frame.shape[0]
+            adj_ts = text_region_score(adj_frame, hero_bbox, a_fw, a_fh)
+            print(f"[Fridge Refine]   f{adj_fid:04d} text_score={adj_ts:.3f}")
+            if adj_ts > best_ts + 0.08:
+                best_ts = adj_ts
+                best_fid = adj_fid
+                best_frame = adj_frame
+
+        if best_fid != hero_fid:
+            print(f"🔄 FRIDGE REFINEMENT: f{hero_fid:04d} → f{best_fid:04d} (text_score {hero_ts:.3f} → {best_ts:.3f})")
+            hero["_frame"] = best_frame
+            hero["_frame_id"] = best_fid
+
     print(f"Saving {len(final_heros)} heroes with clean local annotations for UI consistency...")
     t3 = time.time()
     for idx, hero in enumerate(final_heros):
         fid = hero["_frame_id"]
         cat = hero.get("_category") or normalize_equipment_class(hero["class"])
 
-        # Always draw locally to ensure exactly ONE bounding box with a clean, consistent style.
-        # This completely avoids double/overlapping bounding boxes of different colors from the cloud.
         pil_hero = Image.fromarray(cv2.cvtColor(hero["_frame"], cv2.COLOR_BGR2RGB))
-        
-        # Format a premium capitalized label (e.g., "Air Conditioner", "Microwave")
         clean_label = cat.replace('_', ' ').title()
-        
-        # Create a draw-copy so we don't modify the source candidate data
         hero_to_draw = hero.copy()
         hero_to_draw['class'] = clean_label
 
         out_img = yolo.draw_detections(pil_hero, [hero_to_draw])
 
-        # Encode the frame ID inside the filename (e.g., hero_1_microwave_f0042.png)
         filename = f"hero_{idx + 1}_{cat}_f{fid:04d}.png"
         cv2.imwrite(os.path.join(final_dir, filename), cv2.cvtColor(np.array(out_img), cv2.COLOR_RGB2BGR))
         print(f"SAVED: {filename} (Quality: {hero['_quality']:.2f}, label: {clean_label})")

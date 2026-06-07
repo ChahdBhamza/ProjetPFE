@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../../../../core/design_system/cybersight_theme.dart';
 import '../providers/auth_provider.dart';
@@ -17,7 +18,6 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   late AnimationController _bgController;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  String? _validationError;
 
   @override
   void initState() {
@@ -36,36 +36,59 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Row(children: [
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFFF6B6B), size: 17),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(msg,
+                style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+          ),
+        ]),
+        backgroundColor: const Color(0xFF151B2A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0x33FF6B6B)),
+        ),
+        duration: const Duration(seconds: 4),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ));
+  }
+
   Future<void> _handleSignIn() async {
-    setState(() => _validationError = null);
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      setState(() => _validationError = 'Identification required. Please fill all fields.');
+      _showError('Please fill in all fields.');
       return;
     }
-
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
-      setState(() => _validationError = 'Please enter a valid email address.');
+      _showError('Please enter a valid email address.');
       return;
     }
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.signIn(
-      email,
-      password,
-    );
+    final success = await authProvider.signIn(email, password);
 
-    if (success && mounted) {
+    if (!mounted) return;
+    if (success) {
       Navigator.pushNamedAndRemoveUntil(context, '/auth-success', (_) => false);
+    } else {
+      _showError(authProvider.errorMessage ?? 'Sign in failed. Please try again.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final activeError = _validationError ?? authProvider.errorMessage;
 
     return CybersightAtmosphere(
       child: SafeArea(
@@ -160,38 +183,6 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                                   ),
                                 ),
                               ),
-
-                              // Consolidated Error Display (Validation or Backend)
-                              if (activeError != null) ...[
-                                const SizedBox(height: 14),
-                                GlassContainer(
-                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                                  borderRadius: 14,
-                                  opacity: 0.08,
-                                  blur: 10,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        _validationError != null ? Icons.info_outline_rounded : Icons.error_outline_rounded,
-                                        color: CybersightTheme.accent2,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          activeError,
-                                          style: const TextStyle(
-                                            color: CybersightTheme.accent2,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            letterSpacing: 0.1,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
 
                               const SizedBox(height: 8),
                               GlowingButton(

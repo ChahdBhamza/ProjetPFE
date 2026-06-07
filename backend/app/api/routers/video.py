@@ -191,7 +191,7 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
 
     # Pacing is handled by the shared Groq token-bucket limiter (rate_limiter.py).
     # Process frames in parallel (up to 4 concurrent) to max throughput while respecting rate cap.
-    semaphore = asyncio.Semaphore(4)  # Limit concurrent Groq calls to 4
+    semaphore = asyncio.Semaphore(6)  # Limit concurrent Groq calls to 6
     
     async def process_with_semaphore(f):
         async with semaphore:
@@ -280,7 +280,7 @@ async def video_script_process_endpoint(
                         "-c", "copy",
                         "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
                         fixed_path], check=True, capture_output=True, text=True)
-        # Pass 2: extract 1 frame/sec from the fixed video
+        # Pass 2: extract 1 frame/sec
         result = subprocess.run([ffmpeg_exe, "-y", "-i", fixed_path,
                                  "-r", "1", "-pix_fmt", "yuvj420p",
                                  os.path.join(raw_dir, "frame_%04d.jpg")],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import '../design_system/cybersight_theme.dart';
@@ -80,15 +81,15 @@ class GlassContainer extends StatelessWidget {
 
 class GlowingButton extends StatefulWidget {
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isFullWidth;
   final double textSize;
   final double darkOverlayOpacity;
-  
+
   const GlowingButton({
     super.key,
     required this.label,
-    required this.onTap,
+    this.onTap,
     this.isFullWidth = true,
     this.textSize = 14,
     this.darkOverlayOpacity = 0.0,
@@ -120,10 +121,15 @@ class _GlowingButtonState extends State<GlowingButton> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) => _controller.reverse(),
-      onTapCancel: () => _controller.reverse(),
-      onTap: widget.onTap,
+      onTapDown: widget.onTap != null ? (_) => _controller.forward() : null,
+      onTapUp: widget.onTap != null ? (_) => _controller.reverse() : null,
+      onTapCancel: widget.onTap != null ? () => _controller.reverse() : null,
+      onTap: widget.onTap != null
+          ? () {
+              HapticFeedback.lightImpact();
+              widget.onTap!();
+            }
+          : null,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {

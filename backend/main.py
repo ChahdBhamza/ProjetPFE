@@ -35,7 +35,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS Middleware to enable communication with Android/iOS ADB reverse USB link
+# Add CORS Middleware to enable communication with Android ADB reverse USB link
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # Allows all origins

@@ -25,3 +25,4 @@ backend/sessions/
 .DS_Store
 Thumbs.db
 client_secret*.json
+google-services.json

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:equipment_detection_app/core/design_system/cybersight_theme.dart';
+import 'package:equipment_detection_app/core/network/api_service.dart';
 import 'package:equipment_detection_app/core/widgets/hud_widgets.dart';
 import 'package:equipment_detection_app/features/auth/presentation/providers/auth_provider.dart';
 import 'script_lab_page.dart';
@@ -15,6 +16,26 @@ class EquipmentPage extends StatefulWidget {
 }
 
 class _EquipmentPageState extends State<EquipmentPage> with AutomaticKeepAliveClientMixin {
+  final ApiService _apiService = ApiService();
+  List<dynamic> _recentSessions = [];
+  bool _loadingSessions = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecentSessions();
+  }
+
+  Future<void> _fetchRecentSessions() async {
+    final sessions = await _apiService.fetchScanHistory();
+    if (mounted) {
+      setState(() {
+        _recentSessions = sessions.take(3).toList();
+        _loadingSessions = false;
+      });
+    }
+  }
+
   void _launchScanLab(BuildContext context) {
     Navigator.push(
       context,
@@ -175,6 +196,35 @@ class _EquipmentPageState extends State<EquipmentPage> with AutomaticKeepAliveCl
                 ],
               ),
             ),
+
+            // ── Recent activity ───────────────────────────────────────
+            if (!_loadingSessions && _recentSessions.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              Text(
+                'RECENT ACTIVITY',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white24,
+                  letterSpacing: 1.5,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 14),
+              GlassContainer(
+                opacity: 0.04,
+                blur: 16,
+                borderRadius: 20,
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                child: Column(
+                  children: [
+                    for (int i = 0; i < _recentSessions.length; i++) ...[
+                      if (i > 0) _Divider(),
+                      _SessionRow(session: _recentSessions[i]),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -345,6 +395,96 @@ class _LaunchCardState extends State<_LaunchCard>
           ),
         ),
       ),
+    );
+  }
+}
+
+// ── Session row (recent activity) ─────────────────────────────────────────
+
+class _SessionRow extends StatelessWidget {
+  final dynamic session;
+  const _SessionRow({required this.session});
+
+  String _formatTime(String? raw) {
+    if (raw == null) return '—';
+    try {
+      final dt = DateTime.parse(raw).toLocal();
+      final diff = DateTime.now().difference(dt);
+      if (diff.inDays == 0) return 'Today ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+      if (diff.inDays == 1) return 'Yesterday';
+      if (diff.inDays < 7) return '${diff.inDays}d ago';
+      return '${dt.day}/${dt.month}/${dt.year}';
+    } catch (_) {
+      return '—';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = (session['status'] ?? 'completed').toString().toLowerCase();
+    final isCompleted = status == 'completed';
+    final color = isCompleted ? CybersightTheme.ok : CybersightTheme.accent;
+    final timeStr = _formatTime(session['start_time'] as String?);
+
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withOpacity(0.07),
+            border: Border.all(color: color.withOpacity(0.20)),
+          ),
+          child: Icon(
+            isCompleted ? Icons.check_circle_outline_rounded : Icons.radio_button_unchecked_rounded,
+            color: color,
+            size: 16,
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Scan Session',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                timeStr,
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white38,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: color.withOpacity(0.07),
+            border: Border.all(color: color.withOpacity(0.20)),
+          ),
+          child: Text(
+            status.toUpperCase(),
+            style: GoogleFonts.plusJakartaSans(
+              color: color,
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

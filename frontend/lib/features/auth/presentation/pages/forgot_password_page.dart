@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/design_system/cybersight_theme.dart';
+import '../../../../core/network/api_exception.dart';
+import '../../../../core/network/api_service.dart';
 import '../../../../core/widgets/hud_widgets.dart';
 import '../widgets/auth_widgets.dart';
 
@@ -13,11 +16,63 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
+  final _api = ApiService();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _sendResetCode() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showError('Please enter your email.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final devOtp = await _api.forgotPassword(email);
+      if (!mounted) return;
+      Navigator.pushNamed(context, '/check-email', arguments: {
+        'email': email,
+        if (devOtp != null) 'dev_otp': devOtp,
+      });
+    } on ApiException catch (e) {
+      _showError(e.message);
+    } catch (_) {
+      _showError('Could not connect to server.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showError(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Row(children: [
+          const Icon(Icons.error_outline_rounded, color: Color(0xFFFF6B6B), size: 17),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(msg,
+                style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+          ),
+        ]),
+        backgroundColor: const Color(0xFF151B2A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0x33FF6B6B)),
+        ),
+        duration: const Duration(seconds: 4),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ));
   }
 
   @override
@@ -79,7 +134,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Enter your email and we will send you a reset link.',
+                        'Enter your email and we will send you a 6-digit reset code.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: Colors.white54,
@@ -103,19 +158,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             const SizedBox(height: 14),
                             GlowingButton(
-                              label: 'Send reset link',
+                              label: _isLoading ? 'Sending...' : 'Send reset code',
                               textSize: 11.5,
                               darkOverlayOpacity: 0.20,
-                              onTap: () {
-                                final email = _emailController.text.trim().isEmpty
-                                    ? 'you@example.com'
-                                    : _emailController.text.trim();
-                                Navigator.pushNamed(
-                                  context,
-                                  '/check-email',
-                                  arguments: {'email': email},
-                                );
-                              },
+                              onTap: _isLoading ? null : _sendResetCode,
                             ),
                           ],
                         ),
@@ -145,4 +191,3 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 }
-

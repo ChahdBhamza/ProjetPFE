@@ -152,6 +152,17 @@ class ApiService {
     }
   }
 
+  /// Delete a single inventory item by ID
+  Future<bool> deleteInventoryItem(String itemId) async {
+    try {
+      final response = await _dio.delete("/api/inventory/item/$itemId");
+      return response.data["success"] == true;
+    } catch (e) {
+      print("Inventory Delete Error: $e");
+      return false;
+    }
+  }
+
   /// Authentication: Create a new account
   Future<Map<String, dynamic>> signUp(String email, String password, String fullName) async {
     try {
@@ -233,6 +244,38 @@ class ApiService {
       return 'http://127.0.0.1:8000';
     }
     return 'http://localhost:8000';
+  }
+
+  Future<String?> forgotPassword(String email) async {
+    try {
+      final response = await _dio.post("/api/auth/forgot-password", data: {"email": email});
+      return response.data["dev_otp"] as String?;
+    } on DioException catch (e) {
+      final detail = e.response?.data?["detail"] ?? "Failed to send reset code.";
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
+    }
+  }
+
+  Future<void> verifyOtp(String email, String otp) async {
+    try {
+      await _dio.post("/api/auth/verify-otp", data: {"email": email, "otp": otp});
+    } on DioException catch (e) {
+      final detail = e.response?.data?["detail"] ?? "Invalid or expired code.";
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
+    }
+  }
+
+  Future<void> resetPassword(String email, String otp, String newPassword) async {
+    try {
+      await _dio.post("/api/auth/reset-password", data: {
+        "email": email,
+        "otp": otp,
+        "new_password": newPassword,
+      });
+    } on DioException catch (e) {
+      final detail = e.response?.data?["detail"] ?? "Password reset failed.";
+      throw ApiException(detail.toString(), statusCode: e.response?.statusCode);
+    }
   }
 
   Future<Map<String, dynamic>> getSpecs(String brand, String model, String type) async {

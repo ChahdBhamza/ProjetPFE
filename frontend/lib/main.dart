@@ -88,11 +88,13 @@ class CybersightApp extends StatelessWidget {
           case '/check-email':
             final args = settings.arguments as Map<String, dynamic>?;
             final email = (args?['email'] as String?) ?? 'you@example.com';
-            return _buildAnimatedRoute(settings, CheckEmailPage(email: email));
+            final devOtp = args?['dev_otp'] as String?;
+            return _buildAnimatedRoute(settings, CheckEmailPage(email: email, devOtp: devOtp));
           case '/reset-password':
             final args = settings.arguments as Map<String, dynamic>?;
-            final email = (args?['email'] as String?) ?? 'you@example.com';
-            return _buildAnimatedRoute(settings, ResetPasswordPage(email: email));
+            final email = (args?['email'] as String?) ?? '';
+            final otp = (args?['otp'] as String?) ?? '';
+            return _buildAnimatedRoute(settings, ResetPasswordPage(email: email, otp: otp));
           case '/app':
             final appArgs = settings.arguments as Map<String, dynamic>?;
             final initialTab = (appArgs?['initialTab'] as int?) ?? 0;

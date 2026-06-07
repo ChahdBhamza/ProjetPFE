@@ -100,8 +100,21 @@ class MongoService:
     def get_user_inventory(self, email: str):
         """Fetch the inventory list for a specific user"""
         if not self.client: return []
-        items = list(self.inventory.find({"user_email": email}, {"_id": 0}))
+        items = list(self.inventory.find({"user_email": email}))
+        for item in items:
+            item["item_id"] = str(item.pop("_id"))
         return items
+
+    def delete_inventory_item(self, email: str, item_id: str) -> bool:
+        """Delete a single inventory item belonging to the user"""
+        if not self.client: return False
+        try:
+            from bson import ObjectId
+            result = self.inventory.delete_one({"_id": ObjectId(item_id), "user_email": email})
+            return result.deleted_count == 1
+        except Exception as e:
+            print(f"[MongoDB] Delete Error: {e}")
+            return False
 
     def add_to_inventory(self, email: str, item_data: dict):
         """Add a detected item to the user's inventory"""
@@ -253,6 +266,45 @@ class MongoService:
             self.detections.insert_one(log_data)
             return True
         except Exception:
+            return False
+
+    def save_reset_otp(self, email: str, otp: str, expires_at: datetime.datetime) -> bool:
+        if not self.client:
+            return False
+        try:
+            self.users.update_one(
+                {"email": email},
+                {"$set": {"reset_otp": otp, "reset_otp_expires": expires_at}}
+            )
+            return True
+        except Exception as e:
+            print(f"[MongoDB] OTP save error: {e}")
+            return False
+
+    def get_reset_otp(self, email: str):
+        if not self.client:
+            return None
+        return self.users.find_one(
+            {"email": email},
+            {"reset_otp": 1, "reset_otp_expires": 1}
+        )
+
+    def clear_reset_otp(self, email: str):
+        if not self.client:
+            return
+        self.users.update_one(
+            {"email": email},
+            {"$unset": {"reset_otp": "", "reset_otp_expires": ""}}
+        )
+
+    def update_password(self, email: str, new_hash: str) -> bool:
+        if not self.client:
+            return False
+        try:
+            self.users.update_one({"email": email}, {"$set": {"password_hash": new_hash}})
+            return True
+        except Exception as e:
+            print(f"[MongoDB] Password update error: {e}")
             return False
 
     def add_system_log(self, level: str, module: str, message: str, email: str = None):

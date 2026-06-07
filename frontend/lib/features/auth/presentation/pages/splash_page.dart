@@ -19,13 +19,11 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
-  late AnimationController _scanningController;
   late AnimationController _auroraController;
   
   @override
   void initState() {
     super.initState();
-    _scanningController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
     _auroraController = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
     
     // Auto-navigate after splash delay
@@ -44,7 +42,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _scanningController.dispose();
     _auroraController.dispose();
     super.dispose();
   }
@@ -81,7 +78,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                   children: [
                     const SizedBox(height: 16),
 
-                    // 1) HERO CORE
+                    // 1) HERO CORE — stacked lockup logo
                     Center(
                       child: AnimatedBuilder(
                         animation: _auroraController,
@@ -93,106 +90,41 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                               clipBehavior: Clip.none,
                               alignment: Alignment.center,
                               children: [
-                                // Soft glow halo
+                                // Outer purple glow behind logo
                                 Container(
-                                  width: 220,
-                                  height: 220,
+                                  width: 320,
+                                  height: 320,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     gradient: RadialGradient(
                                       colors: [
-                                        _splashCyan.withOpacity(0.24),
-                                        _splashBlue.withOpacity(0.16),
+                                        _splashPurple.withOpacity(0.30),
+                                        _splashViolet.withOpacity(0.15),
                                         Colors.transparent,
                                       ],
-                                      stops: const [0.0, 0.38, 1.0],
+                                      stops: const [0.0, 0.45, 1.0],
                                     ),
                                   ),
                                 ),
-
-                                // Glass Backdrop
-                                GlassContainer(
-                                  width: 170,
-                                  height: 170,
-                                  opacity: 0.03,
-                                  blur: 18,
-                                  borderRadius: 36,
-                                  child: const SizedBox.shrink(),
-                                ),
-
-                                // Viewfinder HUD
-                                SizedBox(
-                                  width: 108,
-                                  height: 108,
-                                  child: Stack(
-                                    children: [
-                                      _HUDCorner(Alignment.topLeft, _splashCyan),
-                                      _HUDCorner(Alignment.topRight, _splashCyan),
-                                      _HUDCorner(Alignment.bottomLeft, _splashCyan),
-                                      _HUDCorner(Alignment.bottomRight, _splashCyan),
-
-                                      // Scanning Line
-                                      AnimatedBuilder(
-                                        animation: _scanningController,
-                                        builder: (context, child) {
-                                          return Positioned(
-                                            top: _scanningController.value * 108,
-                                            left: 0,
-                                            right: 0,
-                                            child: Container(
-                                              height: 2,
-                                              decoration: BoxDecoration(
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: _splashCyan.withOpacity(0.35),
-                                                    blurRadius: 12,
-                                                    spreadRadius: 1,
-                                                  ),
-                                                ],
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    _splashCyan.withOpacity(0),
-                                                    _splashCyan,
-                                                    _splashBlue.withOpacity(0.65),
-                                                    _splashCyan.withOpacity(0),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-
-                                      Center(
-                                        child: Container(
-                                          width: 26,
-                                          height: 26,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: const LinearGradient(colors: [_splashPurple, _splashCyan]),
-                                            boxShadow: [
-                                              BoxShadow(color: _splashPurple.withOpacity(0.35), blurRadius: 18),
-                                              BoxShadow(color: _splashCyan.withOpacity(0.18), blurRadius: 24),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                // Secondary cyan shimmer
+                                Container(
+                                  width: 200,
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [
+                                        _splashCyan.withOpacity(0.08),
+                                        Colors.transparent,
+                                      ],
+                                    ),
                                   ),
                                 ),
-
-                                // Accent badge
-                                Positioned(
-                                  top: -12,
-                                  right: -12,
-                                  child: GlassContainer(
-                                    width: 42,
-                                    height: 42,
-                                    opacity: 0.05,
-                                    blur: 16,
-                                    borderRadius: 999,
-                                    child: const Icon(Icons.bolt_rounded, color: CybersightTheme.accent, size: 20),
-                                  ),
+                                // The actual transparent logo
+                                Image.asset(
+                                  'assets/logo.png',
+                                  width: 280,
+                                  fit: BoxFit.contain,
                                 ),
                               ],
                             ),
@@ -201,29 +133,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                       ),
                     ),
 
-                    const SizedBox(height: 26),
-
-                    // 2) BRANDING
-                    Text(
-                      'SfmDetect',
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayLarge
-                          ?.copyWith(color: Colors.white, letterSpacing: 3.0),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'EQUIPMENT DETECTION • INVENTORY • INSIGHTS',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white24,
-                        letterSpacing: 4.2,
-                      ),
-                    ),
-
-                    const SizedBox(height: 34),
+                    const SizedBox(height: 32),
 
                     // 3) STATUS + CTA
                     Padding(
@@ -365,28 +275,6 @@ class _DotWavePainter extends CustomPainter {
   bool shouldRepaint(covariant _DotWavePainter oldDelegate) => oldDelegate.t != t;
 }
 
-class _HUDCorner extends StatelessWidget {
-  final Alignment align; final Color color;
-  const _HUDCorner(this.align, this.color);
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: align,
-      child: Container(
-        width: 18, height: 18,
-        decoration: BoxDecoration(
-          border: Border(
-            top: align.y == -1 ? BorderSide(color: color, width: 2.5) : BorderSide.none,
-            bottom: align.y == 1 ? BorderSide(color: color, width: 2.5) : BorderSide.none,
-            left: align.x == -1 ? BorderSide(color: color, width: 2.5) : BorderSide.none,
-            right: align.x == 1 ? BorderSide(color: color, width: 2.5) : BorderSide.none,
-          ),
-          boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 10)],
-        ),
-      ),
-    );
-  }
-}
 
 class _PulseDot extends StatefulWidget {
   @override

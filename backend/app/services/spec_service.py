@@ -239,20 +239,22 @@ Equipment:
 - Brand: {brand}
 - Model: {model}
 
-Extract every technical specification you can find from the scraped content below.
-Return ONLY a raw JSON object with these keys:
+Extract the most important technical specifications from the scraped content below.
+Return ONLY a raw JSON object with exactly these keys:
 {{
   "exact_model_reference": "copy verbatim from the text if present, otherwise empty string",
-  "specs": {{ "key": "value", ... }},
+  "specs": {{ "spec_name": "value" }},
   "summary": "one factual sentence about this equipment"
 }}
 
-IMPORTANT: "exact_model_reference" must come ONLY from the scraped text. If no model code is in the text, return "".
-No markdown, no code blocks. All values must be strings or numbers.
+RULES:
+- "exact_model_reference": ONLY from scraped text, or "" if not found. Never invent.
+- "specs": at most 10 key-value pairs, strings or numbers only. Keep values short.
+- No markdown, no code blocks.
 
 Scraped Web Content:
 ---
-{scraped_data}
+{scraped_data[:800]}
 ---
 """
             try:
@@ -262,7 +264,7 @@ Scraped Web Content:
                     model=self.model,
                     messages=[{"role": "user", "content": generic_prompt}],
                     temperature=0.05,
-                    max_tokens=2048,
+                    max_tokens=4096,
                     response_format={"type": "json_object"},
                 )
                 raw = response.choices[0].message.content.strip()
@@ -308,7 +310,7 @@ Scraped Web Content:
                 model=self.model,
                 messages=[{"role": "user", "content": full_prompt}],
                 temperature=0.05,
-                max_tokens=2048,
+                max_tokens=8192,
                 response_format={"type": "json_object"},
             )
             raw = response.choices[0].message.content.strip()
@@ -352,10 +354,10 @@ Scraped Web Content:
         except Exception as e:
             err_str = str(e)
             print(f"[Groq] Extraction error: {e}")
-            # On json_validate_failed, retry once with even shorter context (Groq token budget issue)
-            if "json_validate_failed" in err_str and scraped_data and len(scraped_data) > 500:
-                print("[Groq] Retrying with shortened context (500 chars)...")
-                return self.extract_and_verify_specs(scraped_data[:500], brand, model, equipment_type)
+            # On json_validate_failed the output was too long — retry with generic minimal extraction
+            if "json_validate_failed" in err_str and scraped_data:
+                print("[Groq] Retrying with minimal generic extraction...")
+                return self.extract_and_verify_specs(scraped_data[:1000], brand, model, "unknown")
             # Even on failure, return the FULL schema (all keys → None) so the
             # frontend always renders every field for this equipment type.
             return {
@@ -518,8 +520,8 @@ Scraped Web Content:
         from concurrent.futures import ThreadPoolExecutor
 
         candidate_urls = [r.get("url", "") for r in search_results if r.get("url")]
-        # Scrape the top 6 candidates concurrently, then keep the first 3 that succeed
-        candidate_urls = candidate_urls[:6]
+        # Scrape the top 4 candidates concurrently, then keep the first 3 that succeed
+        candidate_urls = candidate_urls[:4]
 
         combined_text = ""
         scraped_urls: list[str] = []
@@ -551,9 +553,9 @@ Scraped Web Content:
                 for r in search_results[:5]
             ])
 
-        # Step 3: Extraction — cap at 3,000 chars so total prompt stays within model limits
+        # Step 3: Extraction — cap at 2,000 chars so total prompt stays within model limits
         extraction = self.extract_and_verify_specs(
-            combined_text[:3_000], brand, model, equipment_type
+            combined_text[:2_000], brand, model, equipment_type
         )
         extraction["source_urls"] = scraped_urls if scraped_urls else ["DDG snippets"]
         extraction["pipeline"] = (

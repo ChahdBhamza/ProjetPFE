@@ -21,7 +21,7 @@ class _AuthSuccessPageState extends State<AuthSuccessPage> with SingleTickerProv
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 900),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
@@ -34,7 +34,7 @@ class _AuthSuccessPageState extends State<AuthSuccessPage> with SingleTickerProv
 
     _controller.forward();
 
-    Timer(const Duration(milliseconds: 1800), () {
+    Timer(const Duration(milliseconds: 1200), () {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/app');
       }

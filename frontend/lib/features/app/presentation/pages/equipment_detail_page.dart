@@ -467,6 +467,30 @@ class _EquipmentDetailPageState extends State<EquipmentDetailPage> {
     if (!context.mounted) return;
 
     if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline_rounded,
+                  color: CybersightTheme.ok, size: 18),
+              const SizedBox(width: 10),
+              Text(
+                'Saved to inventory',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF151B2A),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 3),
+          padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+        ),
+      );
       if (moveToNext && onSaveNext != null) {
         Navigator.pop(context);
         onSaveNext!();
@@ -481,11 +505,26 @@ class _EquipmentDetailPageState extends State<EquipmentDetailPage> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          'SYNC FAILED',
-          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: CybersightTheme.warning, size: 18),
+            const SizedBox(width: 10),
+            Text(
+              'Sync failed — try again',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-        backgroundColor: CybersightTheme.warning.withOpacity(0.9),
+        backgroundColor: const Color(0xFF151B2A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 4),
+        padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
       ));
     }
   }

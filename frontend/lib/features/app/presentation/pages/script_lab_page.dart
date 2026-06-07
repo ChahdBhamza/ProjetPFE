@@ -32,6 +32,7 @@ class _ScanLabPageState extends State<ScanLabPage> {
   String? _sessionId;
   List<Map<String, dynamic>> _frames = [];
   Set<String> _selectedFilenames = {};
+  final ValueNotifier<List<Map<String, dynamic>>> _liveDetections = ValueNotifier([]);
 
   Future<void> _pickAndProcessVideo() async {
     final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
@@ -98,6 +99,7 @@ class _ScanLabPageState extends State<ScanLabPage> {
     if (_selectedFilenames.isEmpty || _sessionId == null) return;
 
     final queue = List<String>.from(_selectedFilenames);
+    _liveDetections.value = [];
     setState(() {
       _isProcessingAI = true;
       _aiTotal = queue.length;
@@ -109,14 +111,25 @@ class _ScanLabPageState extends State<ScanLabPage> {
       final List<Map<String, dynamic>> detectedFrames = [];
 
       // STEP 1: Detect brand + model for all frames
-      for (final filename in queue) {
+      for (int i = 0; i < queue.length; i++) {
+        final filename = queue[i];
         final frameMeta = _frames.firstWhere(
           (f) => f['filename'] == filename,
           orElse: () => <String, dynamic>{},
         );
+        final rawClass = (frameMeta['detected_class'] as String?)?.trim() ?? 'equipment';
+        final equipLabel = rawClass.replaceAll('_', ' ');
+        final frameNum = '${i + 1}/${queue.length}';
+
         setState(() {
-          _aiProgress += 1;
-          _aiLabel = 'Detecting: ${(frameMeta['detected_class'] as String?)?.trim() ?? 'Equipment'}';
+          _aiProgress = i + 1;
+          _aiLabel = 'Frame $frameNum — Pass 1: Classifying $equipLabel...';
+        });
+
+        await Future.delayed(const Duration(milliseconds: 400));
+
+        setState(() {
+          _aiLabel = 'Frame $frameNum — Pass 2: Reading brand & model (Groq Vision)...';
         });
 
         final result = await _apiService.processSelectedFrames(
@@ -132,26 +145,35 @@ class _ScanLabPageState extends State<ScanLabPage> {
               setState(() => _frames[idx] = pf);
             }
             if (pf['has_ai'] == true && pf['forensic_data'] != null) {
+              final fd = pf['forensic_data'] as Map?;
+              final brand = fd?['brand'] ?? '';
+              final category = (fd?['equipment_category'] ?? equipLabel).toString().replaceAll('_', ' ');
+              setState(() {
+                _aiLabel = 'Frame $frameNum — ✓ ${brand.isNotEmpty ? brand : ''} $category identified';
+              });
               detectedFrames.add(pf);
+              // Stream: add to live list → carousel appears / updates immediately
+              _liveDetections.value = List.from(_liveDetections.value)..add(pf);
+              // Show carousel after first detection — hide overlay so carousel is visible
+              if (_liveDetections.value.length == 1 && mounted) {
+                setState(() => _isProcessingAI = false);
+                _showVerificationDialog(_liveDetections);
+              }
+              await Future.delayed(const Duration(milliseconds: 400));
             }
           }
         }
       }
 
       if (mounted) setState(() => _isProcessingAI = false);
-
-      // STEP 2: Show verification dialog
-      if (detectedFrames.isNotEmpty && mounted) {
-        await _showVerificationDialog(detectedFrames);
-      }
     } finally {
       if (mounted) setState(() => _isProcessingAI = false);
     }
   }
 
-  Future<void> _showVerificationDialog(List<Map<String, dynamic>> detectedFrames) async {
+  void _showVerificationDialog(ValueNotifier<List<Map<String, dynamic>>> detectionsNotifier) {
     if (!mounted) return;
-    await showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -159,7 +181,7 @@ class _ScanLabPageState extends State<ScanLabPage> {
       enableDrag: false,
       builder: (ctx) => FractionallySizedBox(
         heightFactor: 0.88,
-        child: _VerificationCarouselSheet(detections: detectedFrames),
+        child: _VerificationCarouselSheet(detectionsNotifier: detectionsNotifier),
       ),
     );
   }
@@ -984,8 +1006,8 @@ class _InfoChip extends StatelessWidget {
 // ── Verification carousel sheet ────────────────────────────────────────────
 
 class _VerificationCarouselSheet extends StatefulWidget {
-  final List<Map<String, dynamic>> detections;
-  const _VerificationCarouselSheet({required this.detections});
+  final ValueNotifier<List<Map<String, dynamic>>> detectionsNotifier;
+  const _VerificationCarouselSheet({required this.detectionsNotifier});
 
   @override
   State<_VerificationCarouselSheet> createState() =>
@@ -1004,10 +1026,31 @@ class _VerificationCarouselSheetState
   int _sequentialIndex = 0;
   bool _inSequentialMode = false;
 
+  List<Map<String, dynamic>> get _detections => widget.detectionsNotifier.value;
+
   @override
   void initState() {
     super.initState();
-    _cardValues = widget.detections.map(_defaultValues).toList();
+    _cardValues = _detections.map(_defaultValues).toList();
+    widget.detectionsNotifier.addListener(_onNewDetection);
+  }
+
+  void _onNewDetection() {
+    final detections = widget.detectionsNotifier.value;
+    if (detections.length > _cardValues.length) {
+      setState(() {
+        for (int i = _cardValues.length; i < detections.length; i++) {
+          _cardValues.add(_defaultValues(detections[i]));
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.detectionsNotifier.removeListener(_onNewDetection);
+    _pageController.dispose();
+    super.dispose();
   }
 
   Map<String, String> _defaultValues(Map<String, dynamic> detection) {
@@ -1034,7 +1077,7 @@ class _VerificationCarouselSheetState
   }
 
   Future<void> _processSequentialItem(int index) async {
-    if (index >= widget.detections.length) {
+    if (index >= _detections.length) {
       if (mounted) {
         setState(() => _inSequentialMode = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1051,7 +1094,7 @@ class _VerificationCarouselSheetState
     }
 
     final vals = _cardValues[index];
-    final detection = widget.detections[index];
+    final detection = _detections[index];
     final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
     final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
     final candidates = fd['model_candidates'] as List? ?? [];
@@ -1123,7 +1166,7 @@ class _VerificationCarouselSheetState
                 onSaveNext: onSaveNext,
                 onSkip: onSkip,
                 currentIndex: sequentialIndex,
-                totalItems: widget.detections.length,
+                totalItems: _detections.length,
               ),
             ),
           );
@@ -1151,11 +1194,6 @@ class _VerificationCarouselSheetState
     return Icons.memory_rounded;
   }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1254,7 +1292,7 @@ class _VerificationCarouselSheetState
                       ),
                     ),
                     Text(
-                      '${widget.detections.length} Device${widget.detections.length > 1 ? "s" : ""} Pending',
+                      '${_detections.length} Device${_detections.length > 1 ? "s" : ""} Pending',
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.white,
                         fontSize: 16,
@@ -1271,9 +1309,9 @@ class _VerificationCarouselSheetState
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (idx) => setState(() => _currentIndex = idx),
-              itemCount: widget.detections.length,
+              itemCount: _detections.length,
               itemBuilder: (context, index) {
-                final detection = widget.detections[index];
+                final detection = _detections[index];
                 final frameImage = (detection['ai_image'] ?? detection['raw_image'] ?? detection['image'])?.toString();
                 final fd = (detection['forensic_data'] as Map?)?.cast<String, dynamic>() ?? {};
                 final candidates = fd['model_candidates'] as List? ?? [];
@@ -1299,11 +1337,11 @@ class _VerificationCarouselSheetState
             ),
           ),
           const SizedBox(height: 16),
-          if (widget.detections.length > 1)
+          if (_detections.length > 1)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                widget.detections.length,
+                _detections.length,
                 (index) => AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -1319,11 +1357,11 @@ class _VerificationCarouselSheetState
               ),
             ),
           const SizedBox(height: 8),
-          if (widget.detections.length > 1)
+          if (_detections.length > 1)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Swipe to view all ${widget.detections.length} detections — tap the button on each card',
+                'Swipe to view all ${_detections.length} detections — tap the button on each card',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white24,
@@ -1894,11 +1932,12 @@ class _AiAnalysisOverlayState extends State<_AiAnalysisOverlay>
                     const SizedBox(height: 8),
                     Text(
                       widget.label.isEmpty
-                          ? 'Reading brand & specifications'
-                          : 'Identifying ${widget.label}',
+                          ? 'Reading brand & specifications...'
+                          : widget.label,
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
-                        color: CybersightTheme.accent.withValues(alpha: 0.8),
-                        fontSize: 12,
+                        color: CybersightTheme.accent.withValues(alpha: 0.85),
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

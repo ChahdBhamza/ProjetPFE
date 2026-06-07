@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/widgets/hud_widgets.dart';
@@ -394,7 +395,7 @@ class _AnalyticsTab extends StatelessWidget {
 
           const _Label(title: 'Category split', sub: 'Detected equipment by type'),
           const SizedBox(height: 10),
-          _CategoryBars(data: categories),
+          _DonutChart(data: categories),
         ],
       ),
     );
@@ -1095,11 +1096,20 @@ class _InteractiveBarsState extends State<_InteractiveBars> {
   }
 }
 
-// ── Category percentage bars ───────────────────────────────────────────────
+// ── Donut chart — category split ───────────────────────────────────────────
 
-class _CategoryBars extends StatelessWidget {
+class _DonutChart extends StatefulWidget {
   final Map<String, dynamic> data;
-  const _CategoryBars({required this.data});
+  const _DonutChart({required this.data});
+  @override
+  State<_DonutChart> createState() => _DonutChartState();
+}
+
+class _DonutChartState extends State<_DonutChart>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+  int? _selected;
 
   static final _catColors = <String, Color>{
     'laptop': _kPalette[1],
@@ -1110,106 +1120,343 @@ class _CategoryBars extends StatelessWidget {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1100));
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic);
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  Color _colorFor(String key, int idx) =>
+      _catColors[key.toLowerCase()] ?? _kPalette[idx % _kPalette.length];
+
+  @override
   Widget build(BuildContext context) {
-    final filtered = Map<String, dynamic>.from(data)
+    final filtered = Map<String, dynamic>.from(widget.data)
       ..removeWhere((k, _) => k.toLowerCase() == 'unknown');
     if (filtered.isEmpty) return const _EmptyCard(label: 'No category data');
 
-    final total = filtered.values.whereType<int>().fold<int>(0, (s, v) => s + v);
+    final total =
+        filtered.values.whereType<int>().fold<int>(0, (s, v) => s + v);
     final entries = filtered.entries.toList();
+    final colors =
+        List.generate(entries.length, (i) => _colorFor(entries[i].key, i));
 
     return GlassContainer(
       opacity: 0.04,
       blur: 14,
       borderRadius: 20,
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Segmented stacked bar
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 900),
-            curve: Curves.easeOutCubic,
-            builder: (_, progress, __) => LayoutBuilder(
-              builder: (_, constraints) => ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Row(
-                  children: entries.asMap().entries.map((e) {
-                    final idx = e.key;
-                    final key = e.value.key;
-                    final count = e.value.value as int? ?? 0;
-                    final ratio = total > 0 ? count / total : 0.0;
-                    final color = _catColors[key.toLowerCase()] ??
-                        _kPalette[idx % _kPalette.length];
-                    return Container(
-                      width: constraints.maxWidth * ratio * progress,
-                      height: 14,
-                      color: color,
-                    );
-                  }).toList(),
-                ),
-              ),
+          SizedBox(
+            height: 210,
+            child: LayoutBuilder(
+              builder: (_, constraints) {
+                final chartSize = constraints.biggest;
+                return AnimatedBuilder(
+                  animation: _anim,
+                  builder: (_, __) => Stack(
+                    children: [
+                      GestureDetector(
+                        onTapDown: (d) =>
+                            _onTap(d.localPosition, chartSize, entries, total),
+                        child: CustomPaint(
+                          size: chartSize,
+                          painter: _DonutPainter(
+                            entries: entries,
+                            total: total,
+                            progress: _anim.value,
+                            selected: _selected,
+                            colors: colors,
+                          ),
+                        ),
+                      ),
+                      Center(
+                          child: _centerLabel(entries, total, colors)),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 18),
-          // Rows: dot · label · percentage badge
-          ...entries.asMap().entries.map((e) {
-            final idx = e.key;
-            final key = e.value.key;
-            final count = e.value.value as int? ?? 0;
-            final pct = total > 0 ? (count / total * 100).round() : 0;
-            final color = _catColors[key.toLowerCase()] ??
-                _kPalette[idx % _kPalette.length];
-            final label = key.replaceAll('_', ' ');
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration:
-                        BoxDecoration(shape: BoxShape.circle, color: color),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: entries.asMap().entries.map((e) {
+              final idx = e.key;
+              final key = e.value.key;
+              final count = e.value.value as int? ?? 0;
+              final pct =
+                  total > 0 ? (count / total * 100).round() : 0;
+              final color = colors[idx];
+              final isSel = _selected == idx;
+              return GestureDetector(
+                onTap: () => setState(
+                    () => _selected = _selected == idx ? null : idx),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isSel
+                        ? color.withValues(alpha: 0.14)
+                        : Colors.white.withValues(alpha: 0.03),
+                    border: Border.all(
+                      color: isSel
+                          ? color.withValues(alpha: 0.36)
+                          : Colors.white.withValues(alpha: 0.06),
+                    ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white60,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSel
+                              ? color
+                              : color.withValues(alpha: 0.55),
+                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(999),
-                      color: color.withValues(alpha: 0.14),
-                      border:
-                          Border.all(color: color.withValues(alpha: 0.32)),
-                    ),
-                    child: Text(
-                      '$pct%',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(width: 6),
+                      Text(
+                        key.replaceAll('_', ' '),
+                        style: GoogleFonts.plusJakartaSans(
+                          color: isSel ? Colors.white : Colors.white54,
+                          fontSize: 11,
+                          fontWeight: isSel
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$pct%',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: isSel
+                              ? color
+                              : color.withValues(alpha: 0.70),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }),
+                ),
+              );
+            }).toList(),
+          ),
         ],
       ),
     );
   }
+
+  Widget _centerLabel(
+      List<MapEntry<String, dynamic>> entries, int total, List<Color> colors) {
+    if (_selected != null && _selected! < entries.length) {
+      final key = entries[_selected!].key;
+      final count = entries[_selected!].value as int? ?? 0;
+      final pct = total > 0 ? (count / total * 100).round() : 0;
+      final color = colors[_selected!];
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            key.replaceAll('_', '\n'),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white38,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              height: 1.25,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$count',
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.5,
+              height: 1.0,
+            ),
+          ),
+          Text(
+            '$pct%',
+            style: GoogleFonts.plusJakartaSans(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$total',
+          style: GoogleFonts.plusJakartaSans(
+            color: Colors.white,
+            fontSize: 38,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -2,
+            height: 1.0,
+          ),
+        ),
+        Text(
+          'total',
+          style: GoogleFonts.plusJakartaSans(
+            color: Colors.white24,
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onTap(Offset pos, Size chartSize,
+      List<MapEntry<String, dynamic>> entries, int total) {
+    if (total == 0) return;
+    final center = Offset(chartSize.width / 2, chartSize.height / 2);
+    final outerR = math.min(chartSize.width, chartSize.height) / 2 - 8;
+    final strokeW = outerR * 0.28;
+    final innerR = outerR - strokeW;
+    final dx = pos.dx - center.dx;
+    final dy = pos.dy - center.dy;
+    final dist = math.sqrt(dx * dx + dy * dy);
+
+    if (dist < innerR - 6 || dist > outerR + 8) {
+      setState(() => _selected = null);
+      return;
+    }
+
+    // Normalize angle to [0, 2π) from top
+    double angle = math.atan2(dy, dx) + math.pi / 2;
+    if (angle < 0) angle += 2 * math.pi;
+
+    const gap = 0.04;
+    final available = 2 * math.pi - gap * entries.length;
+    double cursor = 0;
+    for (int i = 0; i < entries.length; i++) {
+      final count = entries[i].value as int? ?? 0;
+      final sweep = (count / total) * available;
+      if (angle >= cursor && angle < cursor + sweep) {
+        setState(() => _selected = _selected == i ? null : i);
+        return;
+      }
+      cursor += sweep + gap;
+    }
+    setState(() => _selected = null);
+  }
+}
+
+class _DonutPainter extends CustomPainter {
+  final List<MapEntry<String, dynamic>> entries;
+  final int total;
+  final double progress;
+  final int? selected;
+  final List<Color> colors;
+
+  const _DonutPainter({
+    required this.entries,
+    required this.total,
+    required this.progress,
+    required this.selected,
+    required this.colors,
+  });
+
+  static const double _gap = 0.04;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (total == 0 || entries.isEmpty) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final outerR = math.min(size.width, size.height) / 2 - 8;
+    final strokeW = outerR * 0.28;
+    final drawR = outerR - strokeW / 2;
+    final available = 2 * math.pi - _gap * entries.length;
+
+    double cursor = -math.pi / 2; // start from top
+
+    // Background ring
+    canvas.drawCircle(
+      center,
+      drawR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeW
+        ..color = Colors.white.withValues(alpha: 0.04),
+    );
+
+    for (int i = 0; i < entries.length; i++) {
+      final count = entries[i].value as int? ?? 0;
+      final ratio = count / total;
+      final sweep = ratio * available * progress;
+      final color = colors[i];
+      final isSel = selected == i;
+
+      final midAngle = cursor + sweep / 2;
+      final pop = isSel ? 9.0 : 0.0;
+      final popCenter =
+          center + Offset(math.cos(midAngle) * pop, math.sin(midAngle) * pop);
+      final rect = Rect.fromCircle(center: popCenter, radius: drawR);
+
+      // Outer glow for selected segment
+      if (isSel) {
+        canvas.drawArc(
+          rect,
+          cursor,
+          sweep,
+          false,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeW + 14
+            ..strokeCap = StrokeCap.butt
+            ..color = color.withValues(alpha: 0.18)
+            ..maskFilter =
+                const MaskFilter.blur(BlurStyle.normal, 12),
+        );
+      }
+
+      // Segment arc
+      canvas.drawArc(
+        rect,
+        cursor,
+        sweep,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeW
+          ..strokeCap = StrokeCap.butt
+          ..color =
+              isSel ? color : color.withValues(alpha: 0.68),
+      );
+
+      cursor += sweep + _gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutPainter old) =>
+      old.progress != progress || old.selected != selected;
 }
 
 // ── Empty placeholder ──────────────────────────────────────────────────────
