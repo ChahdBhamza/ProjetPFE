@@ -30,7 +30,7 @@ MAX_ROBOFLOW_CALLS = 18
 # Everything else (fridge, microwave, AC) gets 1 slot to prevent false-positive duplicates.
 HEROES_PER_CAT = {
     "computer":        2,
-    "tv_monitor":      2,
+    "tv_monitor":      1,
     "refrigerator":    1,
     "microwave":       1,
     "air_conditioner": 1,
