@@ -173,8 +173,11 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
     # Total AI detections (much higher than scans — each scan finds multiple items)
     total_detections = mongo_db.detections.count_documents({})
 
-    # Active operators = those who ran at least one scan session
-    active_operators = len(mongo_db.scan_sessions.distinct("user_email"))
+    # Active operators = those who ran a scan session in the last 30 days
+    active_cutoff = datetime.datetime.now() - datetime.timedelta(days=30)
+    active_operators = len(mongo_db.scan_sessions.distinct(
+        "user_email", {"start_time": {"$gte": active_cutoff}}
+    ))
 
     # 3. Average VLM Confidence Score
     avg_confidence = 80.0
@@ -225,9 +228,12 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
             },
             {"$sort": {"count": -1}}
         ]
+        from app.services.equipment_schemas import normalize_category
         for item in mongo_db.inventory.aggregate(pipeline):
-            cat_name = item["_id"] if item["_id"] else "unknown"
-            categories[cat_name] = item["count"]
+            raw = item["_id"] if item["_id"] else "unknown"
+            # Normalize so tv_monitor → monitor, computer → laptop, etc.
+            cat_name = normalize_category(raw) if raw != "unknown" else "unknown"
+            categories[cat_name] = categories.get(cat_name, 0) + item["count"]
     except Exception as e:
         print(f"[AdminStats] Category error: {e}")
 
@@ -308,6 +314,11 @@ async def get_admin_stats(current_email: str = Depends(verify_token)):
                 "items_saved": item["items_saved"],
                 "avg_confidence": round(item["avg_conf"], 1) if item["avg_conf"] else 80.0
             })
+
+        # Rank: most detections first, items_saved as tiebreaker
+        operators_performance.sort(
+            key=lambda x: (x["items_detected"], x["items_saved"]), reverse=True
+        )
     except Exception as e:
         print(f"[AdminStats] Operator performance error: {e}")
 

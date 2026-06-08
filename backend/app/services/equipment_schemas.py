@@ -281,8 +281,11 @@ LABEL_TO_CATEGORY: dict[str, str] = {
     "computer": "laptop",
     "notebook": "laptop",
     "monitor": "monitor",
+    "tv_monitor": "monitor",
+    "tv monitor": "monitor",
     "screen": "monitor",
     "display": "monitor",
+    "tv": "monitor",
     "ecran": "monitor",
     "écran": "monitor",
 }

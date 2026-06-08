@@ -204,9 +204,12 @@ async def process_selected_frames_endpoint(req: SelectedFramesRequest, current_e
     for frame in final_results:
         fd = frame.get("forensic_data") or {}
         frame["equipment_result"] = build_equipment_result(fd, None, frame.get("ai_image"), frame.get("raw_image"))
-        
-        # Log the raw AI detection to MongoDB
-        mongo_db.log_detection(req.session_id, fd)
+
+        # Only log when a brand was actually identified — keeps the detections
+        # counter meaningful (equipment recognised, not frames processed).
+        brand = (fd.get("brand") or "").strip().lower()
+        if brand and brand not in ("unknown", "n/a", "none", ""):
+            mongo_db.log_detection(req.session_id, fd)
 
     return {"success": True, "frames": final_results}
 
